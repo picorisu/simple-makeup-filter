@@ -5,8 +5,9 @@
   'use strict';
 
   // 初期値は defaults.js（MBF_DEFAULTS）が単一情報源。
-  // __base のみこのファイル固有（bridge.js から受け取る拡張リソースのベースURL）
-  const settings = { ...MBF_DEFAULTS, __base: null };
+  // __base のみこのファイル固有（bridge.js から受け取る拡張リソースのベースURL）。
+  // defaults.js が未注入でもクラッシュさせない（値は bridge の初回送信で全量届く）
+  const settings = { ...(globalThis.MBF_DEFAULTS || {}), __base: null };
 
   window.addEventListener('mbf-settings', (e) => {
     try {

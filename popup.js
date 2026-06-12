@@ -43,6 +43,16 @@ function refreshUI(s) {
 
 chrome.storage.local.get(DEFAULTS, refreshUI);
 
+// 初回起動時に全キーを storage へ書き込んでおく（シーディング）。
+// これにより bridge/override は defaults が読めない状況でも storage の値だけで完走できる
+chrome.storage.local.get(null, (all) => {
+  const missing = {};
+  for (const k of Object.keys(DEFAULTS)) {
+    if (!(k in all)) missing[k] = DEFAULTS[k];
+  }
+  if (Object.keys(missing).length > 0) chrome.storage.local.set(missing);
+});
+
 // 「はじめに」アコーディオンは初回だけ開いた状態にし、開閉状態を記憶する
 const intro = document.getElementById('intro');
 chrome.storage.local.get({ __introClosed: false }, ({ __introClosed }) => {

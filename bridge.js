@@ -1,5 +1,8 @@
 // ISOLATED world。chrome.storage の設定を MAIN world (override.js) へ中継する
-const DEFAULTS = MBF_DEFAULTS; // 初期値は defaults.js が単一情報源
+// 初期値は defaults.js が単一情報源。
+// 万一 defaults.js が先に注入されていなくてもクラッシュさせない
+// （storage は popup 初回起動時に全キーが書き込まれるため、保存済みの値だけで動ける）
+const DEFAULTS = globalThis.MBF_DEFAULTS || {};
 
 function send(s) {
   // オブジェクトを detail でそのまま渡すと isolated world 境界で null に落ちるため JSON 文字列で渡す
