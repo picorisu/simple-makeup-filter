@@ -126,12 +126,21 @@ document.getElementById('presetExport').addEventListener('click', () => {
   }
   chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
     if (!__presets[name]) return;
-    const blob = new Blob([JSON.stringify(sanitize(__presets[name]), null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `${name}.json`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    const preset = sanitize(__presets[name]);
+    currentSettings((live) => {
+      // 現在の設定が保存内容と違う＝未保存の編集中。そのまま書き出すと
+      // 画面の見た目と違う中身が配られるため、確認を挟む
+      const dirty = JSON.stringify(preset) !== JSON.stringify(sanitize(live));
+      if (dirty && !confirm(
+        `未保存の変更があります。\n書き出されるのは保存済みの「${name}」の内容で、今の画面の状態は含まれません。\n続けますか？（今の状態を出したい場合は先に保存してください）`
+      )) return;
+      const blob = new Blob([JSON.stringify(preset, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${name}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
   });
 });
 
