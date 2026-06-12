@@ -17,6 +17,8 @@
     skinRange: 1.0,   // 肌色判定の広さ。肌のトーンが判定から外れる人は上げる
     lipColor: '#c2476e',
     lipA: 0,       // リップ濃さ 0-1（0で無効）
+    lipGloss: 0,   // リップのツヤ 0-1（下唇に光を乗せる）
+    lipW: 1.0,     // リップの太さ 0.8=細め（内側だけ着色） 〜 1.0=地唇なり 〜 1.3=オーバーリップ
     blushColor: '#e8889a',
     blushA: 0,     // チーク濃さ 0-1
     blushShape: 1.6, // チーク形状 1.0=丸 〜 2.5=横長
@@ -438,13 +440,79 @@ void main() {
     // multiply 合成 = 元の肌の陰影や唇の質感を残したまま色だけ重なる（口紅っぽい質感）
     ctx.globalCompositeOperation = 'multiply';
 
+    // リップの輪郭: lipW > 1 なら唇の中心から外側へ拡大（オーバーリップ）
+    let lipOuterPts = null;
+    if (settings.lipA > 0 || settings.lipGloss > 0) {
+      lipOuterPts = LIPS_OUTER.map((i) => [lm[i].x * W, lm[i].y * H]);
+      if (settings.lipW !== 1) {
+        let lcx = 0, lcy = 0;
+        for (const p of lipOuterPts) { lcx += p[0]; lcy += p[1]; }
+        lcx /= lipOuterPts.length; lcy /= lipOuterPts.length;
+        // 口角を結ぶ向き（横）と直交方向（縦）に分解し、縦をメインに伸縮する。
+        // 横は 1/4 だけ追従（完全固定だと口角の形が崩れるため）
+        let mdx = (lm[MOUTH_R].x - lm[MOUTH_L].x) * W;
+        let mdy = (lm[MOUTH_R].y - lm[MOUTH_L].y) * H;
+        const ml = Math.hypot(mdx, mdy) || 1;
+        mdx /= ml; mdy /= ml;
+        const sV = settings.lipW;
+        const sH = 1 + (settings.lipW - 1) * 0.25;
+        lipOuterPts = lipOuterPts.map(([x, y]) => {
+          const dx = x - lcx, dy = y - lcy;
+          const h = dx * mdx + dy * mdy;   // 横成分
+          const vx = dx - h * mdx, vy = dy - h * mdy; // 縦成分
+          return [lcx + h * sH * mdx + vx * sV, lcy + h * sH * mdy + vy * sV];
+        });
+      }
+    }
+    const traceLip = () => {
+      ctx.moveTo(lipOuterPts[0][0], lipOuterPts[0][1]);
+      for (let k = 1; k < lipOuterPts.length; k++) ctx.lineTo(lipOuterPts[k][0], lipOuterPts[k][1]);
+      ctx.closePath();
+      tracePath(ctx, lm, LIPS_INNER, W, H);
+    };
+
     if (settings.lipA > 0) {
       ctx.filter = `blur(${Math.max(1, faceW * 0.008)}px)`;
       ctx.fillStyle = hexToRgba(settings.lipColor, settings.lipA * 0.7);
       ctx.beginPath();
-      tracePath(ctx, lm, LIPS_OUTER, W, H);
-      tracePath(ctx, lm, LIPS_INNER, W, H);
+      traceLip();
       ctx.fill('evenodd'); // 内側ループをくり抜く＝歯に色が乗らない
+    }
+
+    if (settings.lipGloss > 0) {
+      // ツヤ: 唇の領域にクリップした上で、下唇の中央に screen 合成の光を置く。
+      // クリップしているので光が唇からはみ出さない
+      ctx.save();
+      ctx.beginPath();
+      traceLip();
+      ctx.clip('evenodd');
+      ctx.globalCompositeOperation = 'screen';
+      ctx.filter = `blur(${Math.max(1, faceW * 0.006)}px)`;
+      // 下唇の中央（外側の底 17 と内側の底 14 の中間）
+      const cx4 = ((lm[17].x + lm[14].x) / 2) * W;
+      const cy4 = ((lm[17].y + lm[14].y) / 2) * H;
+      // 口角を結ぶ向きに沿った横長の光
+      const mAngle = Math.atan2(
+        (lm[MOUTH_R].y - lm[MOUTH_L].y) * H,
+        (lm[MOUTH_R].x - lm[MOUTH_L].x) * W
+      );
+      const mouthW = Math.hypot(
+        (lm[MOUTH_R].x - lm[MOUTH_L].x) * W,
+        (lm[MOUTH_R].y - lm[MOUTH_L].y) * H
+      );
+      const ry4 = faceW * 0.013;
+      ctx.translate(cx4, cy4);
+      ctx.rotate(mAngle);
+      ctx.scale((mouthW * 0.3) / ry4, 1);
+      const g4 = ctx.createRadialGradient(0, 0, 0, 0, 0, ry4);
+      g4.addColorStop(0, `rgba(255,255,255,${settings.lipGloss * 0.55})`);
+      g4.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g4;
+      ctx.beginPath();
+      ctx.arc(0, 0, ry4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      ctx.globalCompositeOperation = 'multiply'; // 後続のメイク描画用に戻す
     }
 
     if (settings.blushA > 0) {
@@ -805,7 +873,7 @@ void main() {
 
         // 2) メイク・ほうれい線消し: いずれかが有効なときだけ顔検出を回す（不要時は負荷ゼロ）
         const makeupOn = on &&
-          (settings.lipA > 0 || settings.blushA > 0 || settings.browA > 0 ||
+          (settings.lipA > 0 || settings.lipGloss > 0 || settings.blushA > 0 || settings.browA > 0 ||
            settings.nasoA > 0 || settings.eyebagLine > 0 || settings.eyebagBright > 0 ||
            settings.shadowA > 0 || settings.linerA > 0 ||
            settings.noseA > 0 || settings.jawA > 0 ||

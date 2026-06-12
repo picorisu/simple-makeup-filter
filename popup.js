@@ -1,6 +1,6 @@
 const DEFAULTS = {
   enabled: true, smooth: 0.6, bright: 0.05, warmth: 0.04, sat: 1.05, nasoA: 0, eyebagLine: 0, eyebagBright: 0, lipThresh: 0.575, skinRange: 1.0,
-  lipColor: '#c2476e', lipA: 0,
+  lipColor: '#c2476e', lipA: 0, lipGloss: 0, lipW: 1.0,
   blushColor: '#e8889a', blushA: 0, blushShape: 1.6, blushY: 0.06, blushSoft: 1.3,
   browColor: '#5a3d2b', browA: 0, browW: 1.0, browTaper: 0, browArch: 0, browPeak: 0.6, browTail: 0,
   shadowColor: '#9e5a73', shadowColor2: '#c98da1', shadowColor3: '#e8c9c4', shadowUse2: true, shadowUse3: true, shadowA: 0, shadowH: 1.0, shadowW: 1.0, shadowSoft: 1.0, shadowBias: 1.0,
@@ -10,7 +10,7 @@ const DEFAULTS = {
   hiChinA: 0, hiChinW: 1.0, hiChinY: 0, hiChinSoft: 1.0
 };
 
-const RANGES = ['smooth', 'bright', 'warmth', 'sat', 'nasoA', 'eyebagLine', 'eyebagBright', 'lipThresh', 'skinRange', 'lipA', 'blushA', 'blushShape', 'blushY', 'blushSoft', 'browA', 'browW', 'browTaper', 'browArch', 'browPeak', 'browTail', 'shadowA', 'shadowH', 'shadowW', 'shadowSoft', 'shadowBias', 'linerA', 'linerW', 'linerWing', 'linerWingUp', 'linerWingW', 'noseA', 'noseW', 'noseIn', 'noseSoft', 'jawA', 'jawSoft', 'hiA', 'hiW', 'hiSoft', 'hiCheekA', 'hiCheekW', 'hiCheekX', 'hiCheekY', 'hiCheekSoft', 'hiChinA', 'hiChinW', 'hiChinY', 'hiChinSoft'];
+const RANGES = ['smooth', 'bright', 'warmth', 'sat', 'nasoA', 'eyebagLine', 'eyebagBright', 'lipThresh', 'skinRange', 'lipA', 'lipGloss', 'lipW', 'blushA', 'blushShape', 'blushY', 'blushSoft', 'browA', 'browW', 'browTaper', 'browArch', 'browPeak', 'browTail', 'shadowA', 'shadowH', 'shadowW', 'shadowSoft', 'shadowBias', 'linerA', 'linerW', 'linerWing', 'linerWingUp', 'linerWingW', 'noseA', 'noseW', 'noseIn', 'noseSoft', 'jawA', 'jawSoft', 'hiA', 'hiW', 'hiSoft', 'hiCheekA', 'hiCheekW', 'hiCheekX', 'hiCheekY', 'hiCheekSoft', 'hiChinA', 'hiChinW', 'hiChinY', 'hiChinSoft'];
 const COLORS = ['lipColor', 'blushColor', 'browColor', 'shadowColor', 'shadowColor2', 'shadowColor3', 'linerColor', 'shadeColor', 'hiColor'];
 
 const CHECKS = ['enabled', 'shadowUse2', 'shadowUse3'];
