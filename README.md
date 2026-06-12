@@ -59,3 +59,5 @@ f82a8e6c05e08a44cc9f9e7ec5f845935bcbb1b1500ebe8c2f4812fb4e2917dc  vendor/wasm/vi
 - **Meet は Trusted Types を強制** → MediaPipe の script 読み込みのため、拡張リソース限定の default ポリシーを作成
 - **MediaPipe は内部ログを console.error で吐き、拡張の「エラー」に集計される** → ログパターンを debug に格下げするフィルターで対処
 - メイクの濃さが全部 0 の間は顔検出を起動しない（負荷ゼロ）
+- **manifest の js リストは拡張の再読み込みまで反映されない**: ファイルの中身はページ読み込みごとにディスクから読まれるが、注入するファイルの一覧は拡張ロード時に固定される。content_scripts にファイルを追加したら chrome://extensions の更新（↻）が必須。↻ で直らない場合は削除→再読み込み
+- **複数ファイル間のグローバル共有は globalThis 経由 + 未定義ガード**: 注入順が崩れても落ちないよう、利用側は `globalThis.X || {}` で受ける。popup 初回起動時の storage シーディングで値の欠落も防いでいる
