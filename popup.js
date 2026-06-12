@@ -21,8 +21,9 @@ for (const el of document.querySelectorAll('summary input')) {
   el.addEventListener('click', (e) => e.stopPropagation());
 }
 
-// 見出しの ON/OFF バッジ: 各カテゴリの「効いてるか」を閉じたまま分かるように
-const BADGE_KEYS = {
+// 見出しのハート: ♥ピンク=そのカテゴリの効果が効いてる、♡グレー=オフ
+const FX_KEYS = {
+  skin: ['smooth', 'bright', 'warmth', 'nasoA', 'eyebagLine', 'eyebagBright'],
   lip: ['lipA', 'lipGloss'],
   blush: ['blushA'],
   brow: ['browA'],
@@ -32,11 +33,9 @@ const BADGE_KEYS = {
 };
 
 function updateBadges() {
-  for (const [name, keys] of Object.entries(BADGE_KEYS)) {
+  for (const [name, keys] of Object.entries(FX_KEYS)) {
     const on = keys.some((k) => parseFloat(document.getElementById(k).value) > 0);
-    const el = document.querySelector(`[data-badge="${name}"]`);
-    el.textContent = on ? 'ON' : 'OFF';
-    el.classList.toggle('on', on);
+    document.querySelector(`details[data-fx="${name}"]`).classList.toggle('fx-on', on);
   }
 }
 
