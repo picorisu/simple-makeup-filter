@@ -57,26 +57,55 @@ function refreshUI(s) {
   updateBadges();
 }
 
-chrome.storage.local.get(DEFAULTS, refreshUI);
+chrome.storage.local.get(DEFAULTS, (s) => {
+  refreshUI(s);
+  updateStatus();
+});
 
-// Meet のタブに bridge がいるか死活確認して、動作状態を表示する
-(() => {
-  const st = document.getElementById('status');
+// Meet のタブに bridge がいるか死活確認して、動作状態を表示する。
+// マスタースイッチ（enabled）OFF のときは接続状態より先にその旨を出す
+const statusEl = document.getElementById('status');
+
+function flashStatus(text) {
+  const prev = statusEl.textContent;
+  const prevOk = statusEl.classList.contains('ok');
+  statusEl.textContent = text;
+  statusEl.classList.add('ok');
+  setTimeout(() => {
+    statusEl.textContent = prev;
+    statusEl.classList.toggle('ok', prevOk);
+  }, 1500);
+}
+
+function updateStatus() {
+  statusEl.classList.remove('ok');
+  if (!document.getElementById('enabled').checked) {
+    statusEl.textContent = '○ フィルターはオフです（右上のチェックで ON）';
+    return;
+  }
   chrome.tabs.query({ url: 'https://meet.google.com/*' }, (tabs) => {
     if (!tabs || tabs.length === 0) {
-      st.textContent = '○ Meet のタブが見つかりません（meet.google.com を開いてね）';
+      statusEl.textContent = '○ Meet のタブが見つかりません（meet.google.com を開いてね）';
       return;
     }
-    chrome.tabs.sendMessage(tabs[0].id, 'mbf-ping', (resp) => {
-      if (chrome.runtime.lastError || resp !== 'pong') {
-        st.textContent = '○ Meet のタブを再読み込みすると有効になります';
-      } else {
-        st.textContent = '● Meet で動作中';
-        st.classList.add('ok');
-      }
-    });
+    // 複数タブがあればどれか1つでも応答すれば動作中とみなす
+    let pending = tabs.length;
+    let alive = false;
+    for (const tab of tabs) {
+      chrome.tabs.sendMessage(tab.id, 'mbf-ping', (resp) => {
+        if (!chrome.runtime.lastError && resp === 'pong') alive = true;
+        if (--pending === 0) {
+          if (alive) {
+            statusEl.textContent = '● Meet で動作中';
+            statusEl.classList.add('ok');
+          } else {
+            statusEl.textContent = '○ Meet のタブを再読み込みすると有効になります';
+          }
+        }
+      });
+    }
   });
-})();
+}
 
 // 初回起動時に全キーを storage へ書き込んでおく（シーディング）。
 // これにより bridge/override は defaults が読めない状況でも storage の値だけで完走できる
@@ -122,6 +151,10 @@ const QUICK_PRESETS = {
 
 for (const btn of document.querySelectorAll('[data-quick]')) {
   btn.addEventListener('click', () => {
+    // 既にメイクをカスタマイズしている人が誤タップで全消ししないよう確認を挟む
+    const customized = Object.values(FX_KEYS).flat()
+      .some((k) => parseFloat(document.getElementById(k).value) > 0);
+    if (customized && !confirm('今の設定はこのプリセットで上書きされます。続けますか？\n（大事な設定は先に「プリセット」で保存してください）')) return;
     // キャリブレーション（顔・照明への校正）はメイクの濃さとは別物なので、
     // クイックプリセットでは現在値を維持する
     chrome.storage.local.get(DEFAULTS, (cur) => {
@@ -140,6 +173,7 @@ for (const btn of document.querySelectorAll('[data-quick]')) {
 for (const k of CHECKS) {
   document.getElementById(k).addEventListener('change', (e) => {
     chrome.storage.local.set({ [k]: e.target.checked });
+    if (k === 'enabled') updateStatus(); // ON/OFF とステータス表示を連動させる
   });
 }
 for (const k of RANGES) {
@@ -241,7 +275,14 @@ document.getElementById('presetApply').addEventListener('click', () => {
   chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
     if (!__presets[name]) return;
     const s = sanitize(__presets[name]);
-    chrome.storage.local.set(s, () => refreshUI({ ...DEFAULTS, ...s }));
+    // ON/OFF（マスタースイッチ）はプリセットの対象外。今の状態を維持する
+    delete s.enabled;
+    chrome.storage.local.set(s, () => {
+      chrome.storage.local.get(DEFAULTS, (cur) => {
+        refreshUI(cur);
+        flashStatus(`✓ 「${name}」を適用しました`);
+      });
+    });
   });
 });
 

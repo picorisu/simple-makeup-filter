@@ -805,6 +805,8 @@ void main() {
       e.preventDefault();
     });
     glCanvas.addEventListener('webglcontextrestored', () => {
+      // dispose 由来の lost→restored で死んだパイプラインに新コンテキストを作らない
+      if (!running) return;
       try {
         GLS = createGL(glCanvas);
         GLS.gl.viewport(0, 0, glCanvas.width || 1, glCanvas.height || 1);
