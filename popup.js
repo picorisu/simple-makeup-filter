@@ -1,11 +1,11 @@
 const DEFAULTS = {
-  enabled: true, smooth: 0.6, bright: 0.05, warmth: 0.04, sat: 1.05, nasoA: 0,
+  enabled: true, smooth: 0.6, bright: 0.05, warmth: 0.04, sat: 1.05, nasoA: 0, lipThresh: 0.575, skinRange: 1.0,
   lipColor: '#c2476e', lipA: 0,
   blushColor: '#e8889a', blushA: 0, blushShape: 1.6, blushY: 0.06, blushSoft: 1.3,
   browColor: '#5a3d2b', browA: 0, browW: 1.0
 };
 
-const RANGES = ['smooth', 'bright', 'warmth', 'sat', 'nasoA', 'lipA', 'blushA', 'blushShape', 'blushY', 'blushSoft', 'browA', 'browW'];
+const RANGES = ['smooth', 'bright', 'warmth', 'sat', 'nasoA', 'lipThresh', 'skinRange', 'lipA', 'blushA', 'blushShape', 'blushY', 'blushSoft', 'browA', 'browW'];
 const COLORS = ['lipColor', 'blushColor', 'browColor'];
 
 chrome.storage.local.get(DEFAULTS, (s) => {

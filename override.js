@@ -11,6 +11,8 @@
     warmth: 0.04,  // 血色（暖色寄せ） 0-0.2
     sat: 1.05,     // 彩度 0.5-1.5
     nasoA: 0,      // ほうれい線消し 0-1（0で無効。顔検出を使用）
+    lipThresh: 0.575, // 唇除外しきい値（Cr）。下げるほど赤みの弱い唇も除外される
+    skinRange: 1.0,   // 肌色判定の広さ。肌のトーンが判定から外れる人は上げる
     lipColor: '#c2476e',
     lipA: 0,       // リップ濃さ 0-1（0で無効）
     blushColor: '#e8889a',
@@ -55,15 +57,22 @@ uniform float uSmooth;
 uniform float uBright;
 uniform float uWarmth;
 uniform float uSat;
+uniform float uLipThresh;
+uniform float uSkinRange;
 
-// YCbCr 色空間での肌色判定。肌なら1、それ以外（目・髪・服・背景）なら0に滑らかに落ちる
+// YCbCr 色空間での肌色判定。肌なら1、それ以外（目・髪・服・背景）なら0に滑らかに落ちる。
+// uSkinRange で許容窓の広さを、uLipThresh で唇（強い赤み）の除外位置を調整できる
 float skinMask(vec3 rgb) {
   float cb = -0.169 * rgb.r - 0.331 * rgb.g + 0.5 * rgb.b + 0.5;
   float cr = 0.5 * rgb.r - 0.419 * rgb.g - 0.081 * rgb.b + 0.5;
-  float mb = smoothstep(0.27, 0.32, cb) * (1.0 - smoothstep(0.48, 0.53, cb));
-  float mr = smoothstep(0.50, 0.55, cr) * (1.0 - smoothstep(0.68, 0.73, cr));
+  float hwB = 0.105 * uSkinRange; // cb 窓の半幅（中心 0.40）
+  float hwR = 0.09 * uSkinRange;  // cr 窓の半幅（中心 0.615）
+  float mb = smoothstep(0.40 - hwB - 0.025, 0.40 - hwB + 0.025, cb)
+           * (1.0 - smoothstep(0.40 + hwB - 0.025, 0.40 + hwB + 0.025, cb));
+  float mr = smoothstep(0.615 - hwR - 0.025, 0.615 - hwR + 0.025, cr)
+           * (1.0 - smoothstep(0.615 + hwR - 0.025, 0.615 + hwR + 0.025, cr));
   // 唇除外: 肌より赤みが強い画素はマスクから外してシャープに保つ
-  float lip = smoothstep(0.575, 0.615, cr);
+  float lip = smoothstep(uLipThresh, uLipThresh + 0.04, cr);
   return mb * mr * (1.0 - lip);
 }
 
@@ -142,7 +151,9 @@ void main() {
         smooth: gl.getUniformLocation(prog, 'uSmooth'),
         bright: gl.getUniformLocation(prog, 'uBright'),
         warmth: gl.getUniformLocation(prog, 'uWarmth'),
-        sat: gl.getUniformLocation(prog, 'uSat')
+        sat: gl.getUniformLocation(prog, 'uSat'),
+        lipThresh: gl.getUniformLocation(prog, 'uLipThresh'),
+        skinRange: gl.getUniformLocation(prog, 'uSkinRange')
       }
     };
   }
@@ -418,6 +429,8 @@ void main() {
         gl.uniform1f(uniforms.bright, on ? settings.bright : 0);
         gl.uniform1f(uniforms.warmth, on ? settings.warmth : 0);
         gl.uniform1f(uniforms.sat, on ? settings.sat : 1);
+        gl.uniform1f(uniforms.lipThresh, settings.lipThresh);
+        gl.uniform1f(uniforms.skinRange, settings.skinRange);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
         ctx.drawImage(glCanvas, 0, 0);
 

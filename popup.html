@@ -29,6 +29,10 @@
   <label>彩度 <input type="range" id="sat" min="0.5" max="1.5" step="0.05"></label>
   <label>ほうれい線消し（0で無効） <input type="range" id="nasoA" min="0" max="1" step="0.05"></label>
 
+  <h2>キャリブレーション（人・環境に合わせる）</h2>
+  <label>唇除外のしきい値（広く除外 ⇔ 狭く） <input type="range" id="lipThresh" min="0.52" max="0.65" step="0.005"></label>
+  <label>肌色判定の広さ（狭い ⇔ 広い） <input type="range" id="skinRange" min="0.6" max="1.6" step="0.05"></label>
+
   <h2>メイク（0で無効）</h2>
   <div class="row">
     <label>リップ</label>

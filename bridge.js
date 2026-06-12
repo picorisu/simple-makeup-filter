@@ -1,6 +1,6 @@
 // ISOLATED world。chrome.storage の設定を MAIN world (override.js) へ中継する
 const DEFAULTS = {
-  enabled: true, smooth: 0.6, bright: 0.05, warmth: 0.04, sat: 1.05, nasoA: 0,
+  enabled: true, smooth: 0.6, bright: 0.05, warmth: 0.04, sat: 1.05, nasoA: 0, lipThresh: 0.575, skinRange: 1.0,
   lipColor: '#c2476e', lipA: 0,
   blushColor: '#e8889a', blushA: 0, blushShape: 1.6, blushY: 0.06, blushSoft: 1.3,
   browColor: '#5a3d2b', browA: 0, browW: 1.0
