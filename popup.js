@@ -118,11 +118,18 @@ document.getElementById('presetDelete').addEventListener('click', () => {
 });
 
 document.getElementById('presetExport').addEventListener('click', () => {
-  currentSettings((s) => {
-    const blob = new Blob([JSON.stringify(sanitize(s), null, 2)], { type: 'application/json' });
+  // 書き出すのは「選択中のプリセット」。編集途中の無名状態は対象外
+  const name = document.getElementById('presetList').value;
+  if (!name) {
+    alert('先にプリセットとして保存してから書き出してください');
+    return;
+  }
+  chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
+    if (!__presets[name]) return;
+    const blob = new Blob([JSON.stringify(sanitize(__presets[name]), null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'meet-beauty-filter-settings.json';
+    a.download = `${name}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
   });
@@ -140,7 +147,15 @@ document.getElementById('presetFile').addEventListener('change', (e) => {
     try {
       const s = sanitize(JSON.parse(reader.result));
       if (Object.keys(s).length === 0) throw new Error('有効な設定がありません');
-      chrome.storage.local.set(s, () => refreshUI({ ...DEFAULTS, ...s }));
+      // 即適用せず、ファイル名のプリセットとして一覧に追加する（適用はユーザーが選ぶ）
+      const name = file.name.replace(/\.json$/i, '') || 'インポート';
+      chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
+        __presets[name] = s;
+        chrome.storage.local.set({ __presets }, () => {
+          refreshPresetList();
+          document.getElementById('presetList').value = name;
+        });
+      });
     } catch (err) {
       alert('読み込めませんでした: ' + err.message);
     }
