@@ -41,6 +41,13 @@
     linerWing: 0,    // 目尻の跳ね上げ長さ 0-1（0でハネなし）
     linerWingUp: 25, // ハネ角度（度）。マイナスで下向き（垂れ目）、0で真横、プラスで上向き
     linerWingW: 1.5, // ハネの根元の太さ（ライン幅比）
+    shadeColor: '#8a5a40', // シェーディング色（影色）
+    noseA: 0,        // ノーズシャドウ濃さ 0-1
+    noseW: 1.0,      // ノーズシャドウの幅 0.5-2.0
+    noseIn: 0.25,    // ノーズシャドウの内側寄せ 0=小鼻の外側 〜 0.6=鼻筋ギリギリ
+    noseSoft: 1.0,   // ノーズシャドウぼかし 0.5-3.0
+    jawA: 0,         // 輪郭シェーディング濃さ 0-1
+    jawSoft: 1.0,    // 輪郭シェーディングぼかし 0.5-3.0
     __base: null   // 拡張リソースのベースURL（bridge.js から受け取る）
   };
 
@@ -248,6 +255,12 @@ void main() {
   const EYE_BOT_R = [263, 249, 390, 373, 374, 380, 381, 382, 362];
   const CHEEK_L = 205;
   const CHEEK_R = 425;
+  // 鼻筋の付け根（眉頭の下あたり）
+  const NOSE_TOP_L = 193;
+  const NOSE_TOP_R = 417;
+  // フェイスライン（耳下→顎へ）
+  const JAW_L = [93, 132, 58, 172, 136, 150, 149, 176, 148];
+  const JAW_R = [323, 361, 288, 397, 365, 379, 378, 400, 377];
   const ALA_L = 49;    // 左小鼻の外側
   const ALA_R = 279;   // 右小鼻の外側
   const MOUTH_L = 61;  // 左口角
@@ -547,6 +560,61 @@ void main() {
       }
     }
 
+    if (settings.noseA > 0) {
+      // ノーズシャドウ: 鼻筋の付け根→小鼻のラインに沿った細長い影を左右に落とす
+      ctx.filter = `blur(${Math.max(1, faceW * 0.012 * settings.noseSoft)}px)`;
+      // 内側寄せ: 上端は鼻筋の付け根（眉間側）、下端は鼻先へ向けて寄せる
+      const bx = lm[168].x * W, by = lm[168].y * H; // 眉間（鼻筋の上端中心）
+      const tipX = lm[NOSE_TIP].x * W, tipY = lm[NOSE_TIP].y * H;
+      const inn = settings.noseIn;
+      for (const [topI, alaI] of [[NOSE_TOP_L, ALA_L], [NOSE_TOP_R, ALA_R]]) {
+        const tx2 = lm[topI].x * W + (bx - lm[topI].x * W) * inn;
+        const ty2 = lm[topI].y * H + (by - lm[topI].y * H) * inn;
+        const ax = lm[alaI].x * W + (tipX - lm[alaI].x * W) * inn;
+        const ay = lm[alaI].y * H + (tipY - lm[alaI].y * H) * inn;
+        const len = Math.hypot(ax - tx2, ay - ty2);
+        const angle = Math.atan2(ay - ty2, ax - tx2);
+        const cx2 = (tx2 + ax) / 2, cy2 = (ty2 + ay) / 2;
+        const ry = faceW * 0.018 * settings.noseW;
+        ctx.save();
+        ctx.translate(cx2, cy2);
+        ctx.rotate(angle);
+        ctx.scale((len * 0.55) / ry, 1);
+        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, ry);
+        g.addColorStop(0, hexToRgba(settings.shadeColor, settings.noseA * 0.3));
+        g.addColorStop(1, hexToRgba(settings.shadeColor, 0));
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(0, 0, ry, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    if (settings.jawA > 0) {
+      // 輪郭シェーディング: フェイスラインを少し内側へオフセットした帯に影を落として
+      // 輪郭をシャープに見せる。強くぼかして「影」として馴染ませる
+      ctx.filter = `blur(${Math.max(2, faceW * 0.025 * settings.jawSoft)}px)`;
+      ctx.strokeStyle = hexToRgba(settings.shadeColor, settings.jawA * 0.3);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = faceW * 0.05;
+      const nx2 = lm[NOSE_TIP].x * W, ny2 = lm[NOSE_TIP].y * H;
+      for (const jaw of [JAW_L, JAW_R]) {
+        ctx.beginPath();
+        jaw.forEach((i, k) => {
+          // 鼻先方向（顔の内側）へ少し寄せる＝帯が背景にはみ出さない
+          let x = lm[i].x * W, y = lm[i].y * H;
+          const dx2 = nx2 - x, dy2 = ny2 - y;
+          const dl2 = Math.hypot(dx2, dy2) || 1;
+          x += (dx2 / dl2) * faceW * 0.03;
+          y += (dy2 / dl2) * faceW * 0.03;
+          if (k === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+      }
+    }
+
     if (settings.browA > 0) {
       ctx.filter = `blur(${Math.max(1, faceW * 0.01)}px)`;
       ctx.fillStyle = hexToRgba(settings.browColor, settings.browA * 0.5);
@@ -631,7 +699,8 @@ void main() {
         const makeupOn = on &&
           (settings.lipA > 0 || settings.blushA > 0 || settings.browA > 0 ||
            settings.nasoA > 0 || settings.eyebagLine > 0 || settings.eyebagBright > 0 ||
-           settings.shadowA > 0 || settings.linerA > 0);
+           settings.shadowA > 0 || settings.linerA > 0 ||
+           settings.noseA > 0 || settings.jawA > 0);
         if (makeupOn && !landmarkerRequested && settings.__base) {
           landmarkerRequested = true;
           getLandmarker().then((l) => { landmarker = l; });
