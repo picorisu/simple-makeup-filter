@@ -237,8 +237,11 @@ void main() {
       // MediaPipe は内部ログ（W0612... / INFO: ... / xxx.cc:NN）を console.error/warn で
       // 吐くため、chrome://extensions に「エラー」として集計されてしまう。
       // そのパターンのみ debug に格下げし、本物のエラーはそのまま通す
+      // MediaPipe のログだけに厳密マッチさせる（Meet 本来のログを巻き込まないように）:
+      // 例 "W0612 17:24:13.735000 1880752 face_landmarker_graph.cc:180] ..." / "INFO: Created TensorFlow ..."
       const isMediapipeLog = (a) =>
-        typeof a === 'string' && /^(W\d{4}|I\d{4}|INFO:)|[a-z_]+\.cc:\d+/.test(a);
+        typeof a === 'string' &&
+        (/^[WIEF]\d{4} \d{2}:\d{2}:\d{2}\.\d+\s+\d+\s+\S+\.(cc|h):\d+\]/.test(a) || /^INFO: /.test(a));
       for (const level of ['error', 'warn']) {
         const orig = console[level].bind(console);
         console[level] = (...args) => {
@@ -841,10 +844,22 @@ void main() {
     video.muted = true;
     video.playsInline = true;
     video.srcObject = new MediaStream([videoTrack]);
-    video.play().catch(() => {});
 
     const glCanvas = document.createElement('canvas');
-    const { gl, uniforms } = createGL(glCanvas);
+    // GL コンテキストは復元時に作り直すため再代入可能にしておく
+    let GLS = createGL(glCanvas);
+    glCanvas.addEventListener('webglcontextlost', (e) => {
+      // preventDefault しないと restored イベントが来ない（=永遠に真っ黒）
+      e.preventDefault();
+    });
+    glCanvas.addEventListener('webglcontextrestored', () => {
+      try {
+        GLS = createGL(glCanvas);
+        GLS.gl.viewport(0, 0, glCanvas.width || 1, glCanvas.height || 1);
+      } catch (e) {
+        console.warn('[Meet Beauty Filter] WebGL 復元に失敗:', e);
+      }
+    });
 
     const outCanvas = document.createElement('canvas');
     const ctx = outCanvas.getContext('2d');
@@ -857,8 +872,24 @@ void main() {
     let landmarks = null;
 
     let running = true;
+
+    // play() はまれに失敗する（autoplay 制限等）。失敗すると映像が一切流れないため
+    // 数回リトライし、それでもダメなら警告を残す
+    const tryPlay = (attempt = 0) => {
+      video.play().catch(() => {
+        if (!running) return;
+        if (attempt < 3) {
+          setTimeout(() => tryPlay(attempt + 1), 300);
+        } else {
+          console.warn('[Meet Beauty Filter] video.play() に失敗。映像が表示されない場合はページを再読み込みしてください');
+        }
+      });
+    };
+    tryPlay();
+
     const render = () => {
       if (!running) return;
+      const { gl, uniforms } = GLS;
       if (video.readyState >= 2 && video.videoWidth > 0) {
         const W = video.videoWidth;
         const H = video.videoHeight;
@@ -932,7 +963,7 @@ void main() {
       if (!running) return;
       running = false;
       video.srcObject = null;
-      const lose = gl.getExtension('WEBGL_lose_context');
+      const lose = GLS.gl.getExtension('WEBGL_lose_context');
       if (lose) lose.loseContext();
       if (disposeActive === dispose) disposeActive = null;
     };
