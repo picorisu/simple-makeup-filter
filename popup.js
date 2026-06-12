@@ -21,11 +21,13 @@ for (const el of document.querySelectorAll('summary input')) {
   el.addEventListener('click', (e) => e.stopPropagation());
 }
 
-chrome.storage.local.get(DEFAULTS, (s) => {
+function refreshUI(s) {
   for (const k of CHECKS) document.getElementById(k).checked = s[k];
   for (const k of RANGES) document.getElementById(k).value = s[k];
   for (const k of COLORS) document.getElementById(k).value = s[k];
-});
+}
+
+chrome.storage.local.get(DEFAULTS, refreshUI);
 
 for (const k of CHECKS) {
   document.getElementById(k).addEventListener('change', (e) => {
@@ -42,3 +44,107 @@ for (const k of COLORS) {
     chrome.storage.local.set({ [k]: e.target.value });
   });
 }
+
+// ---------- プリセット ----------
+// 保存場所は storage.local の '__presets'（設定キーと衝突しない名前）。
+// 取り込み時は DEFAULTS にあるキーだけ通す（未知のキーは無視 = 安全側）
+
+function sanitize(obj) {
+  const out = {};
+  for (const k of Object.keys(DEFAULTS)) {
+    if (k in obj && typeof obj[k] === typeof DEFAULTS[k]) out[k] = obj[k];
+  }
+  return out;
+}
+
+function currentSettings(cb) {
+  chrome.storage.local.get(DEFAULTS, cb);
+}
+
+function refreshPresetList() {
+  chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
+    const sel = document.getElementById('presetList');
+    sel.innerHTML = '';
+    const names = Object.keys(__presets);
+    if (names.length === 0) {
+      const o = document.createElement('option');
+      o.textContent = '（保存なし）';
+      o.value = '';
+      sel.appendChild(o);
+      return;
+    }
+    for (const name of names) {
+      const o = document.createElement('option');
+      o.textContent = name;
+      o.value = name;
+      sel.appendChild(o);
+    }
+  });
+}
+refreshPresetList();
+
+document.getElementById('presetSave').addEventListener('click', () => {
+  const name = document.getElementById('presetName').value.trim();
+  if (!name) return;
+  currentSettings((s) => {
+    chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
+      __presets[name] = sanitize(s);
+      chrome.storage.local.set({ __presets }, () => {
+        document.getElementById('presetName').value = '';
+        refreshPresetList();
+        document.getElementById('presetList').value = name;
+      });
+    });
+  });
+});
+
+document.getElementById('presetApply').addEventListener('click', () => {
+  const name = document.getElementById('presetList').value;
+  if (!name) return;
+  chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
+    if (!__presets[name]) return;
+    const s = sanitize(__presets[name]);
+    chrome.storage.local.set(s, () => refreshUI({ ...DEFAULTS, ...s }));
+  });
+});
+
+document.getElementById('presetDelete').addEventListener('click', () => {
+  const name = document.getElementById('presetList').value;
+  if (!name) return;
+  chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
+    delete __presets[name];
+    chrome.storage.local.set({ __presets }, refreshPresetList);
+  });
+});
+
+document.getElementById('presetExport').addEventListener('click', () => {
+  currentSettings((s) => {
+    const blob = new Blob([JSON.stringify(sanitize(s), null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'meet-beauty-filter-settings.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+});
+
+document.getElementById('presetImport').addEventListener('click', () => {
+  document.getElementById('presetFile').click();
+});
+
+document.getElementById('presetFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const s = sanitize(JSON.parse(reader.result));
+      if (Object.keys(s).length === 0) throw new Error('有効な設定がありません');
+      chrome.storage.local.set(s, () => refreshUI({ ...DEFAULTS, ...s }));
+    } catch (err) {
+      alert('読み込めませんでした: ' + err.message);
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});

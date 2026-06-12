@@ -74,6 +74,17 @@
     margin: 12px 0 0; border-top: 1px dashed #f3cdd9; padding-top: 10px;
   }
   .note { font-size: 9.5px; color: #c9a4b2; margin-top: 12px; text-align: center; }
+  .btn {
+    font-size: 11px; padding: 5px 10px; border: none; border-radius: 8px;
+    background: #d45f8a; color: #fff; cursor: pointer; font-weight: 600;
+  }
+  .btn:hover { background: #c14d78; }
+  .btn-sub { background: #e8b3c6; }
+  .btn-sub:hover { background: #dd9cb5; }
+  .txt, .sel {
+    flex: 1; font-size: 11px; padding: 5px 8px;
+    border: 1px solid #f0c4d3; border-radius: 8px; background: #fff; color: #5c4a50;
+  }
 </style>
 </head>
 <body>
@@ -170,6 +181,24 @@
     <summary>⚙️ キャリブレーション（人・環境用）</summary>
     <label>唇除外のしきい値（広く除外 ⇔ 狭く） <input type="range" id="lipThresh" min="0.52" max="0.65" step="0.005"></label>
     <label>肌色判定の広さ（狭い ⇔ 広い） <input type="range" id="skinRange" min="0.6" max="1.6" step="0.05"></label>
+  </details>
+
+  <details>
+    <summary>💾 プリセット</summary>
+    <div class="row">
+      <input type="text" id="presetName" placeholder="プリセット名" class="txt">
+      <button id="presetSave" class="btn">保存</button>
+    </div>
+    <div class="row">
+      <select id="presetList" class="sel"></select>
+      <button id="presetApply" class="btn">適用</button>
+      <button id="presetDelete" class="btn btn-sub">削除</button>
+    </div>
+    <div class="row">
+      <button id="presetExport" class="btn" style="flex:1">書き出し（DL）</button>
+      <button id="presetImport" class="btn" style="flex:1">読み込み</button>
+      <input type="file" id="presetFile" accept=".json" style="display:none">
+    </div>
   </details>
 
   <div class="note">設定は即時反映。映像・顔データは全てローカル処理。</div>
