@@ -48,6 +48,19 @@
     noseSoft: 1.0,   // ノーズシャドウぼかし 0.5-3.0
     jawA: 0,         // 輪郭シェーディング濃さ 0-1
     jawSoft: 1.0,    // 輪郭シェーディングぼかし 0.5-3.0
+    hiColor: '#fff2e2', // ハイライト色
+    hiA: 0,          // 鼻筋ハイライト濃さ 0-1
+    hiW: 1.0,        // 鼻筋ハイライトの幅 0.5-2.0
+    hiSoft: 1.0,      // 鼻筋ハイライトぼかし 0.5-3.0
+    hiCheekA: 0,      // 頬骨ハイライト（Cゾーン）濃さ 0-1
+    hiCheekW: 1.0,    // 頬骨ハイライトの大きさ 0.5-2.0
+    hiCheekX: 0,      // 頬骨ハイライトの横位置（顔幅比）。プラスで外側、マイナスで内側
+    hiCheekY: 0,      // 頬骨ハイライトの縦位置（顔幅比）。プラスで上、マイナスで下
+    hiCheekSoft: 1.0, // 頬骨ハイライトぼかし 0.5-3.0
+    hiChinA: 0,       // 顎先ハイライト濃さ 0-1
+    hiChinW: 1.0,     // 顎先ハイライトの大きさ 0.5-2.0
+    hiChinY: 0,       // 顎先ハイライトの縦位置（顔幅比）。プラスで上、マイナスで下
+    hiChinSoft: 1.0,  // 顎先ハイライトぼかし 0.5-3.0
     __base: null   // 拡張リソースのベースURL（bridge.js から受け取る）
   };
 
@@ -615,6 +628,73 @@ void main() {
       }
     }
 
+    if (settings.hiA > 0 || settings.hiCheekA > 0 || settings.hiChinA > 0) {
+      // ハイライト: 顔の高い位置に明るさを乗せる（screen 合成）。
+      // multiply とは逆に「光が当たってる」見え方になる
+      ctx.globalCompositeOperation = 'screen';
+
+      // 回転楕円のグラデーションを置くヘルパー（cx,cy 中心、angle 回転、rx×ry、alpha、soft=ぼかし係数）
+      const glow = (cx3, cy3, angle, rx, ry, alpha, soft) => {
+        ctx.filter = `blur(${Math.max(1, faceW * 0.01 * soft)}px)`;
+        ctx.save();
+        ctx.translate(cx3, cy3);
+        ctx.rotate(angle);
+        ctx.scale(rx / ry, 1);
+        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, ry);
+        g.addColorStop(0, hexToRgba(settings.hiColor, alpha));
+        g.addColorStop(1, hexToRgba(settings.hiColor, 0));
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(0, 0, ry, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      };
+
+      if (settings.hiA > 0) {
+        // 鼻筋: 眉間→鼻先の中心線
+        const tx3 = lm[168].x * W, ty3 = lm[168].y * H;
+        const nx3 = lm[NOSE_TIP].x * W, ny3 = lm[NOSE_TIP].y * H;
+        const len = Math.hypot(nx3 - tx3, ny3 - ty3);
+        glow(
+          (tx3 + nx3) / 2, (ty3 + ny3) / 2,
+          Math.atan2(ny3 - ty3, nx3 - tx3),
+          len * 0.55, faceW * 0.012 * settings.hiW,
+          settings.hiA * 0.4, settings.hiSoft
+        );
+      }
+
+      if (settings.hiCheekA > 0) {
+        // 頬骨の上（Cゾーン）: 目尻の下の高い位置に、頬骨に沿った楕円。
+        // 横位置は左右対称（プラスで両方とも外側へ）、縦位置は顔の傾きに追従
+        const rightX = Math.cos(roll), rightY = Math.sin(roll);
+        const noseX2 = lm[NOSE_TIP].x * W, noseY2 = lm[NOSE_TIP].y * H;
+        for (const idx of [117, 346]) {
+          let x = lm[idx].x * W, y = lm[idx].y * H;
+          // 外向きの符号: 鼻先から見てこの頬がどちら側かで決める
+          const side = Math.sign((x - noseX2) * rightX + (y - noseY2) * rightY) || 1;
+          x += (rightX * side * settings.hiCheekX + upX * settings.hiCheekY) * faceW;
+          y += (rightY * side * settings.hiCheekX + upY * settings.hiCheekY) * faceW;
+          glow(
+            x, y,
+            roll,
+            faceW * 0.09 * settings.hiCheekW, faceW * 0.035 * settings.hiCheekW,
+            settings.hiCheekA * 0.35, settings.hiCheekSoft
+          );
+        }
+      }
+
+      if (settings.hiChinA > 0) {
+        // 顎先: 顎の先端から少し上に丸く
+        const chinX = lm[152].x * W + upX * faceW * (0.035 + settings.hiChinY);
+        const chinY = lm[152].y * H + upY * faceW * (0.035 + settings.hiChinY);
+        glow(chinX, chinY, roll,
+          faceW * 0.05 * settings.hiChinW, faceW * 0.035 * settings.hiChinW,
+          settings.hiChinA * 0.35, settings.hiChinSoft);
+      }
+
+      ctx.globalCompositeOperation = 'multiply'; // 後続のメイク描画用に戻す
+    }
+
     if (settings.browA > 0) {
       ctx.filter = `blur(${Math.max(1, faceW * 0.01)}px)`;
       ctx.fillStyle = hexToRgba(settings.browColor, settings.browA * 0.5);
@@ -700,7 +780,8 @@ void main() {
           (settings.lipA > 0 || settings.blushA > 0 || settings.browA > 0 ||
            settings.nasoA > 0 || settings.eyebagLine > 0 || settings.eyebagBright > 0 ||
            settings.shadowA > 0 || settings.linerA > 0 ||
-           settings.noseA > 0 || settings.jawA > 0);
+           settings.noseA > 0 || settings.jawA > 0 ||
+           settings.hiA > 0 || settings.hiCheekA > 0 || settings.hiChinA > 0);
         if (makeupOn && !landmarkerRequested && settings.__base) {
           landmarkerRequested = true;
           getLandmarker().then((l) => { landmarker = l; });

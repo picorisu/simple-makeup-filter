@@ -40,6 +40,22 @@
   <label>ノーズぼかし（くっきり ⇔ ふんわり） <input type="range" id="noseSoft" min="0.5" max="3" step="0.1"></label>
   <label>輪郭シェーディング（0で無効） <input type="range" id="jawA" min="0" max="1" step="0.05"></label>
   <label>輪郭ぼかし（くっきり ⇔ ふんわり） <input type="range" id="jawSoft" min="0.5" max="3" step="0.1"></label>
+  <div class="row">
+    <label>鼻筋ハイライト</label>
+    <input type="range" id="hiA" min="0" max="1" step="0.05">
+    <input type="color" id="hiColor">
+  </div>
+  <label>ハイライトの幅（細 ⇔ 太） <input type="range" id="hiW" min="0.5" max="2" step="0.05"></label>
+  <label>鼻筋ぼかし（くっきり ⇔ ふんわり） <input type="range" id="hiSoft" min="0.5" max="3" step="0.1"></label>
+  <label>頬骨ハイライト（Cゾーン・0で無効） <input type="range" id="hiCheekA" min="0" max="1" step="0.05"></label>
+  <label>頬骨の大きさ（小 ⇔ 大） <input type="range" id="hiCheekW" min="0.5" max="2" step="0.05"></label>
+  <label>頬骨の横位置（内 ⇔ 外） <input type="range" id="hiCheekX" min="-0.08" max="0.08" step="0.01"></label>
+  <label>頬骨の縦位置（下 ⇔ 上） <input type="range" id="hiCheekY" min="-0.08" max="0.08" step="0.01"></label>
+  <label>頬骨ぼかし（くっきり ⇔ ふんわり） <input type="range" id="hiCheekSoft" min="0.5" max="3" step="0.1"></label>
+  <label>顎先ハイライト（0で無効） <input type="range" id="hiChinA" min="0" max="1" step="0.05"></label>
+  <label>顎先の大きさ（小 ⇔ 大） <input type="range" id="hiChinW" min="0.5" max="2" step="0.05"></label>
+  <label>顎先の縦位置（下 ⇔ 上） <input type="range" id="hiChinY" min="-0.06" max="0.06" step="0.01"></label>
+  <label>顎先ぼかし（くっきり ⇔ ふんわり） <input type="range" id="hiChinSoft" min="0.5" max="3" step="0.1"></label>
 
   <h2>キャリブレーション（人・環境に合わせる）</h2>
   <label>唇除外のしきい値（広く除外 ⇔ 狭く） <input type="range" id="lipThresh" min="0.52" max="0.65" step="0.005"></label>
