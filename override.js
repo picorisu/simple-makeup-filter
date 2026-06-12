@@ -4,10 +4,10 @@
 (() => {
   'use strict';
 
-  // 初期値は defaults.js（MBF_DEFAULTS）が単一情報源。
-  // __base のみこのファイル固有（bridge.js から受け取る拡張リソースのベースURL）。
-  // defaults.js が未注入でもクラッシュさせない（値は bridge の初回送信で全量届く）
-  const settings = { ...(globalThis.MBF_DEFAULTS || {}), __base: null };
+  // 設定値は bridge.js の初回送信（storage の全量）で届く。
+  // MAIN world への複数ファイル注入は環境により defaults.js が落ちることが確認されたため、
+  // このファイルは defaults.js に依存しない（manifest の MAIN world エントリにも含めない）
+  const settings = { __base: null };
 
   window.addEventListener('mbf-settings', (e) => {
     try {
@@ -852,14 +852,15 @@ void main() {
 
         // 1) WebGL: 美肌・明るさ・血色・彩度
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
-        const on = settings.enabled;
+        // ?? は bridge の初回送信が届く前の一瞬のフォールバック（素通し相当の値）
+        const on = settings.enabled ?? true;
         gl.uniform2f(uniforms.texel, 1 / W, 1 / H);
-        gl.uniform1f(uniforms.smooth, on ? settings.smooth : 0);
-        gl.uniform1f(uniforms.bright, on ? settings.bright : 0);
-        gl.uniform1f(uniforms.warmth, on ? settings.warmth : 0);
-        gl.uniform1f(uniforms.sat, on ? settings.sat : 1);
-        gl.uniform1f(uniforms.lipThresh, settings.lipThresh);
-        gl.uniform1f(uniforms.skinRange, settings.skinRange);
+        gl.uniform1f(uniforms.smooth, on ? (settings.smooth ?? 0) : 0);
+        gl.uniform1f(uniforms.bright, on ? (settings.bright ?? 0) : 0);
+        gl.uniform1f(uniforms.warmth, on ? (settings.warmth ?? 0) : 0);
+        gl.uniform1f(uniforms.sat, on ? (settings.sat ?? 1) : 1);
+        gl.uniform1f(uniforms.lipThresh, settings.lipThresh ?? 0.575);
+        gl.uniform1f(uniforms.skinRange, settings.skinRange ?? 1);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
         ctx.drawImage(glCanvas, 0, 0);
 
