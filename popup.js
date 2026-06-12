@@ -52,7 +52,17 @@ for (const k of COLORS) {
 function sanitize(obj) {
   const out = {};
   for (const k of Object.keys(DEFAULTS)) {
-    if (k in obj && typeof obj[k] === typeof DEFAULTS[k]) out[k] = obj[k];
+    if (!(k in obj) || typeof obj[k] !== typeof DEFAULTS[k]) continue;
+    let v = obj[k];
+    if (RANGES.includes(k)) {
+      // スライダーの min/max に収める（壊れた JSON の異常値で映像が崩壊するのを防ぐ）
+      const el = document.getElementById(k);
+      v = Math.min(parseFloat(el.max), Math.max(parseFloat(el.min), v));
+      if (Number.isNaN(v)) continue;
+    } else if (COLORS.includes(k)) {
+      if (!/^#[0-9a-f]{6}$/i.test(v)) continue;
+    }
+    out[k] = v;
   }
   return out;
 }

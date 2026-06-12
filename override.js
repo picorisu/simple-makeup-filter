@@ -73,7 +73,16 @@
   window.addEventListener('mbf-settings', (e) => {
     try {
       const s = typeof e.detail === 'string' ? JSON.parse(e.detail) : e.detail;
-      if (s && typeof s === 'object') Object.assign(settings, s);
+      if (!s || typeof s !== 'object') return;
+      // __base（MediaPipe の読み込み元）はスクリプト読み込みに直結するため特別扱い:
+      // 拡張オリジンの形式のみ許可し、一度設定されたら以降の上書きを拒否する。
+      // MAIN world のイベントはページ上の他スクリプトからも偽装発火できるため
+      if (typeof s.__base === 'string' && settings.__base === null &&
+          /^chrome-extension:\/\/[a-p]{32}\/$/.test(s.__base)) {
+        settings.__base = s.__base;
+      }
+      delete s.__base;
+      Object.assign(settings, s);
     } catch (err) {
       console.warn('[Meet Beauty Filter] 設定の受信に失敗:', err);
     }
@@ -817,9 +826,16 @@ void main() {
 
   // ---------- ストリーム加工 ----------
 
+  // 直近の加工パイプラインの破棄関数。Meet はカメラ切替・再入室などで
+  // getUserMedia を何度も呼ぶため、新しいパイプラインを作る前に古い方を
+  // 確実に止めないと描画ループと WebGL コンテキストが溜まり続ける
+  let disposeActive = null;
+
   function processStream(srcStream) {
     const videoTrack = srcStream.getVideoTracks()[0];
     if (!videoTrack) return srcStream;
+
+    if (disposeActive) disposeActive();
 
     const video = document.createElement('video');
     video.muted = true;
@@ -911,16 +927,27 @@ void main() {
     const outStream = outCanvas.captureStream(fps);
     srcStream.getAudioTracks().forEach((t) => outStream.addTrack(t));
 
+    // パイプライン一式の破棄: 描画ループ停止・video解放・WebGLコンテキスト返却
+    const dispose = () => {
+      if (!running) return;
+      running = false;
+      video.srcObject = null;
+      const lose = gl.getExtension('WEBGL_lose_context');
+      if (lose) lose.loseContext();
+      if (disposeActive === dispose) disposeActive = null;
+    };
+    disposeActive = dispose;
+
     // Meet 側が出力トラックを stop したら元カメラも止める（カメラランプ消灯のため）
     const outTrack = outStream.getVideoTracks()[0];
     const origStop = outTrack.stop.bind(outTrack);
     outTrack.stop = () => {
-      running = false;
+      dispose();
       videoTrack.stop();
       origStop();
     };
     videoTrack.addEventListener('ended', () => {
-      running = false;
+      dispose();
       outTrack.stop();
     });
 
