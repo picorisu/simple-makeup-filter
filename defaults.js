@@ -29,6 +29,7 @@ globalThis.MBF_DEFAULTS = {
   blushColor: '#e8889a',
   blushA: 0,       // 濃さ 0-1
   blushShape: 1.6, // 形状 1=丸 - 2.5=横長
+  blushX: 0,       // 横位置（顔幅比）。プラスで外側、マイナスで内側
   blushY: 0.06,    // 縦位置（顔幅比）
   blushSoft: 1.3,  // ぼかし 1-2.2
 

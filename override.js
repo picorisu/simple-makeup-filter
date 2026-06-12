@@ -476,13 +476,18 @@ void main() {
       ctx.filter = 'none';
       const r = faceW * 0.13;
       const aspect = Math.max(1, settings.blushShape); // 横:縦 の比率
+      const noseX5 = lm[NOSE_TIP].x * W, noseY5 = lm[NOSE_TIP].y * H;
+      const rX5 = Math.cos(roll), rY5 = Math.sin(roll);
       for (const idx of [CHEEK_L, CHEEK_R]) {
         const x = lm[idx].x * W;
         const y = lm[idx].y * H;
+        // 横位置: 左右対称（プラスで両頬とも外側へ）。どちら側の頬かは鼻先基準で判定
+        const side = Math.sign((x - noseX5) * rX5 + (y - noseY5) * rY5) || 1;
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(roll);
-        ctx.translate(0, -settings.blushY * faceW); // 顔の傾きに沿った上下オフセット
+        // 顔の傾きに沿った横・上下オフセット
+        ctx.translate(side * (settings.blushX ?? 0) * faceW, -settings.blushY * faceW);
         ctx.scale(aspect, 1); // 横方向に引き伸ばして楕円化
         // ぼかし: soft を上げるほど広い半径に薄く伸ばす（総量はほぼ一定に保つ）。
         // 中間ストップで指数減衰っぽく落として、自然な「霞み」にする
