@@ -30,12 +30,28 @@ function updateBadges() {
   }
 }
 
+// 各スライダーのラベル右端に現在値を常時表示する。
+// HTML には書かず、起動時にスライダーごとへ自動で差し込む
+const valEls = {};
+for (const k of RANGES) {
+  const input = document.getElementById(k);
+  const span = document.createElement('span');
+  span.className = 'val';
+  input.parentElement.insertBefore(span, input);
+  valEls[k] = span;
+}
+
+function showVal(k, v) {
+  // 0.30000000000004 みたいな浮動小数の尻尾を整える
+  valEls[k].textContent = String(Math.round(v * 100) / 100);
+}
+
 function refreshUI(s) {
   for (const k of CHECKS) document.getElementById(k).checked = s[k];
   for (const k of RANGES) {
     const el = document.getElementById(k);
     el.value = s[k];
-    el.title = String(s[k]); // ホバーで現在値が見える
+    showVal(k, s[k]);
   }
   for (const k of COLORS) document.getElementById(k).value = s[k];
   updateBadges();
@@ -129,7 +145,7 @@ for (const k of CHECKS) {
 for (const k of RANGES) {
   document.getElementById(k).addEventListener('input', (e) => {
     chrome.storage.local.set({ [k]: parseFloat(e.target.value) });
-    e.target.title = e.target.value;
+    showVal(k, parseFloat(e.target.value));
     updateBadges();
   });
 }
