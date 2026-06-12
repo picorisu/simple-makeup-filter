@@ -10,6 +10,7 @@
     bright: 0.05,  // 明るさ 0-0.3
     warmth: 0.04,  // 血色（暖色寄せ） 0-0.2
     sat: 1.05,     // 彩度 0.5-1.5
+    nasoA: 0,      // ほうれい線消し 0-1（0で無効。顔検出を使用）
     lipColor: '#c2476e',
     lipA: 0,       // リップ濃さ 0-1（0で無効）
     blushColor: '#e8889a',
@@ -212,6 +213,11 @@ void main() {
   const BROW_R = [300, 293, 334, 296, 336, 285, 295, 282, 283, 276];
   const CHEEK_L = 205;
   const CHEEK_R = 425;
+  const ALA_L = 49;    // 左小鼻の外側
+  const ALA_R = 279;   // 右小鼻の外側
+  const MOUTH_L = 61;  // 左口角
+  const MOUTH_R = 291; // 右口角
+  const NOSE_TIP = 1;
   const FACE_LEFT = 234;
   const FACE_RIGHT = 454;
 
@@ -226,6 +232,61 @@ void main() {
   function hexToRgba(hex, a) {
     const n = parseInt(hex.slice(1), 16);
     return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+  }
+
+  // ほうれい線消し: 小鼻→口角のラインに沿った楕円領域だけ、強くぼかした画像を
+  // ソフトマスク付きで上書きする。領域外は一切触らないので全体のシャープさは保たれる
+  function drawNasoFix(ctx, srcCanvas, patch, mask, lm, W, H) {
+    const a = settings.nasoA;
+    if (a <= 0) return;
+
+    const faceW = Math.hypot(
+      (lm[FACE_RIGHT].x - lm[FACE_LEFT].x) * W,
+      (lm[FACE_RIGHT].y - lm[FACE_LEFT].y) * H
+    );
+    const mctx = mask.getContext('2d');
+    mctx.clearRect(0, 0, W, H);
+
+    for (const [alaI, mouthI] of [[ALA_L, MOUTH_L], [ALA_R, MOUTH_R]]) {
+      const ax = lm[alaI].x * W, ay = lm[alaI].y * H;
+      const mx = lm[mouthI].x * W, my = lm[mouthI].y * H;
+      const len = Math.hypot(mx - ax, my - ay);
+      const angle = Math.atan2(my - ay, mx - ax);
+      // 中点を鼻先と反対方向（頬側）へ少し逃がす＝実際の溝の位置に寄せる
+      let px = -(my - ay) / len, py = (mx - ax) / len;
+      const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
+      let cx = (ax + mx) / 2, cy = (ay + my) / 2;
+      if ((cx + px - nx) ** 2 + (cy + py - ny) ** 2 < (cx - px - nx) ** 2 + (cy - py - ny) ** 2) {
+        px = -px; py = -py;
+      }
+      cx += px * faceW * 0.02;
+      cy += py * faceW * 0.02;
+
+      mctx.save();
+      mctx.translate(cx, cy);
+      mctx.rotate(angle);
+      mctx.scale((len * 0.7) / (faceW * 0.05), 1); // 溝に沿った細長い楕円
+      const g = mctx.createRadialGradient(0, 0, 0, 0, 0, faceW * 0.05);
+      g.addColorStop(0, `rgba(0,0,0,${a})`);
+      g.addColorStop(0.7, `rgba(0,0,0,${a * 0.6})`);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      mctx.fillStyle = g;
+      mctx.beginPath();
+      mctx.arc(0, 0, faceW * 0.05, 0, Math.PI * 2);
+      mctx.fill();
+      mctx.restore();
+    }
+
+    const pctx = patch.getContext('2d');
+    pctx.clearRect(0, 0, W, H);
+    pctx.filter = `blur(${Math.max(2, faceW * 0.02)}px)`;
+    pctx.drawImage(srcCanvas, 0, 0);
+    pctx.filter = 'none';
+    pctx.globalCompositeOperation = 'destination-in';
+    pctx.drawImage(mask, 0, 0);
+    pctx.globalCompositeOperation = 'source-over';
+
+    ctx.drawImage(patch, 0, 0);
   }
 
   function drawMakeup(ctx, lm, W, H) {
@@ -323,6 +384,8 @@ void main() {
 
     const outCanvas = document.createElement('canvas');
     const ctx = outCanvas.getContext('2d');
+    const patchCanvas = document.createElement('canvas'); // ほうれい線消し用の作業バッファ
+    const maskCanvas = document.createElement('canvas');
 
     let landmarker = null;
     let landmarkerRequested = false;
@@ -340,6 +403,10 @@ void main() {
           glCanvas.height = H;
           outCanvas.width = W;
           outCanvas.height = H;
+          patchCanvas.width = W;
+          patchCanvas.height = H;
+          maskCanvas.width = W;
+          maskCanvas.height = H;
           gl.viewport(0, 0, W, H);
         }
 
@@ -354,8 +421,9 @@ void main() {
         gl.drawArrays(gl.TRIANGLES, 0, 3);
         ctx.drawImage(glCanvas, 0, 0);
 
-        // 2) メイク: いずれかの濃さ > 0 のときだけ顔検出を回す（不要時は負荷ゼロ）
-        const makeupOn = on && (settings.lipA > 0 || settings.blushA > 0 || settings.browA > 0);
+        // 2) メイク・ほうれい線消し: いずれかが有効なときだけ顔検出を回す（不要時は負荷ゼロ）
+        const makeupOn = on &&
+          (settings.lipA > 0 || settings.blushA > 0 || settings.browA > 0 || settings.nasoA > 0);
         if (makeupOn && !landmarkerRequested && settings.__base) {
           landmarkerRequested = true;
           getLandmarker().then((l) => { landmarker = l; });
@@ -370,7 +438,10 @@ void main() {
               landmarks = null;
             }
           }
-          if (landmarks) drawMakeup(ctx, landmarks, W, H);
+          if (landmarks) {
+            drawNasoFix(ctx, glCanvas, patchCanvas, maskCanvas, landmarks, W, H);
+            drawMakeup(ctx, landmarks, W, H);
+          }
         }
       }
       if (video.requestVideoFrameCallback) {
