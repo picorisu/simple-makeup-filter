@@ -21,13 +21,62 @@ for (const el of document.querySelectorAll('summary input')) {
   el.addEventListener('click', (e) => e.stopPropagation());
 }
 
+// 見出しの ON/OFF バッジ: 各カテゴリの「効いてるか」を閉じたまま分かるように
+const BADGE_KEYS = {
+  lip: ['lipA', 'lipGloss'],
+  blush: ['blushA'],
+  brow: ['browA'],
+  eye: ['shadowA', 'linerA'],
+  shade: ['noseA', 'jawA'],
+  hi: ['hiA', 'hiCheekA', 'hiChinA']
+};
+
+function updateBadges() {
+  for (const [name, keys] of Object.entries(BADGE_KEYS)) {
+    const on = keys.some((k) => parseFloat(document.getElementById(k).value) > 0);
+    const el = document.querySelector(`[data-badge="${name}"]`);
+    el.textContent = on ? 'ON' : 'OFF';
+    el.classList.toggle('on', on);
+  }
+}
+
 function refreshUI(s) {
   for (const k of CHECKS) document.getElementById(k).checked = s[k];
   for (const k of RANGES) document.getElementById(k).value = s[k];
   for (const k of COLORS) document.getElementById(k).value = s[k];
+  updateBadges();
 }
 
 chrome.storage.local.get(DEFAULTS, refreshUI);
+
+// ワンタップ初期プリセット: 「全部0で何も起きない」初回体験の回避が主目的
+const QUICK_PRESETS = {
+  natural: {
+    smooth: 0.55, bright: 0.05, warmth: 0.04, sat: 1.05,
+    nasoA: 0.5, eyebagLine: 0.4, eyebagBright: 0.2,
+    lipA: 0.3, lipGloss: 0.2, blushA: 0.25, browA: 0.2,
+    shadowA: 0.2, linerA: 0.2
+  },
+  full: {
+    smooth: 0.75, bright: 0.08, warmth: 0.06, sat: 1.08,
+    nasoA: 1.0, eyebagLine: 0.8, eyebagBright: 0.4,
+    lipA: 0.55, lipGloss: 0.35, lipW: 1.06, blushA: 0.4, browA: 0.35,
+    shadowA: 0.4, linerA: 0.45, linerWing: 0.3,
+    noseA: 0.25, jawA: 0.25, hiA: 0.25, hiCheekA: 0.25
+  },
+  healthy: {
+    smooth: 0.6, bright: 0.06, warmth: 0.09, sat: 1.12,
+    eyebagBright: 0.3, lipA: 0.4, lipGloss: 0.3,
+    blushA: 0.45, blushSoft: 1.6
+  }
+};
+
+for (const btn of document.querySelectorAll('[data-quick]')) {
+  btn.addEventListener('click', () => {
+    const s = { ...DEFAULTS, ...QUICK_PRESETS[btn.dataset.quick], enabled: true };
+    chrome.storage.local.set(s, () => refreshUI(s));
+  });
+}
 
 for (const k of CHECKS) {
   document.getElementById(k).addEventListener('change', (e) => {
@@ -37,6 +86,7 @@ for (const k of CHECKS) {
 for (const k of RANGES) {
   document.getElementById(k).addEventListener('input', (e) => {
     chrome.storage.local.set({ [k]: parseFloat(e.target.value) });
+    updateBadges();
   });
 }
 for (const k of COLORS) {
@@ -98,6 +148,7 @@ document.getElementById('presetSave').addEventListener('click', () => {
   if (!name) return;
   currentSettings((s) => {
     chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
+      if (__presets[name] && !confirm(`「${name}」は既にあります。上書きしますか？`)) return;
       __presets[name] = sanitize(s);
       chrome.storage.local.set({ __presets }, () => {
         document.getElementById('presetName').value = '';
@@ -121,6 +172,7 @@ document.getElementById('presetApply').addEventListener('click', () => {
 document.getElementById('presetDelete').addEventListener('click', () => {
   const name = document.getElementById('presetList').value;
   if (!name) return;
+  if (!confirm(`「${name}」を削除しますか？`)) return;
   chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
     delete __presets[name];
     chrome.storage.local.set({ __presets }, refreshPresetList);
@@ -169,10 +221,12 @@ document.getElementById('presetFile').addEventListener('change', (e) => {
       // 即適用せず、ファイル名のプリセットとして一覧に追加する（適用はユーザーが選ぶ）
       const name = file.name.replace(/\.json$/i, '') || 'インポート';
       chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
+        if (__presets[name] && !confirm(`「${name}」は既にあります。上書きしますか？`)) return;
         __presets[name] = s;
         chrome.storage.local.set({ __presets }, () => {
           refreshPresetList();
           document.getElementById('presetList').value = name;
+          alert(`「${name}」を追加しました。隣の「適用」を押すと反映されます`);
         });
       });
     } catch (err) {

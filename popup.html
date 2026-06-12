@@ -85,11 +85,25 @@
     flex: 1; font-size: 11px; padding: 5px 8px;
     border: 1px solid #f0c4d3; border-radius: 8px; background: #fff; color: #5c4a50;
   }
+  .guide { font-size: 11px; color: #8a6f7a; margin: 6px 0 0; line-height: 1.5; }
+  .quick { display: flex; gap: 6px; margin-top: 8px; }
+  .quick .btn { flex: 1; }
+  .badge {
+    font-size: 9px; font-weight: 700; margin-left: 6px; padding: 1px 6px;
+    border-radius: 8px; background: #eee0e5; color: #b9a3ac;
+  }
+  .badge.on { background: #d45f8a; color: #fff; }
 </style>
 </head>
 <body>
 <div class="panel">
   <h1><img src="icons/icon48.png" alt="">Meet Beauty Filter<input type="checkbox" id="enabled" title="フィルターの有効/無効"></h1>
+  <p class="guide">Google Meet を開いてカメラON → 下の項目のスライダーを動かすと、すぐ映像に反映されます💄</p>
+  <div class="quick">
+    <button class="btn" data-quick="natural">ナチュラル</button>
+    <button class="btn" data-quick="full">しっかり</button>
+    <button class="btn" data-quick="healthy">血色感</button>
+  </div>
 
   <details>
     <summary>✨ 肌</summary>
@@ -103,14 +117,14 @@
   </details>
 
   <details>
-    <summary>💋 リップ<input type="color" id="lipColor" class="hdr-color"></summary>
+    <summary>💋 リップ<span class="badge" data-badge="lip">OFF</span><input type="color" id="lipColor" class="hdr-color"></summary>
     <label>濃さ <input type="range" id="lipA" min="0" max="1" step="0.05"></label>
     <label>ツヤ（マット ⇔ グロス） <input type="range" id="lipGloss" min="0" max="1" step="0.05"></label>
     <label>太さ（細め ⇔ オーバーリップ） <input type="range" id="lipW" min="0.8" max="1.3" step="0.02"></label>
   </details>
 
   <details>
-    <summary>🍑 チーク<input type="color" id="blushColor" class="hdr-color"></summary>
+    <summary>🍑 チーク<span class="badge" data-badge="blush">OFF</span><input type="color" id="blushColor" class="hdr-color"></summary>
     <label>濃さ <input type="range" id="blushA" min="0" max="1" step="0.05"></label>
     <label>形状（丸 ⇔ 横長） <input type="range" id="blushShape" min="1" max="2.5" step="0.1"></label>
     <label>位置（下 ⇔ 上） <input type="range" id="blushY" min="-0.08" max="0.2" step="0.01"></label>
@@ -118,7 +132,7 @@
   </details>
 
   <details>
-    <summary>🖌 眉<input type="color" id="browColor" class="hdr-color"></summary>
+    <summary>🖌 眉<span class="badge" data-badge="brow">OFF</span><input type="color" id="browColor" class="hdr-color"></summary>
     <label>濃さ <input type="range" id="browA" min="0" max="1" step="0.05"></label>
     <label>太さ（細 ⇔ 太） <input type="range" id="browW" min="0.25" max="1.05" step="0.05"></label>
     <label>眉尻の細さ（均一 ⇔ 先細り） <input type="range" id="browTaper" min="0" max="1" step="0.05"></label>
@@ -128,7 +142,7 @@
   </details>
 
   <details>
-    <summary>🪞 アイメイク<input type="color" id="shadowColor" class="hdr-color" title="シャドウ際色"><input type="checkbox" id="shadowUse2" class="hdr-check" title="中間色を使う"><input type="color" id="shadowColor2" class="hdr-color" style="margin-left:0" title="シャドウ中間色"><input type="checkbox" id="shadowUse3" class="hdr-check" title="上色を使う"><input type="color" id="shadowColor3" class="hdr-color" style="margin-left:0" title="シャドウ上色"><input type="color" id="linerColor" class="hdr-color" title="アイライン色"></summary>
+    <summary>🪞 アイメイク<span class="badge" data-badge="eye">OFF</span><input type="color" id="shadowColor" class="hdr-color" title="シャドウ際色"><input type="checkbox" id="shadowUse2" class="hdr-check" title="中間色を使う"><input type="color" id="shadowColor2" class="hdr-color" style="margin-left:0" title="シャドウ中間色"><input type="checkbox" id="shadowUse3" class="hdr-check" title="上色を使う"><input type="color" id="shadowColor3" class="hdr-color" style="margin-left:0" title="シャドウ上色"><input type="color" id="linerColor" class="hdr-color" title="アイライン色"></summary>
     <p class="sub">アイシャドウ</p>
     <div class="row">
       <label>濃さ</label>
@@ -147,7 +161,7 @@
   </details>
 
   <details>
-    <summary>🌘 シェーディング<input type="color" id="shadeColor" class="hdr-color" title="影色（ノーズ・輪郭共通）"></summary>
+    <summary>🌘 シェーディング<span class="badge" data-badge="shade">OFF</span><input type="color" id="shadeColor" class="hdr-color" title="影色（ノーズ・輪郭共通）"></summary>
     <p class="sub">ノーズシャドウ</p>
     <label>濃さ（0で無効） <input type="range" id="noseA" min="0" max="1" step="0.05"></label>
     <label>幅（細 ⇔ 太） <input type="range" id="noseW" min="0.5" max="2" step="0.05"></label>
@@ -159,7 +173,7 @@
   </details>
 
   <details>
-    <summary>🌟 ハイライト<input type="color" id="hiColor" class="hdr-color" title="光色（鼻筋・頬骨・顎先共通）"></summary>
+    <summary>🌟 ハイライト<span class="badge" data-badge="hi">OFF</span><input type="color" id="hiColor" class="hdr-color" title="光色（鼻筋・頬骨・顎先共通）"></summary>
     <p class="sub">鼻筋</p>
     <label>濃さ（0で無効） <input type="range" id="hiA" min="0" max="1" step="0.05"></label>
     <label>幅（細 ⇔ 太） <input type="range" id="hiW" min="0.5" max="2" step="0.05"></label>
