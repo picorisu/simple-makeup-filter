@@ -17,7 +17,8 @@ const FX_KEYS = {
   lip: ['lipA', 'lipGloss'],
   blush: ['blushA'],
   brow: ['browA'],
-  eye: ['shadowA', 'linerA'],
+  shadow: ['shadowA'],
+  liner: ['linerA'],
   shade: ['noseA', 'jawA'],
   hi: ['hiA', 'hiCheekA', 'hiChinA']
 };

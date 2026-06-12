@@ -143,18 +143,17 @@
     <label>眉尻の高さ（下げ ⇔ 上げ） <input type="range" id="browTail" min="-1" max="1" step="0.05"></label>
   </details>
 
-  <details data-fx="eye">
-    <summary>🪞 アイメイク<input type="color" id="shadowColor" class="hdr-color" title="シャドウ際色" aria-label="シャドウ際色"><input type="checkbox" id="shadowUse2" class="hdr-check" title="中間色を使う" aria-label="中間色を使う"><input type="color" id="shadowColor2" class="hdr-color" style="margin-left:0" title="シャドウ中間色" aria-label="シャドウ中間色"><input type="checkbox" id="shadowUse3" class="hdr-check" title="上色を使う" aria-label="上色を使う"><input type="color" id="shadowColor3" class="hdr-color" style="margin-left:0" title="シャドウ上色" aria-label="シャドウ上色"><input type="color" id="linerColor" class="hdr-color" title="アイライン色" aria-label="アイライン色"></summary>
-    <p class="sub">アイシャドウ</p>
-    <div class="row">
-      <label>濃さ</label>
-      <input type="range" id="shadowA" min="0" max="1" step="0.05">
-    </div>
+  <details data-fx="shadow">
+    <summary>🎨 アイシャドウ<input type="color" id="shadowColor" class="hdr-color" title="際色" aria-label="際色"><input type="checkbox" id="shadowUse2" class="hdr-check" title="中間色を使う" aria-label="中間色を使う"><input type="color" id="shadowColor2" class="hdr-color" style="margin-left:0" title="中間色" aria-label="中間色"><input type="checkbox" id="shadowUse3" class="hdr-check" title="上色を使う" aria-label="上色を使う"><input type="color" id="shadowColor3" class="hdr-color" style="margin-left:0" title="上色" aria-label="上色"></summary>
+    <label>濃さ <input type="range" id="shadowA" min="0" max="1" step="0.05"></label>
     <label>高さ（低 ⇔ 高） <input type="range" id="shadowH" min="0.5" max="2" step="0.05"></label>
     <label>幅（狭 ⇔ 広） <input type="range" id="shadowW" min="0.8" max="1.4" step="0.05"></label>
     <label>ぼかし（くっきり ⇔ ふんわり） <input type="range" id="shadowSoft" min="0.5" max="3" step="0.1"></label>
     <label>際色の量（均等 ⇔ 際多め） <input type="range" id="shadowBias" min="1" max="3" step="0.1"></label>
-    <p class="sub">アイライン</p>
+  </details>
+
+  <details data-fx="liner">
+    <summary>✒️ アイライン<input type="color" id="linerColor" class="hdr-color" title="アイライン色" aria-label="アイライン色"></summary>
     <label>濃さ <input type="range" id="linerA" min="0" max="1" step="0.05"></label>
     <label>ラインの太さ（細 ⇔ 太） <input type="range" id="linerW" min="0.4" max="2" step="0.05"></label>
     <label>目尻ハネの長さ（0でなし） <input type="range" id="linerWing" min="0" max="1" step="0.05"></label>
