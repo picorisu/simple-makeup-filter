@@ -1,0 +1,4 @@
+# MediaPipe 同梱物（サードパーティ・約13MB）。入手方法は README 参照
+vendor/
+.local/
+.DS_Store

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: -apple-system, sans-serif; width: 260px; padding: 12px; margin: 0; }
+  h1 { font-size: 14px; margin: 0 0 10px; }
+  h2 { font-size: 11px; margin: 14px 0 2px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+  label { display: block; font-size: 12px; margin-top: 8px; color: #444; }
+  input[type=range] { width: 100%; }
+  .row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .row label { margin: 0; flex: 1; }
+  .row input[type=range] { flex: 2; }
+  .row input[type=color] { width: 28px; height: 22px; padding: 0; border: none; }
+  .toggle { display: flex; align-items: center; gap: 6px; font-size: 13px; margin-top: 4px; }
+  .note { font-size: 10px; color: #999; margin-top: 12px; }
+</style>
+</head>
+<body>
+  <h1>Meet Beauty Filter</h1>
+  <div class="toggle">
+    <input type="checkbox" id="enabled"><label for="enabled" style="margin:0">有効</label>
+  </div>
+
+  <h2>肌</h2>
+  <label>美肌 <input type="range" id="smooth" min="0" max="1" step="0.05"></label>
+  <label>明るさ <input type="range" id="bright" min="0" max="0.3" step="0.01"></label>
+  <label>血色 <input type="range" id="warmth" min="0" max="0.2" step="0.01"></label>
+  <label>彩度 <input type="range" id="sat" min="0.5" max="1.5" step="0.05"></label>
+
+  <h2>メイク（0で無効）</h2>
+  <div class="row">
+    <label>リップ</label>
+    <input type="range" id="lipA" min="0" max="1" step="0.05">
+    <input type="color" id="lipColor">
+  </div>
+  <div class="row">
+    <label>チーク</label>
+    <input type="range" id="blushA" min="0" max="1" step="0.05">
+    <input type="color" id="blushColor">
+  </div>
+  <label>チーク形状（丸 ⇔ 横長） <input type="range" id="blushShape" min="1" max="2.5" step="0.1"></label>
+  <label>チーク位置（下 ⇔ 上） <input type="range" id="blushY" min="-0.08" max="0.2" step="0.01"></label>
+  <label>チークぼかし（標準 ⇔ 広くふんわり） <input type="range" id="blushSoft" min="1" max="2.2" step="0.05"></label>
+  <div class="row">
+    <label>眉</label>
+    <input type="range" id="browA" min="0" max="1" step="0.05">
+    <input type="color" id="browColor">
+  </div>
+  <label>眉の太さ（細 ⇔ 太） <input type="range" id="browW" min="0.25" max="1.05" step="0.05"></label>
+  <div class="note">設定は即時反映。映像・顔データは全てローカル処理。</div>
+  <script src="popup.js"></script>
+</body>
+</html>
