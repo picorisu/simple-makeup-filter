@@ -36,6 +36,7 @@
   }
   summary::-webkit-details-marker { display: none; }
   summary::before { content: '♡'; color: #d9c3cc; margin-right: 6px; }
+  details:not([data-fx]) summary::before { content: none; }
   details.fx-on summary::before { content: '♥'; color: #d45f8a; }
   summary::after {
     content: '▸'; color: #cf9fb4; font-size: 10px; margin-left: 8px; flex-shrink: 0;
