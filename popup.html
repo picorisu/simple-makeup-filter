@@ -28,6 +28,8 @@
   <label>血色 <input type="range" id="warmth" min="0" max="0.2" step="0.01"></label>
   <label>彩度 <input type="range" id="sat" min="0.5" max="1.5" step="0.05"></label>
   <label>ほうれい線消し（0で無効・1超は強力モード） <input type="range" id="nasoA" min="0" max="2" step="0.05"></label>
+  <label>目の下の線消し（0で無効・1超は強力モード） <input type="range" id="eyebagLine" min="0" max="2" step="0.05"></label>
+  <label>クマの明るさ持ち上げ（0で無効） <input type="range" id="eyebagBright" min="0" max="1" step="0.05"></label>
 
   <h2>キャリブレーション（人・環境に合わせる）</h2>
   <label>唇除外のしきい値（広く除外 ⇔ 狭く） <input type="range" id="lipThresh" min="0.52" max="0.65" step="0.005"></label>
@@ -72,6 +74,9 @@
     <input type="range" id="linerA" min="0" max="1" step="0.05">
     <input type="color" id="linerColor">
   </div>
+  <label>目尻ハネの長さ（0でなし） <input type="range" id="linerWing" min="0" max="1" step="0.05"></label>
+  <label>ハネの角度（下向き ⇔ 上向き） <input type="range" id="linerWingUp" min="-60" max="60" step="1"></label>
+  <label>ハネの太さ（細 ⇔ 太） <input type="range" id="linerWingW" min="0.5" max="3" step="0.1"></label>
   <div class="note">設定は即時反映。映像・顔データは全てローカル処理。</div>
   <script src="popup.js"></script>
 </body>

@@ -11,6 +11,8 @@
     warmth: 0.04,  // 血色（暖色寄せ） 0-0.2
     sat: 1.05,     // 彩度 0.5-1.5
     nasoA: 0,      // ほうれい線消し 0-2（0で無効。顔検出を使用。1超でぼかし・範囲も強化）
+    eyebagLine: 0,   // 目の下の線消し 0-2（ぼかしの強さ。1超で範囲も強化）
+    eyebagBright: 0, // クマの明るさ持ち上げ 0-1（コンシーラー相当）
     lipThresh: 0.575, // 唇除外しきい値（Cr）。下げるほど赤みの弱い唇も除外される
     skinRange: 1.0,   // 肌色判定の広さ。肌のトーンが判定から外れる人は上げる
     lipColor: '#c2476e',
@@ -34,7 +36,10 @@
     shadowSoft: 1.0, // アイシャドウぼかし 0.5-3.0
     shadowBias: 1.0, // 際色の量 1.0=均等 〜 3.0=際色を高さの2/3まで引っ張る
     linerColor: '#2b1d1a',
-    linerA: 0,     // アイライン濃さ 0-1
+    linerA: 0,       // アイライン濃さ 0-1
+    linerWing: 0,    // 目尻の跳ね上げ長さ 0-1（0でハネなし）
+    linerWingUp: 25, // ハネ角度（度）。マイナスで下向き（垂れ目）、0で真横、プラスで上向き
+    linerWingW: 1.5, // ハネの根元の太さ（ライン幅比）
     __base: null   // 拡張リソースのベースURL（bridge.js から受け取る）
   };
 
@@ -237,6 +242,9 @@ void main() {
   // 上まぶたの際（目尻→目頭の順）
   const EYE_TOP_L = [33, 246, 161, 160, 159, 158, 157, 173, 133];
   const EYE_TOP_R = [263, 466, 388, 387, 386, 385, 384, 398, 362];
+  // 下まぶたの際
+  const EYE_BOT_L = [33, 7, 163, 144, 145, 153, 154, 155, 133];
+  const EYE_BOT_R = [263, 249, 390, 373, 374, 380, 381, 382, 362];
   const CHEEK_L = 205;
   const CHEEK_R = 425;
   const ALA_L = 49;    // 左小鼻の外側
@@ -310,6 +318,69 @@ void main() {
     const pctx = patch.getContext('2d');
     pctx.clearRect(0, 0, W, H);
     pctx.filter = `blur(${Math.max(2, faceW * 0.02 * boost)}px)`;
+    pctx.drawImage(srcCanvas, 0, 0);
+    pctx.filter = 'none';
+    pctx.globalCompositeOperation = 'destination-in';
+    pctx.drawImage(mask, 0, 0);
+    pctx.globalCompositeOperation = 'source-over';
+
+    ctx.drawImage(patch, 0, 0);
+  }
+
+  // クマ・目の下の線消し: 下まぶたの少し下の楕円領域に、ぼかし + 明るさを少し
+  // 持ち上げたパッチを貼る（コンシーラー相当）。目自体には掛からないよう下げて配置
+  function drawEyebagFix(ctx, srcCanvas, patch, mask, lm, W, H) {
+    const line = settings.eyebagLine;
+    const bright = settings.eyebagBright;
+    if (line <= 0 && bright <= 0) return;
+    // パッチの不透明度は2機能のうち強い方に合わせる
+    const a = Math.min(1, Math.max(line, bright));
+    const boost = Math.max(1, line);
+
+    const faceW = Math.hypot(
+      (lm[FACE_RIGHT].x - lm[FACE_LEFT].x) * W,
+      (lm[FACE_RIGHT].y - lm[FACE_LEFT].y) * H
+    );
+    const roll = Math.atan2(
+      (lm[FACE_RIGHT].y - lm[FACE_LEFT].y) * H,
+      (lm[FACE_RIGHT].x - lm[FACE_LEFT].x) * W
+    );
+    const downX = -Math.sin(roll), downY = Math.cos(roll);
+
+    const mctx = mask.getContext('2d');
+    mctx.clearRect(0, 0, W, H);
+
+    for (const eye of [EYE_BOT_L, EYE_BOT_R]) {
+      const p = eye.map((i) => [lm[i].x * W, lm[i].y * H]);
+      let cx = 0, cy = 0;
+      for (const q of p) { cx += q[0]; cy += q[1]; }
+      cx /= p.length; cy /= p.length;
+      const eyeW = Math.hypot(p[p.length - 1][0] - p[0][0], p[p.length - 1][1] - p[0][1]);
+      // 目の真下に少し下げて配置（目にパッチが掛かるとぼやけた目になるため）
+      cx += downX * faceW * 0.055;
+      cy += downY * faceW * 0.055;
+
+      const ry = faceW * 0.035 * boost;
+      mctx.save();
+      mctx.translate(cx, cy);
+      mctx.rotate(roll);
+      mctx.scale((eyeW * 0.65) / ry, 1);
+      const g = mctx.createRadialGradient(0, 0, 0, 0, 0, ry);
+      g.addColorStop(0, `rgba(0,0,0,${a})`);
+      g.addColorStop(0.7, `rgba(0,0,0,${a * 0.6})`);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      mctx.fillStyle = g;
+      mctx.beginPath();
+      mctx.arc(0, 0, ry, 0, Math.PI * 2);
+      mctx.fill();
+      mctx.restore();
+    }
+
+    const pctx = patch.getContext('2d');
+    pctx.clearRect(0, 0, W, H);
+    // ぼかしで線を消し、brightness でクマの暗さを持ち上げる（それぞれ独立に効く）
+    const blurPx = line > 0 ? Math.max(2, faceW * 0.015 * boost) : 0;
+    pctx.filter = `blur(${blurPx}px) brightness(${1 + 0.16 * bright})`;
     pctx.drawImage(srcCanvas, 0, 0);
     pctx.filter = 'none';
     pctx.globalCompositeOperation = 'destination-in';
@@ -438,6 +509,7 @@ void main() {
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.lineWidth = Math.max(1, faceW * 0.008);
+      const lw = Math.max(1, faceW * 0.008);
       for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
         ctx.beginPath();
         // [0] が目尻。まぶたの際よりほんの少し上をなぞる
@@ -447,6 +519,30 @@ void main() {
           ctx.lineTo(lm[eye[k]].x * W + upX * off, lm[eye[k]].y * H + upY * off);
         }
         ctx.stroke();
+
+        // 目尻の跳ね上げ: 目頭→目尻の向きを基準に、指定角度だけ上へ振った
+        // 先細りの三角形を描き足す
+        if (settings.linerWing > 0) {
+          const ox = lm[eye[0]].x * W, oy = lm[eye[0]].y * H;          // 目尻
+          const ix = lm[eye[eye.length - 1]].x * W, iy = lm[eye[eye.length - 1]].y * H; // 目頭
+          let dx = ox - ix, dy = oy - iy;
+          const dl = Math.hypot(dx, dy) || 1;
+          dx /= dl; dy /= dl;
+          // 上方向（upX, upY）へ linerWingUp 度ぶん回転
+          const rad = (settings.linerWingUp * Math.PI) / 180;
+          const wx = dx * Math.cos(rad) + upX * Math.sin(rad);
+          const wy = dy * Math.cos(rad) + upY * Math.sin(rad);
+          const len = faceW * 0.06 * settings.linerWing;
+          ctx.fillStyle = hexToRgba(settings.linerColor, settings.linerA * 0.85);
+          ctx.beginPath();
+          // 根元は ライン幅 × linerWingW、先端は点＝自然な先細り
+          const hw = lw * 0.6 * settings.linerWingW;
+          ctx.moveTo(ox - upX * hw, oy - upY * hw);
+          ctx.lineTo(ox + upX * hw, oy + upY * hw);
+          ctx.lineTo(ox + wx * len, oy + wy * len);
+          ctx.closePath();
+          ctx.fill();
+        }
       }
     }
 
@@ -533,7 +629,8 @@ void main() {
         // 2) メイク・ほうれい線消し: いずれかが有効なときだけ顔検出を回す（不要時は負荷ゼロ）
         const makeupOn = on &&
           (settings.lipA > 0 || settings.blushA > 0 || settings.browA > 0 ||
-           settings.nasoA > 0 || settings.shadowA > 0 || settings.linerA > 0);
+           settings.nasoA > 0 || settings.eyebagLine > 0 || settings.eyebagBright > 0 ||
+           settings.shadowA > 0 || settings.linerA > 0);
         if (makeupOn && !landmarkerRequested && settings.__base) {
           landmarkerRequested = true;
           getLandmarker().then((l) => { landmarker = l; });
@@ -550,6 +647,7 @@ void main() {
           }
           if (landmarks) {
             drawNasoFix(ctx, glCanvas, patchCanvas, maskCanvas, landmarks, W, H);
+            drawEyebagFix(ctx, glCanvas, patchCanvas, maskCanvas, landmarks, W, H);
             drawMakeup(ctx, landmarks, W, H);
           }
         }
