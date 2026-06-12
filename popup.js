@@ -82,8 +82,18 @@ const QUICK_PRESETS = {
 
 for (const btn of document.querySelectorAll('[data-quick]')) {
   btn.addEventListener('click', () => {
-    const s = { ...DEFAULTS, ...QUICK_PRESETS[btn.dataset.quick], enabled: true };
-    chrome.storage.local.set(s, () => refreshUI(s));
+    // キャリブレーション（顔・照明への校正）はメイクの濃さとは別物なので、
+    // クイックプリセットでは現在値を維持する
+    chrome.storage.local.get(DEFAULTS, (cur) => {
+      const s = {
+        ...DEFAULTS,
+        ...QUICK_PRESETS[btn.dataset.quick],
+        lipThresh: cur.lipThresh,
+        skinRange: cur.skinRange,
+        enabled: true
+      };
+      chrome.storage.local.set(s, () => refreshUI(s));
+    });
   });
 }
 
