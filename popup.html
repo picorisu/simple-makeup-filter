@@ -90,6 +90,8 @@
     border: 1px solid #f0c4d3; border-radius: 8px; background: #fff; color: #5c4a50;
   }
   .guide { font-size: 11px; color: #8a6f7a; margin: 2px 0 0; line-height: 1.5; }
+  .status { font-size: 10.5px; color: #b9a3ac; margin: 2px 0 0; }
+  .status.ok { color: #4caf7d; }
   .quick { display: flex; gap: 6px; margin-top: 10px; }
   .quick .btn { flex: 1; }
 </style>
@@ -97,6 +99,7 @@
 <body>
 <div class="panel">
   <h1><img src="icons/icon48.png" alt="">Meet Beauty Filter<input type="checkbox" id="enabled" title="フィルターの有効/無効" aria-label="フィルターの有効/無効"></h1>
+  <p class="status" id="status">○ Meet のタブを確認中…</p>
   <details id="intro">
     <summary>🌸 はじめに（使い方）</summary>
     <p class="guide">Google Meet を開いてカメラON → 下の項目のスライダーを動かすと、すぐ映像に反映されます💄 まずはボタンでベースを選ぶのがおすすめ：</p>

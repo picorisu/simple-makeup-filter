@@ -21,7 +21,11 @@
         settings.__base = s.__base;
       }
       delete s.__base;
-      Object.assign(settings, s);
+      // 既知の設定キーだけ受け入れる（偽装イベントによる未知キー注入の遮断）
+      const known = globalThis.MBF_DEFAULTS || settings;
+      for (const k of Object.keys(s)) {
+        if (k in known) settings[k] = s[k];
+      }
     } catch (err) {
       console.warn('[Meet Beauty Filter] 設定の受信に失敗:', err);
     }

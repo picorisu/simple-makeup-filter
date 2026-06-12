@@ -43,6 +43,25 @@ function refreshUI(s) {
 
 chrome.storage.local.get(DEFAULTS, refreshUI);
 
+// Meet のタブに bridge がいるか死活確認して、動作状態を表示する
+(() => {
+  const st = document.getElementById('status');
+  chrome.tabs.query({ url: 'https://meet.google.com/*' }, (tabs) => {
+    if (!tabs || tabs.length === 0) {
+      st.textContent = '○ Meet のタブが見つかりません（meet.google.com を開いてね）';
+      return;
+    }
+    chrome.tabs.sendMessage(tabs[0].id, 'mbf-ping', (resp) => {
+      if (chrome.runtime.lastError || resp !== 'pong') {
+        st.textContent = '○ Meet のタブを再読み込みすると有効になります';
+      } else {
+        st.textContent = '● Meet で動作中';
+        st.classList.add('ok');
+      }
+    });
+  });
+})();
+
 // 初回起動時に全キーを storage へ書き込んでおく（シーディング）。
 // これにより bridge/override は defaults が読めない状況でも storage の値だけで完走できる
 chrome.storage.local.get(null, (all) => {

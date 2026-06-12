@@ -20,6 +20,11 @@ function sendCurrent() {
 window.addEventListener('mbf-ready', sendCurrent);
 sendCurrent();
 
+// popup からの死活確認に応答する（「Meet で動作中」表示用）
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg === 'mbf-ping') sendResponse('pong');
+});
+
 chrome.storage.onChanged.addListener((changes) => {
   const s = {};
   for (const k in changes) {
