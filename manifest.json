@@ -8,13 +8,13 @@
   "content_scripts": [
     {
       "matches": ["https://meet.google.com/*"],
-      "js": ["override.js"],
+      "js": ["defaults.js", "override.js"],
       "run_at": "document_start",
       "world": "MAIN"
     },
     {
       "matches": ["https://meet.google.com/*"],
-      "js": ["bridge.js"],
+      "js": ["defaults.js", "bridge.js"],
       "run_at": "document_start"
     }
   ],
