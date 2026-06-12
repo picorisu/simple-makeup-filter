@@ -37,6 +37,7 @@
     shadowBias: 1.0, // 際色の量 1.0=均等 〜 3.0=際色を高さの2/3まで引っ張る
     linerColor: '#2b1d1a',
     linerA: 0,       // アイライン濃さ 0-1
+    linerW: 1.0,     // アイラインの太さ 0.4-2.0
     linerWing: 0,    // 目尻の跳ね上げ長さ 0-1（0でハネなし）
     linerWingUp: 25, // ハネ角度（度）。マイナスで下向き（垂れ目）、0で真横、プラスで上向き
     linerWingW: 1.5, // ハネの根元の太さ（ライン幅比）
@@ -508,8 +509,8 @@ void main() {
       ctx.strokeStyle = hexToRgba(settings.linerColor, settings.linerA * 0.85);
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.lineWidth = Math.max(1, faceW * 0.008);
-      const lw = Math.max(1, faceW * 0.008);
+      const lw = Math.max(0.8, faceW * 0.008 * settings.linerW);
+      ctx.lineWidth = lw;
       for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
         ctx.beginPath();
         // [0] が目尻。まぶたの際よりほんの少し上をなぞる

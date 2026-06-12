@@ -5,7 +5,7 @@ const DEFAULTS = {
   blushColor: '#e8889a', blushA: 0, blushShape: 1.6, blushY: 0.06, blushSoft: 1.3,
   browColor: '#5a3d2b', browA: 0, browW: 1.0,
   shadowColor: '#9e5a73', shadowColor2: '#c98da1', shadowColor3: '#e8c9c4', shadowUse2: true, shadowUse3: true, shadowA: 0, shadowH: 1.0, shadowW: 1.0, shadowSoft: 1.0, shadowBias: 1.0,
-  linerColor: '#2b1d1a', linerA: 0, linerWing: 0, linerWingUp: 25, linerWingW: 1.5
+  linerColor: '#2b1d1a', linerA: 0, linerW: 1.0, linerWing: 0, linerWingUp: 25, linerWingW: 1.5
 };
 
 function send(s) {
