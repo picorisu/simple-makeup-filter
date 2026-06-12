@@ -49,13 +49,14 @@ function refreshUI(s) {
 
 chrome.storage.local.get(DEFAULTS, refreshUI);
 
-// ガイド文は「✕で閉じるまで」だけ表示する（閉じたら二度と出ない）
-chrome.storage.local.get({ __guideClosed: false }, ({ __guideClosed }) => {
-  if (!__guideClosed) document.getElementById('guide').hidden = false;
-});
-document.getElementById('guideClose').addEventListener('click', () => {
-  document.getElementById('guide').hidden = true;
-  chrome.storage.local.set({ __guideClosed: true });
+// 「はじめに」アコーディオンは初回だけ開いた状態にし、開閉状態を記憶する
+const intro = document.getElementById('intro');
+chrome.storage.local.get({ __introClosed: false }, ({ __introClosed }) => {
+  intro.open = !__introClosed;
+  // open の初期反映が終わってから toggle の記憶を開始（初期設定で誤記憶しないように）
+  intro.addEventListener('toggle', () => {
+    chrome.storage.local.set({ __introClosed: !intro.open });
+  });
 });
 
 // ワンタップ初期プリセット: 「全部0で何も起きない」初回体験の回避が主目的

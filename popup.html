@@ -85,16 +85,8 @@
     flex: 1; font-size: 11px; padding: 5px 8px;
     border: 1px solid #f0c4d3; border-radius: 8px; background: #fff; color: #5c4a50;
   }
-  .guide {
-    font-size: 11px; color: #8a6f7a; margin: 6px 0 0; line-height: 1.5;
-    display: flex; align-items: flex-start; gap: 4px;
-  }
-  .guide[hidden] { display: none; }
-  .guide-x {
-    border: none; background: none; color: #c9a4b2; cursor: pointer;
-    font-size: 11px; padding: 0 2px; flex-shrink: 0;
-  }
-  .quick { display: flex; gap: 6px; margin-top: 8px; }
+  .guide { font-size: 11px; color: #8a6f7a; margin: 2px 0 0; line-height: 1.5; }
+  .quick { display: flex; gap: 6px; margin-top: 10px; }
   .quick .btn { flex: 1; }
   .badge {
     font-size: 9px; font-weight: 700; margin-left: 6px; padding: 1px 6px;
@@ -106,12 +98,15 @@
 <body>
 <div class="panel">
   <h1><img src="icons/icon48.png" alt="">Meet Beauty Filter<input type="checkbox" id="enabled" title="フィルターの有効/無効"></h1>
-  <p class="guide" id="guide" hidden>Google Meet を開いてカメラON → 下の項目のスライダーを動かすと、すぐ映像に反映されます💄<button id="guideClose" class="guide-x" title="閉じる">✕</button></p>
-  <div class="quick">
-    <button class="btn" data-quick="natural">ナチュラル</button>
-    <button class="btn" data-quick="full">しっかり</button>
-    <button class="btn" data-quick="healthy">血色感</button>
-  </div>
+  <details id="intro">
+    <summary>🌸 はじめに（使い方）</summary>
+    <p class="guide">Google Meet を開いてカメラON → 下の項目のスライダーを動かすと、すぐ映像に反映されます💄 まずはボタンでベースを選ぶのがおすすめ：</p>
+    <div class="quick">
+      <button class="btn" data-quick="natural">ナチュラル</button>
+      <button class="btn" data-quick="full">しっかり</button>
+      <button class="btn" data-quick="healthy">血色感</button>
+    </div>
+  </details>
 
   <details>
     <summary>✨ 肌</summary>
