@@ -24,7 +24,11 @@
     blushSoft: 1.3,  // チークぼかし 1.0=標準 〜 2.2=広くふんわり霞む
     browColor: '#5a3d2b',
     browA: 0,      // 眉濃さ 0-1
-    browW: 1.0,    // 眉の太さ 0.25=極細 〜 1.05=やや太
+    browW: 1.0,     // 眉の太さ 0.25=極細 〜 1.05=やや太
+    browTaper: 0,   // 眉尻の細さ 0=均一 〜 1=眉尻ほぼ線
+    browArch: 0,    // アーチの高さ -1=下げ（垂れ眉） 〜 0=地眉なり 〜 1=上げ
+    browPeak: 0.6,  // アーチの山の位置 0.2=眉頭寄り 〜 0.9=眉尻寄り
+    browTail: 0,    // 眉尻の高さ -1=下げ 〜 0=地眉なり 〜 1=上げ
     shadowColor: '#9e5a73',  // 際（いちばん濃い色）
     shadowColor2: '#c98da1', // 中間
     shadowColor3: '#e8c9c4', // 上（ハイライト寄り）
@@ -699,14 +703,38 @@ void main() {
       ctx.filter = `blur(${Math.max(1, faceW * 0.01)}px)`;
       ctx.fillStyle = hexToRgba(settings.browColor, settings.browA * 0.5);
       const bw = settings.browW;
+      const taper = settings.browTaper;
+      const noseX3 = lm[NOSE_TIP].x * W, noseY3 = lm[NOSE_TIP].y * H;
       for (const brow of [BROW_L, BROW_R]) {
         let pts = brow.map((i) => [lm[i].x * W, lm[i].y * H]);
 
-        // 太さ: 重心を基準に縦方向だけ伸縮
+        // 鼻からの距離で眉頭（近）→眉尻（遠）の進行度を点ごとに出す
+        const ds = pts.map(([x, y]) => Math.hypot(x - noseX3, y - noseY3));
+        const dmin = Math.min(...ds), dmax = Math.max(...ds);
+
+        // 太さ: 重心を基準に縦方向だけ伸縮。眉尻に向かって taper 分だけ絞る
         let cy = 0;
         for (const p of pts) cy += p[1];
         cy /= pts.length;
-        pts = pts.map(([x, y]) => [x, cy + (y - cy) * bw]);
+        pts = pts.map(([x, y], i) => {
+          const t = (ds[i] - dmin) / (dmax - dmin || 1);
+          const s = bw * (1 - 0.85 * taper * t);
+          let px = x, py = cy + (y - cy) * s;
+          // アーチ: 山の位置（browPeak）を中心とした釣鐘カーブで上下にずらす
+          if (settings.browArch !== 0) {
+            const bell = Math.exp(-((t - settings.browPeak) ** 2) / 0.06);
+            const lift = faceW * 0.05 * settings.browArch * bell;
+            px += upX * lift;
+            py += upY * lift;
+          }
+          // 眉尻の高さ: 眉尻に近いほど強く上下にずらす（t^2 で眉頭側は動かない）
+          if (settings.browTail !== 0) {
+            const lift = faceW * 0.06 * settings.browTail * t * t;
+            px += upX * lift;
+            py += upY * lift;
+          }
+          return [px, py];
+        });
 
         ctx.beginPath();
         ctx.moveTo(pts[0][0], pts[0][1]);
