@@ -1,8 +1,9 @@
 // 設定初期値の単一情報源。
 // MAIN world（override.js）・ISOLATED world（bridge.js）・popup（popup.js）の
 // 3コンテキストすべてで、このファイルを先に読み込んで MBF_DEFAULTS を共有する。
-// 項目を追加するときはここだけ更新すればよい（popup.html の input 追加は別途必要）
-const MBF_DEFAULTS = {
+// 項目を追加するときはここだけ更新すればよい（popup.html の input 追加は別途必要）。
+// const だとファイル間で見えない環境があるため、globalThis に明示的に生やす
+globalThis.MBF_DEFAULTS = {
   enabled: true,
 
   // --- 肌 ---
