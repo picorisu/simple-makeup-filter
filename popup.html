@@ -5,9 +5,13 @@
 <style>
   body {
     font-family: -apple-system, "Hiragino Maru Gothic ProN", sans-serif;
-    width: 290px; padding: 14px; margin: 0;
-    background: linear-gradient(160deg, #fff5f7 0%, #ffeef3 60%, #fde8ef 100%);
+    width: 290px; padding: 5px; margin: 0;
+    background: #fff;
     color: #5c4a50;
+  }
+  .panel {
+    background: linear-gradient(160deg, #fff5f7 0%, #ffeef3 60%, #fde8ef 100%);
+    border-radius: 16px; padding: 12px;
   }
   h1 {
     font-size: 15px; margin: 0 0 4px; color: #d45f8a; letter-spacing: 0.5px;
@@ -77,6 +81,7 @@
 </style>
 </head>
 <body>
+<div class="panel">
   <h1>Meet Beauty Filter</h1>
   <div class="toggle">
     <input type="checkbox" id="enabled"><label for="enabled" style="margin:0">有効</label>
@@ -169,6 +174,7 @@
   </details>
 
   <div class="note">設定は即時反映。映像・顔データは全てローカル処理。</div>
+</div>
   <script src="popup.js"></script>
 </body>
 </html>
