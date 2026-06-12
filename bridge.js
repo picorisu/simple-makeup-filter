@@ -30,7 +30,7 @@ sendCurrent();
 chrome.storage.onChanged.addListener((changes) => {
   const s = {};
   for (const k in changes) {
-    if (k === '__presets') continue; // プリセット一覧の変更は描画設定と無関係
+    if (k.startsWith('__')) continue; // __presets 等の UI 内部用キーは描画設定と無関係
     s[k] = changes[k].newValue;
   }
   if (Object.keys(s).length > 0) send(s);

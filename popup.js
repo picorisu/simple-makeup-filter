@@ -49,6 +49,15 @@ function refreshUI(s) {
 
 chrome.storage.local.get(DEFAULTS, refreshUI);
 
+// ガイド文は「✕で閉じるまで」だけ表示する（閉じたら二度と出ない）
+chrome.storage.local.get({ __guideClosed: false }, ({ __guideClosed }) => {
+  if (!__guideClosed) document.getElementById('guide').hidden = false;
+});
+document.getElementById('guideClose').addEventListener('click', () => {
+  document.getElementById('guide').hidden = true;
+  chrome.storage.local.set({ __guideClosed: true });
+});
+
 // ワンタップ初期プリセット: 「全部0で何も起きない」初回体験の回避が主目的
 const QUICK_PRESETS = {
   natural: {
