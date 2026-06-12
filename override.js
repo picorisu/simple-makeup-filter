@@ -10,7 +10,7 @@
     bright: 0.05,  // 明るさ 0-0.3
     warmth: 0.04,  // 血色（暖色寄せ） 0-0.2
     sat: 1.05,     // 彩度 0.5-1.5
-    nasoA: 0,      // ほうれい線消し 0-1（0で無効。顔検出を使用）
+    nasoA: 0,      // ほうれい線消し 0-2（0で無効。顔検出を使用。1超でぼかし・範囲も強化）
     lipThresh: 0.575, // 唇除外しきい値（Cr）。下げるほど赤みの弱い唇も除外される
     skinRange: 1.0,   // 肌色判定の広さ。肌のトーンが判定から外れる人は上げる
     lipColor: '#c2476e',
@@ -23,6 +23,18 @@
     browColor: '#5a3d2b',
     browA: 0,      // 眉濃さ 0-1
     browW: 1.0,    // 眉の太さ 0.25=極細 〜 1.05=やや太
+    shadowColor: '#9e5a73',  // 際（いちばん濃い色）
+    shadowColor2: '#c98da1', // 中間
+    shadowColor3: '#e8c9c4', // 上（ハイライト寄り）
+    shadowUse2: true, // 中間色を使うか
+    shadowUse3: true, // 上色を使うか
+    shadowA: 0,      // アイシャドウ濃さ 0-1
+    shadowH: 1.0,    // アイシャドウ高さ 0.5-2.0
+    shadowW: 1.0,    // アイシャドウ幅 0.8-1.4
+    shadowSoft: 1.0, // アイシャドウぼかし 0.5-3.0
+    shadowBias: 1.0, // 際色の量 1.0=均等 〜 3.0=際色を高さの2/3まで引っ張る
+    linerColor: '#2b1d1a',
+    linerA: 0,     // アイライン濃さ 0-1
     __base: null   // 拡張リソースのベースURL（bridge.js から受け取る）
   };
 
@@ -222,6 +234,9 @@ void main() {
   const LIPS_INNER = [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95];
   const BROW_L = [70, 63, 105, 66, 107, 55, 65, 52, 53, 46];
   const BROW_R = [300, 293, 334, 296, 336, 285, 295, 282, 283, 276];
+  // 上まぶたの際（目尻→目頭の順）
+  const EYE_TOP_L = [33, 246, 161, 160, 159, 158, 157, 173, 133];
+  const EYE_TOP_R = [263, 466, 388, 387, 386, 385, 384, 398, 362];
   const CHEEK_L = 205;
   const CHEEK_R = 425;
   const ALA_L = 49;    // 左小鼻の外側
@@ -248,8 +263,11 @@ void main() {
   // ほうれい線消し: 小鼻→口角のラインに沿った楕円領域だけ、強くぼかした画像を
   // ソフトマスク付きで上書きする。領域外は一切触らないので全体のシャープさは保たれる
   function drawNasoFix(ctx, srcCanvas, patch, mask, lm, W, H) {
-    const a = settings.nasoA;
-    if (a <= 0) return;
+    const raw = settings.nasoA;
+    if (raw <= 0) return;
+    // 1.0 までは不透明度、それ以上はぼかしの強さとパッチの太さを増やして消す力を上げる
+    const a = Math.min(1, raw);
+    const boost = Math.max(1, raw);
 
     const faceW = Math.hypot(
       (lm[FACE_RIGHT].x - lm[FACE_LEFT].x) * W,
@@ -276,21 +294,22 @@ void main() {
       mctx.save();
       mctx.translate(cx, cy);
       mctx.rotate(angle);
-      mctx.scale((len * 0.7) / (faceW * 0.05), 1); // 溝に沿った細長い楕円
-      const g = mctx.createRadialGradient(0, 0, 0, 0, 0, faceW * 0.05);
+      const ry = faceW * 0.05 * boost; // boost でパッチの太さも広がる
+      mctx.scale((len * 0.7) / ry, 1); // 溝に沿った細長い楕円
+      const g = mctx.createRadialGradient(0, 0, 0, 0, 0, ry);
       g.addColorStop(0, `rgba(0,0,0,${a})`);
       g.addColorStop(0.7, `rgba(0,0,0,${a * 0.6})`);
       g.addColorStop(1, 'rgba(0,0,0,0)');
       mctx.fillStyle = g;
       mctx.beginPath();
-      mctx.arc(0, 0, faceW * 0.05, 0, Math.PI * 2);
+      mctx.arc(0, 0, ry, 0, Math.PI * 2);
       mctx.fill();
       mctx.restore();
     }
 
     const pctx = patch.getContext('2d');
     pctx.clearRect(0, 0, W, H);
-    pctx.filter = `blur(${Math.max(2, faceW * 0.02)}px)`;
+    pctx.filter = `blur(${Math.max(2, faceW * 0.02 * boost)}px)`;
     pctx.drawImage(srcCanvas, 0, 0);
     pctx.filter = 'none';
     pctx.globalCompositeOperation = 'destination-in';
@@ -305,6 +324,13 @@ void main() {
       (lm[FACE_RIGHT].x - lm[FACE_LEFT].x) * W,
       (lm[FACE_RIGHT].y - lm[FACE_LEFT].y) * H
     );
+    // 首をかしげても描画が顔のラインに沿うよう、顔の傾き（ロール角）を求める
+    const roll = Math.atan2(
+      (lm[FACE_RIGHT].y - lm[FACE_LEFT].y) * H,
+      (lm[FACE_RIGHT].x - lm[FACE_LEFT].x) * W
+    );
+    // 顔基準の「上」方向ベクトル
+    const upX = Math.sin(roll), upY = -Math.cos(roll);
 
     ctx.save();
     // multiply 合成 = 元の肌の陰影や唇の質感を残したまま色だけ重なる（口紅っぽい質感）
@@ -323,11 +349,6 @@ void main() {
       ctx.filter = 'none';
       const r = faceW * 0.13;
       const aspect = Math.max(1, settings.blushShape); // 横:縦 の比率
-      // 首をかしげても楕円が頬骨のラインに沿うよう、顔の傾き（ロール角）を求める
-      const roll = Math.atan2(
-        (lm[FACE_RIGHT].y - lm[FACE_LEFT].y) * H,
-        (lm[FACE_RIGHT].x - lm[FACE_LEFT].x) * W
-      );
       for (const idx of [CHEEK_L, CHEEK_R]) {
         const x = lm[idx].x * W;
         const y = lm[idx].y * H;
@@ -351,6 +372,81 @@ void main() {
         ctx.arc(0, 0, rEff, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
+      }
+    }
+
+    if (settings.shadowA > 0) {
+      // アイシャドウ: 上まぶたの際ラインを顔基準の上方向へ押し出した帯を塗る。
+      // 際側が濃く上端へ向かって薄くなるよう、ぼかし + multiply で馴染ませる
+      ctx.filter = `blur(${Math.max(2, faceW * 0.015 * settings.shadowSoft)}px)`;
+      const lift = faceW * 0.055 * settings.shadowH;
+      const dirX = Math.cos(roll), dirY = Math.sin(roll); // 顔基準の「横」方向
+      const widen = settings.shadowW - 1;
+      for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
+        let lid = eye.map((i) => [lm[i].x * W, lm[i].y * H]);
+        // 幅: 目の中心を基準に、顔の横方向にだけ伸縮（高さは変えない）
+        if (widen !== 0) {
+          let cx = 0, cy = 0;
+          for (const p of lid) { cx += p[0]; cy += p[1]; }
+          cx /= lid.length; cy /= lid.length;
+          lid = lid.map(([x, y]) => {
+            const d = (x - cx) * dirX + (y - cy) * dirY;
+            return [x + dirX * d * widen, y + dirY * d * widen];
+          });
+        }
+        // グラデーション: 際 → (中間) → (上)。オフの色は飛ばして使う色だけ等間隔に並べる。
+        // 1色のときは同じ色が上に向かって薄く抜ける
+        let gx = 0, gy = 0;
+        for (const p of lid) { gx += p[0]; gy += p[1]; }
+        gx /= lid.length; gy /= lid.length;
+        const a = settings.shadowA;
+        const colors = [settings.shadowColor];
+        if (settings.shadowUse2) colors.push(settings.shadowColor2);
+        if (settings.shadowUse3) colors.push(settings.shadowColor3);
+        const g = ctx.createLinearGradient(gx, gy, gx + upX * lift, gy + upY * lift);
+        // 際色を plateau の高さまでベタで保ち、そこから上をグラデーションにする
+        const plateau = 1 - 1 / Math.max(1, settings.shadowBias);
+        if (colors.length === 1) {
+          g.addColorStop(0, hexToRgba(colors[0], a * 0.5));
+          g.addColorStop(plateau, hexToRgba(colors[0], a * 0.5));
+          g.addColorStop(1, hexToRgba(colors[0], a * 0.1));
+        } else {
+          g.addColorStop(0, hexToRgba(colors[0], a * 0.5));
+          colors.forEach((c, i) => {
+            const t = i / (colors.length - 1);
+            g.addColorStop(plateau + t * (1 - plateau), hexToRgba(c, a * (0.5 - 0.25 * t)));
+          });
+        }
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.moveTo(lid[0][0], lid[0][1]);
+        for (let k = 1; k < lid.length; k++) ctx.lineTo(lid[k][0], lid[k][1]);
+        // 上方向へ押し出した辺を逆順でたどって閉じる（目尻・目頭側は少し狭める）
+        for (let k = lid.length - 1; k >= 0; k--) {
+          const edge = k === 0 || k === lid.length - 1 ? 0.4 : 1;
+          ctx.lineTo(lid[k][0] + upX * lift * edge, lid[k][1] + upY * lift * edge);
+        }
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    if (settings.linerA > 0) {
+      // アイライン: 上まつげの際に沿った線。目尻側をわずかに太くする
+      ctx.filter = `blur(${Math.max(0.5, faceW * 0.002)}px)`;
+      ctx.strokeStyle = hexToRgba(settings.linerColor, settings.linerA * 0.85);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = Math.max(1, faceW * 0.008);
+      for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
+        ctx.beginPath();
+        // [0] が目尻。まぶたの際よりほんの少し上をなぞる
+        const off = faceW * 0.002;
+        ctx.moveTo(lm[eye[0]].x * W + upX * off, lm[eye[0]].y * H + upY * off);
+        for (let k = 1; k < eye.length; k++) {
+          ctx.lineTo(lm[eye[k]].x * W + upX * off, lm[eye[k]].y * H + upY * off);
+        }
+        ctx.stroke();
       }
     }
 
@@ -436,7 +532,8 @@ void main() {
 
         // 2) メイク・ほうれい線消し: いずれかが有効なときだけ顔検出を回す（不要時は負荷ゼロ）
         const makeupOn = on &&
-          (settings.lipA > 0 || settings.blushA > 0 || settings.browA > 0 || settings.nasoA > 0);
+          (settings.lipA > 0 || settings.blushA > 0 || settings.browA > 0 ||
+           settings.nasoA > 0 || settings.shadowA > 0 || settings.linerA > 0);
         if (makeupOn && !landmarkerRequested && settings.__base) {
           landmarkerRequested = true;
           getLandmarker().then((l) => { landmarker = l; });

@@ -2,21 +2,27 @@ const DEFAULTS = {
   enabled: true, smooth: 0.6, bright: 0.05, warmth: 0.04, sat: 1.05, nasoA: 0, lipThresh: 0.575, skinRange: 1.0,
   lipColor: '#c2476e', lipA: 0,
   blushColor: '#e8889a', blushA: 0, blushShape: 1.6, blushY: 0.06, blushSoft: 1.3,
-  browColor: '#5a3d2b', browA: 0, browW: 1.0
+  browColor: '#5a3d2b', browA: 0, browW: 1.0,
+  shadowColor: '#9e5a73', shadowColor2: '#c98da1', shadowColor3: '#e8c9c4', shadowUse2: true, shadowUse3: true, shadowA: 0, shadowH: 1.0, shadowW: 1.0, shadowSoft: 1.0, shadowBias: 1.0,
+  linerColor: '#2b1d1a', linerA: 0
 };
 
-const RANGES = ['smooth', 'bright', 'warmth', 'sat', 'nasoA', 'lipThresh', 'skinRange', 'lipA', 'blushA', 'blushShape', 'blushY', 'blushSoft', 'browA', 'browW'];
-const COLORS = ['lipColor', 'blushColor', 'browColor'];
+const RANGES = ['smooth', 'bright', 'warmth', 'sat', 'nasoA', 'lipThresh', 'skinRange', 'lipA', 'blushA', 'blushShape', 'blushY', 'blushSoft', 'browA', 'browW', 'shadowA', 'shadowH', 'shadowW', 'shadowSoft', 'shadowBias', 'linerA'];
+const COLORS = ['lipColor', 'blushColor', 'browColor', 'shadowColor', 'shadowColor2', 'shadowColor3', 'linerColor'];
+
+const CHECKS = ['enabled', 'shadowUse2', 'shadowUse3'];
 
 chrome.storage.local.get(DEFAULTS, (s) => {
-  document.getElementById('enabled').checked = s.enabled;
+  for (const k of CHECKS) document.getElementById(k).checked = s[k];
   for (const k of RANGES) document.getElementById(k).value = s[k];
   for (const k of COLORS) document.getElementById(k).value = s[k];
 });
 
-document.getElementById('enabled').addEventListener('change', (e) => {
-  chrome.storage.local.set({ enabled: e.target.checked });
-});
+for (const k of CHECKS) {
+  document.getElementById(k).addEventListener('change', (e) => {
+    chrome.storage.local.set({ [k]: e.target.checked });
+  });
+}
 for (const k of RANGES) {
   document.getElementById(k).addEventListener('input', (e) => {
     chrome.storage.local.set({ [k]: parseFloat(e.target.value) });
