@@ -17,7 +17,8 @@
     font-size: 15px; margin: 0 0 4px; color: #d45f8a; letter-spacing: 0.5px;
     display: flex; align-items: center; gap: 6px;
   }
-  h1::before { content: '💄'; }
+  h1 img { width: 20px; height: 20px; border-radius: 5px; }
+  h1 input[type=checkbox] { margin-left: auto; accent-color: #d45f8a; width: 16px; height: 16px; cursor: pointer; }
   details {
     background: rgba(255, 255, 255, 0.85);
     border: 1px solid #f6d3de; border-radius: 14px;
@@ -72,20 +73,12 @@
     font-size: 11px; font-weight: 600; color: #cf7ea0;
     margin: 12px 0 0; border-top: 1px dashed #f3cdd9; padding-top: 10px;
   }
-  .toggle {
-    display: flex; align-items: center; gap: 6px; font-size: 13px;
-    margin: 6px 0 2px; color: #7d6570;
-  }
-  .toggle input { accent-color: #d45f8a; }
   .note { font-size: 9.5px; color: #c9a4b2; margin-top: 12px; text-align: center; }
 </style>
 </head>
 <body>
 <div class="panel">
-  <h1>Meet Beauty Filter</h1>
-  <div class="toggle">
-    <input type="checkbox" id="enabled"><label for="enabled" style="margin:0">有効</label>
-  </div>
+  <h1><img src="icons/icon48.png" alt="">Meet Beauty Filter<input type="checkbox" id="enabled" title="フィルターの有効/無効"></h1>
 
   <details>
     <summary>✨ 肌</summary>
