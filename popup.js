@@ -31,7 +31,11 @@ function updateBadges() {
 
 function refreshUI(s) {
   for (const k of CHECKS) document.getElementById(k).checked = s[k];
-  for (const k of RANGES) document.getElementById(k).value = s[k];
+  for (const k of RANGES) {
+    const el = document.getElementById(k);
+    el.value = s[k];
+    el.title = String(s[k]); // ホバーで現在値が見える
+  }
   for (const k of COLORS) document.getElementById(k).value = s[k];
   updateBadges();
 }
@@ -95,9 +99,16 @@ for (const k of CHECKS) {
 for (const k of RANGES) {
   document.getElementById(k).addEventListener('input', (e) => {
     chrome.storage.local.set({ [k]: parseFloat(e.target.value) });
+    e.target.title = e.target.value;
     updateBadges();
   });
 }
+
+// すべて初期値に戻す（プリセット一覧は消さない）
+document.getElementById('resetAll').addEventListener('click', () => {
+  if (!confirm('すべての設定を初期値に戻しますか？（保存済みプリセットは残ります）')) return;
+  chrome.storage.local.set({ ...DEFAULTS }, () => refreshUI(DEFAULTS));
+});
 for (const k of COLORS) {
   document.getElementById(k).addEventListener('input', (e) => {
     chrome.storage.local.set({ [k]: e.target.value });
@@ -152,9 +163,19 @@ function refreshPresetList() {
 }
 refreshPresetList();
 
+document.getElementById('presetName').addEventListener('input', (e) => {
+  e.target.classList.remove('err');
+});
+
 document.getElementById('presetSave').addEventListener('click', () => {
-  const name = document.getElementById('presetName').value.trim();
-  if (!name) return;
+  const nameEl = document.getElementById('presetName');
+  const name = nameEl.value.trim();
+  if (!name) {
+    // 無反応だと「壊れてる」と思われるため、名前が必要なことを視覚的に伝える
+    nameEl.classList.add('err');
+    nameEl.focus();
+    return;
+  }
   currentSettings((s) => {
     chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
       if (__presets[name] && !confirm(`「${name}」は既にあります。上書きしますか？`)) return;

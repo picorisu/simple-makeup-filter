@@ -76,7 +76,8 @@
     font-size: 11px; font-weight: 600; color: #cf7ea0;
     margin: 12px 0 0; border-top: 1px dashed #f3cdd9; padding-top: 10px;
   }
-  .note { font-size: 9.5px; color: #c9a4b2; margin-top: 12px; text-align: center; }
+  .note { font-size: 11px; color: #a9808f; margin-top: 12px; text-align: center; }
+  .err { border-color: #d45f8a !important; background: #fdeef3 !important; }
   .btn {
     font-size: 11px; padding: 5px 10px; border: none; border-radius: 8px;
     background: #d45f8a; color: #fff; cursor: pointer; font-weight: 600;
@@ -95,7 +96,7 @@
 </head>
 <body>
 <div class="panel">
-  <h1><img src="icons/icon48.png" alt="">Meet Beauty Filter<input type="checkbox" id="enabled" title="フィルターの有効/無効"></h1>
+  <h1><img src="icons/icon48.png" alt="">Meet Beauty Filter<input type="checkbox" id="enabled" title="フィルターの有効/無効" aria-label="フィルターの有効/無効"></h1>
   <details id="intro">
     <summary>🌸 はじめに（使い方）</summary>
     <p class="guide">Google Meet を開いてカメラON → 下の項目のスライダーを動かすと、すぐ映像に反映されます💄 まずはボタンでベースを選ぶのがおすすめ：</p>
@@ -111,10 +112,10 @@
     <label>美肌 <input type="range" id="smooth" min="0" max="1" step="0.05"></label>
     <label>明るさ <input type="range" id="bright" min="0" max="0.3" step="0.01"></label>
     <label>血色 <input type="range" id="warmth" min="0" max="0.2" step="0.01"></label>
-    <label>彩度 <input type="range" id="sat" min="0.5" max="1.5" step="0.05"></label>
-    <label>ほうれい線消し（0で無効・1超は強力モード） <input type="range" id="nasoA" min="0" max="2" step="0.05"></label>
-    <label>目の下の線消し（0で無効・1超は強力モード） <input type="range" id="eyebagLine" min="0" max="2" step="0.05"></label>
-    <label>クマの明るさ持ち上げ（0で無効） <input type="range" id="eyebagBright" min="0" max="1" step="0.05"></label>
+    <label>鮮やかさ <input type="range" id="sat" min="0.5" max="1.5" step="0.05"></label>
+    <label>ほうれい線うすめ（右ほど強力） <input type="range" id="nasoA" min="0" max="2" step="0.05"></label>
+    <label>目の下の線うすめ（右ほど強力） <input type="range" id="eyebagLine" min="0" max="2" step="0.05"></label>
+    <label>クマを明るく <input type="range" id="eyebagBright" min="0" max="1" step="0.05"></label>
   </details>
 
   <details data-fx="lip">
@@ -143,7 +144,7 @@
   </details>
 
   <details data-fx="eye">
-    <summary>🪞 アイメイク<input type="color" id="shadowColor" class="hdr-color" title="シャドウ際色"><input type="checkbox" id="shadowUse2" class="hdr-check" title="中間色を使う"><input type="color" id="shadowColor2" class="hdr-color" style="margin-left:0" title="シャドウ中間色"><input type="checkbox" id="shadowUse3" class="hdr-check" title="上色を使う"><input type="color" id="shadowColor3" class="hdr-color" style="margin-left:0" title="シャドウ上色"><input type="color" id="linerColor" class="hdr-color" title="アイライン色"></summary>
+    <summary>🪞 アイメイク<input type="color" id="shadowColor" class="hdr-color" title="シャドウ際色" aria-label="シャドウ際色"><input type="checkbox" id="shadowUse2" class="hdr-check" title="中間色を使う" aria-label="中間色を使う"><input type="color" id="shadowColor2" class="hdr-color" style="margin-left:0" title="シャドウ中間色" aria-label="シャドウ中間色"><input type="checkbox" id="shadowUse3" class="hdr-check" title="上色を使う" aria-label="上色を使う"><input type="color" id="shadowColor3" class="hdr-color" style="margin-left:0" title="シャドウ上色" aria-label="シャドウ上色"><input type="color" id="linerColor" class="hdr-color" title="アイライン色" aria-label="アイライン色"></summary>
     <p class="sub">アイシャドウ</p>
     <div class="row">
       <label>濃さ</label>
@@ -162,7 +163,7 @@
   </details>
 
   <details data-fx="shade">
-    <summary>🌘 シェーディング<input type="color" id="shadeColor" class="hdr-color" title="影色（ノーズ・輪郭共通）"></summary>
+    <summary>🌘 シェーディング<input type="color" id="shadeColor" class="hdr-color" title="影色（ノーズ・輪郭共通）" aria-label="影色（ノーズ・輪郭共通）"></summary>
     <p class="sub">ノーズシャドウ</p>
     <label>濃さ（0で無効） <input type="range" id="noseA" min="0" max="1" step="0.05"></label>
     <label>幅（細 ⇔ 太） <input type="range" id="noseW" min="0.5" max="2" step="0.05"></label>
@@ -174,7 +175,7 @@
   </details>
 
   <details data-fx="hi">
-    <summary>🌟 ハイライト<input type="color" id="hiColor" class="hdr-color" title="光色（鼻筋・頬骨・顎先共通）"></summary>
+    <summary>🌟 ハイライト<input type="color" id="hiColor" class="hdr-color" title="光色（鼻筋・頬骨・顎先共通）" aria-label="光色（鼻筋・頬骨・顎先共通）"></summary>
     <p class="sub">鼻筋</p>
     <label>濃さ（0で無効） <input type="range" id="hiA" min="0" max="1" step="0.05"></label>
     <label>幅（細 ⇔ 太） <input type="range" id="hiW" min="0.5" max="2" step="0.05"></label>
@@ -192,11 +193,7 @@
     <label>ぼかし（くっきり ⇔ ふんわり） <input type="range" id="hiChinSoft" min="0.5" max="3" step="0.1"></label>
   </details>
 
-  <details>
-    <summary>⚙️ キャリブレーション（人・環境用）</summary>
-    <label>唇除外のしきい値（広く除外 ⇔ 狭く） <input type="range" id="lipThresh" min="0.52" max="0.65" step="0.005"></label>
-    <label>肌色判定の広さ（狭い ⇔ 広い） <input type="range" id="skinRange" min="0.6" max="1.6" step="0.05"></label>
-  </details>
+
 
   <details>
     <summary>💾 プリセット</summary>
@@ -214,9 +211,19 @@
       <button id="presetImport" class="btn" style="flex:1">読み込み</button>
       <input type="file" id="presetFile" accept=".json" style="display:none">
     </div>
+    <div class="row">
+      <button id="resetAll" class="btn btn-sub" style="flex:1">すべて初期値に戻す</button>
+    </div>
   </details>
 
-  <div class="note">設定は即時反映。映像・顔データは全てローカル処理。</div>
+  <details>
+    <summary>🔧 うまく反映されないとき</summary>
+    <p class="guide">照明や肌・唇の色は人それぞれ。症状に合わせて調整してください。</p>
+    <label>唇の保護範囲（唇までぼやける→左へ／頬がまだらになる→右へ） <input type="range" id="lipThresh" min="0.52" max="0.65" step="0.005"></label>
+    <label>肌と判定する色の範囲（肌に効かない→右へ／髪や背景までぼける→左へ） <input type="range" id="skinRange" min="0.6" max="1.6" step="0.05"></label>
+  </details>
+
+  <div class="note">🔒 映像がパソコンの外に送られることはありません</div>
 </div>
   <script src="defaults.js"></script>
   <script src="popup.js"></script>
