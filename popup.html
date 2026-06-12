@@ -11,7 +11,7 @@
   }
   .panel {
     background: linear-gradient(160deg, #fff5f7 0%, #ffeef3 60%, #fde8ef 100%);
-    border-radius: 16px; padding: 12px;
+    border-radius: 16px; padding: 10px;
   }
   h1 {
     font-size: 15px; margin: 0 0 4px; color: #d45f8a; letter-spacing: 0.5px;
@@ -21,17 +21,17 @@
   h1 input[type=checkbox] { margin-left: auto; accent-color: #d45f8a; width: 16px; height: 16px; cursor: pointer; }
   details {
     background: rgba(255, 255, 255, 0.85);
-    border: 1px solid #f6d3de; border-radius: 14px;
-    margin-top: 10px; padding: 0 12px;
+    border: 1px solid #f6d3de; border-radius: 12px;
+    margin-top: 6px; padding: 0 10px;
     box-shadow: 0 2px 6px rgba(212, 95, 138, 0.08);
     transition: box-shadow 0.15s;
   }
   details:hover { box-shadow: 0 3px 10px rgba(212, 95, 138, 0.15); }
-  details[open] { padding-bottom: 12px; }
+  details[open] { padding-bottom: 10px; }
   summary {
     display: flex; align-items: center; white-space: nowrap;
     font-size: 12.5px; font-weight: 600; color: #b1567c;
-    padding: 10px 0; cursor: pointer; user-select: none;
+    padding: 7px 0; cursor: pointer; user-select: none;
     list-style: none;
   }
   summary::-webkit-details-marker { display: none; }
@@ -76,7 +76,7 @@
     font-size: 11px; font-weight: 600; color: #cf7ea0;
     margin: 12px 0 0; border-top: 1px dashed #f3cdd9; padding-top: 10px;
   }
-  .note { font-size: 11px; color: #a9808f; margin-top: 12px; text-align: center; }
+  .note { font-size: 11px; color: #a9808f; margin-top: 8px; text-align: center; }
   .err { border-color: #d45f8a !important; background: #fdeef3 !important; }
   .btn {
     font-size: 11px; padding: 5px 10px; border: none; border-radius: 8px;
@@ -116,6 +116,9 @@
     <label>ほうれい線うすめ（右ほど強力） <input type="range" id="nasoA" min="0" max="2" step="0.05"></label>
     <label>目の下の線うすめ（右ほど強力） <input type="range" id="eyebagLine" min="0" max="2" step="0.05"></label>
     <label>クマを明るく <input type="range" id="eyebagBright" min="0" max="1" step="0.05"></label>
+    <p class="sub">うまく反映されないとき</p>
+    <label>唇の保護範囲（唇までぼやける→左へ／頬がまだらになる→右へ） <input type="range" id="lipThresh" min="0.52" max="0.65" step="0.005"></label>
+    <label>肌と判定する色の範囲（肌に効かない→右へ／髪や背景までぼける→左へ） <input type="range" id="skinRange" min="0.6" max="1.6" step="0.05"></label>
   </details>
 
   <details data-fx="lip">
@@ -213,13 +216,6 @@
     <div class="row">
       <button id="resetAll" class="btn btn-sub" style="flex:1">すべて初期値に戻す</button>
     </div>
-  </details>
-
-  <details>
-    <summary>🔧 うまく反映されないとき</summary>
-    <p class="guide">照明や肌・唇の色は人それぞれ。症状に合わせて調整してください。</p>
-    <label>唇の保護範囲（唇までぼやける→左へ／頬がまだらになる→右へ） <input type="range" id="lipThresh" min="0.52" max="0.65" step="0.005"></label>
-    <label>肌と判定する色の範囲（肌に効かない→右へ／髪や背景までぼける→左へ） <input type="range" id="skinRange" min="0.6" max="1.6" step="0.05"></label>
   </details>
 
   <div class="note">🔒 映像がパソコンの外に送られることはありません</div>
