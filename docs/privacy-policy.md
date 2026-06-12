@@ -28,7 +28,7 @@
 
 ### お問い合わせ
 
-本ポリシーに関するお問い合わせは、[GitHub リポジトリ](https://github.com/picorisu) の Issue にてお願いします。
+本ポリシーに関するお問い合わせは、Chrome ウェブストアの掲載ページに記載の連絡先までお願いします。
 
 ## English
 
@@ -49,4 +49,4 @@ The Extension requests only: `storage` (to save your filter settings locally) an
 
 ### Contact
 
-For questions about this policy, please open an issue on the [GitHub repository](https://github.com/picorisu).
+For questions about this policy, please use the contact information listed on the Chrome Web Store page.
