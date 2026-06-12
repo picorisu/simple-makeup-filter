@@ -15,6 +15,12 @@ const COLORS = ['lipColor', 'blushColor', 'browColor', 'shadowColor', 'shadowCol
 
 const CHECKS = ['enabled', 'shadowUse2', 'shadowUse3'];
 
+// summary 内の色チップ: クリックでアコーディオンが開閉しないようにする
+// （カラーピッカー自体は input の既定動作で開く）
+for (const el of document.querySelectorAll('summary input')) {
+  el.addEventListener('click', (e) => e.stopPropagation());
+}
+
 chrome.storage.local.get(DEFAULTS, (s) => {
   for (const k of CHECKS) document.getElementById(k).checked = s[k];
   for (const k of RANGES) document.getElementById(k).value = s[k];
