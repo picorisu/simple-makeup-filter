@@ -567,13 +567,20 @@ void main() {
       const lw = Math.max(0.8, faceW * 0.008 * settings.linerW);
       ctx.lineWidth = lw;
       for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
+        // [0] が目尻、末尾が目頭。上下位置はスライダーで調整可能（目・メガネによりズレるため）
+        const off = faceW * (settings.linerY ?? 0.002);
+        const pts = eye.map((i) => [lm[i].x * W + upX * off, lm[i].y * H + upY * off]);
+        // round cap は端点から線幅の半分はみ出すため、目頭側の終点を
+        // ひとつ手前の点の方向へ半幅ぶん引っ込めて、丸い端がちょうど目頭で止まるようにする
+        const last = pts[pts.length - 1], prev = pts[pts.length - 2];
+        let bx = prev[0] - last[0], by = prev[1] - last[1];
+        const bl = Math.hypot(bx, by) || 1;
+        const back = Math.min(bl, lw * 0.6);
+        last[0] += (bx / bl) * back;
+        last[1] += (by / bl) * back;
         ctx.beginPath();
-        // [0] が目尻。まぶたの際よりほんの少し上をなぞる
-        const off = faceW * 0.002;
-        ctx.moveTo(lm[eye[0]].x * W + upX * off, lm[eye[0]].y * H + upY * off);
-        for (let k = 1; k < eye.length; k++) {
-          ctx.lineTo(lm[eye[k]].x * W + upX * off, lm[eye[k]].y * H + upY * off);
-        }
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k][0], pts[k][1]);
         ctx.stroke();
 
         // 目尻の跳ね上げ: 目頭→目尻の向きを基準に、指定角度だけ上へ振った

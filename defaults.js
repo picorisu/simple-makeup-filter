@@ -57,6 +57,7 @@ globalThis.MBF_DEFAULTS = {
   linerColor: '#2b1d1a',
   linerA: 0,       // 濃さ 0-1
   linerW: 1.0,     // 太さ 0.4-2
+  linerY: 0.002,   // 上下位置（顔幅比）-0.006〜0.01。0=際ぴったり
   linerWing: 0,    // 目尻ハネの長さ 0-1
   linerWingUp: 25, // ハネ角度（度）-60〜60
   linerWingW: 1.5, // ハネの太さ 0.5-3
