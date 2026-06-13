@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>プライバシーポリシー | Simple Makeup Filter for Google Meet</title>
+<link rel="icon" type="image/png" href="icon.png">
+<style>
+  body {
+    font-family: -apple-system, "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif;
+    margin: 0; padding: 24px 16px;
+    background: linear-gradient(160deg, #fff5f7 0%, #ffeef3 60%, #fde8ef 100%);
+    color: #5c4a50; line-height: 1.9;
+    min-height: 100vh; box-sizing: border-box;
+  }
+  .card {
+    max-width: 720px; margin: 0 auto;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid #f6d3de; border-radius: 20px;
+    box-shadow: 0 4px 16px rgba(212, 95, 138, 0.12);
+    padding: 32px 28px;
+  }
+  h1 {
+    font-size: 1.3em; color: #d45f8a; letter-spacing: 0.5px;
+    margin: 0 0 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h1 img { width: 36px; height: 36px; border-radius: 9px; box-shadow: 0 2px 6px rgba(212, 95, 138, 0.3); }
+  .updated { color: #c9a4b2; font-size: 0.85em; margin: 0 0 24px; }
+  h2 {
+    font-size: 1.1em; color: #b1567c;
+    border-bottom: 2px solid #f6d3de; padding-bottom: 6px; margin-top: 36px;
+  }
+  h3 { font-size: 1em; color: #b1567c; margin-top: 24px; }
+  h3::before { content: '♥ '; color: #e8a3bd; }
+  strong { color: #d45f8a; }
+  ul { padding-left: 20px; }
+  li { margin: 8px 0; }
+  li::marker { content: '🌸 '; font-size: 0.8em; }
+  .lock {
+    background: #fde8ef; border-radius: 14px; padding: 14px 18px;
+    font-weight: 600; color: #b1567c; margin: 18px 0;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+  th, td { border: 1px solid #f6d3de; padding: 8px 12px; text-align: left; font-size: 0.92em; }
+  th { background: #fdeef3; color: #b1567c; }
+  .footer { text-align: center; color: #c9a4b2; font-size: 0.8em; margin-top: 28px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1><img src="icon.png" alt="">Simple Makeup Filter for Google Meet</h1>
+  <p class="updated">プライバシーポリシー / Privacy Policy ・ 最終更新日 Last updated: 2026-06-13</p>
+
+  <div class="lock">🔒 本拡張機能は、いかなるデータも収集・送信しません。すべての処理はあなたのパソコンの中で完結します。</div>
+
+  <h2>日本語</h2>
+  <p><strong>Simple Makeup Filter for Google Meet</strong>（以下「本拡張機能」）は、Google Meet のカメラ映像に美肌補正・メイクアップ効果を適用する Chrome 拡張機能です。</p>
+
+  <h3>データの収集について</h3>
+  <ul>
+    <li><strong>カメラ映像</strong>: すべての映像処理（美肌補正・顔ランドマーク検出・メイク描画）は、お使いのパソコンのブラウザ内で完結します。映像・画像・顔データが外部サーバーに送信されることは一切ありません。</li>
+    <li><strong>顔検出</strong>: 顔の特徴点検出には Google MediaPipe（オープンソース）を使用していますが、検出モデルは拡張機能に同梱されており、検出処理はすべてローカルで実行されます。</li>
+    <li><strong>設定データ</strong>: フィルターの設定値（スライダーの値・色など）は、Chrome の拡張機能用ストレージ（chrome.storage.local）にのみ保存されます。これはお使いのブラウザ内のローカル領域であり、開発者を含む第三者がアクセスすることはできません。</li>
+    <li><strong>アナリティクス・トラッキング</strong>: 一切使用していません。</li>
+  </ul>
+
+  <h3>権限について</h3>
+  <p>本拡張機能が要求する権限は以下のみです。ネットワーク通信に関する権限は要求しておらず、外部との通信機能を持ちません。</p>
+  <table>
+    <tr><th>権限</th><th>用途</th></tr>
+    <tr><td>storage</td><td>フィルター設定をブラウザ内に保存するため</td></tr>
+    <tr><td>meet.google.com へのアクセス</td><td>Google Meet のページ上でのみフィルターを動作させるため</td></tr>
+  </table>
+
+  <h3>ポリシーの変更について</h3>
+  <p>本ポリシーを変更する場合は、本ページを更新します。重要な変更がある場合は、拡張機能の更新情報にてお知らせします。</p>
+
+  <h3>お問い合わせ</h3>
+  <p>本ポリシーに関するお問い合わせ・不具合のご報告は、<a href="https://forms.gle/PLrEpVQxsKttEWri6" style="color:#d45f8a;">ご意見フォーム</a>までお願いします。</p>
+
+  <h2>English</h2>
+  <p><strong>Simple Makeup Filter for Google Meet</strong> ("the Extension") is a Chrome extension that applies skin smoothing and makeup effects to your camera feed in Google Meet.</p>
+
+  <h3>Data Collection</h3>
+  <p>The Extension <strong>does not collect or transmit any data.</strong></p>
+  <ul>
+    <li><strong>Camera feed</strong>: All video processing (skin smoothing, face landmark detection, and makeup rendering) happens entirely within your browser. No video, images, or facial data ever leave your computer.</li>
+    <li><strong>Face detection</strong>: Face landmark detection uses Google MediaPipe (open source). The detection model is bundled with the Extension and runs fully on-device.</li>
+    <li><strong>Settings</strong>: Filter settings (slider values, colors) are stored only in Chrome's extension storage (chrome.storage.local) on your device. No one, including the developer, can access them.</li>
+    <li><strong>Analytics / tracking</strong>: None.</li>
+  </ul>
+
+  <h3>Permissions</h3>
+  <p>The Extension requests only: <strong>storage</strong> (to save your filter settings locally) and access to <strong>meet.google.com</strong> (to run only on Google Meet pages). It requests no network-related permissions and has no capability to communicate with external servers.</p>
+
+  <h3>Changes to This Policy</h3>
+  <p>Any changes to this policy will be posted on this page. Significant changes will be announced in the extension's release notes.</p>
+
+  <h3>Contact</h3>
+  <p>For questions about this policy, please use our <a href="https://forms.gle/PLrEpVQxsKttEWri6" style="color:#d45f8a;">feedback form</a>.</p>
+
+  <p class="footer">Simple Makeup Filter for Google Meet by picorisu 🐿️</p>
+</div>
+</body>
+</html>
