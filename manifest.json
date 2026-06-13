@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Simple Makeup Filter for Google Meet",
   "version": "1.0.0",
-  "description": "美肌・メイク・シェーディングをカメラ映像に。全てローカル処理、映像は一切外部送信しません。",
+  "description": "ナチュラルな綺麗を ON。Google Meet のカメラ映像に美肌とメイクを、全てローカル処理で。映像が外部に送信されることは一切ありません。",
   "permissions": ["storage"],
   "host_permissions": ["https://meet.google.com/*"],
   "content_scripts": [
