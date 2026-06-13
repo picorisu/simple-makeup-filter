@@ -6,7 +6,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 # vendor/ が揃っているか確認（無いとメイク機能が動かないパッケージになる）
-for f in vendor/vision_bundle.mjs vendor/wasm/vision_wasm_internal.js vendor/wasm/vision_wasm_internal.wasm vendor/face_landmarker.task; do
+for f in vendor/vision_bundle.mjs vendor/wasm/vision_wasm_internal.js vendor/wasm/vision_wasm_internal.wasm vendor/face_landmarker.task vendor/LICENSE; do
   if [ ! -f "$f" ]; then
     echo "ERROR: $f がありません。README の手順で vendor/ をダウンロードしてください" >&2
     exit 1

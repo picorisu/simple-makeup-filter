@@ -27,6 +27,7 @@ curl -sL -o vendor/vision_bundle.mjs https://cdn.jsdelivr.net/npm/@mediapipe/tas
 curl -sL -o vendor/wasm/vision_wasm_internal.js https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm/vision_wasm_internal.js
 curl -sL -o vendor/wasm/vision_wasm_internal.wasm https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm/vision_wasm_internal.wasm
 curl -sL -o vendor/face_landmarker.task https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task
+curl -sL -o vendor/LICENSE https://raw.githubusercontent.com/google-ai-edge/mediapipe/master/LICENSE
 ```
 
 検証用 SHA-256（2026-06-13 取得時点）:
