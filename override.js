@@ -437,18 +437,14 @@ void main() {
     }
 
     if (settings.lipGloss > 0) {
-      // ツヤ: 唇の領域にクリップした上で、下唇の中央に screen 合成の光を置く。
-      // クリップしているので光が唇からはみ出さない
       ctx.save();
       ctx.beginPath();
       traceLip();
       ctx.clip('evenodd');
       ctx.globalCompositeOperation = 'screen';
-      ctx.filter = `blur(${Math.max(1, faceW * 0.006)}px)`;
-      // 下唇の中央（外側の底 17 と内側の底 14 の中間）
+      ctx.filter = `blur(${Math.max(1, faceW * 0.004)}px)`;
       const cx4 = ((lm[17].x + lm[14].x) / 2) * W;
       const cy4 = ((lm[17].y + lm[14].y) / 2) * H;
-      // 口角を結ぶ向きに沿った横長の光
       const mAngle = Math.atan2(
         (lm[MOUTH_R].y - lm[MOUTH_L].y) * H,
         (lm[MOUTH_R].x - lm[MOUTH_L].x) * W
@@ -458,18 +454,40 @@ void main() {
         (lm[MOUTH_R].y - lm[MOUTH_L].y) * H
       );
       const ry4 = faceW * 0.013;
+      const ga = settings.lipGloss;
+      ctx.save();
       ctx.translate(cx4, cy4);
       ctx.rotate(mAngle);
       ctx.scale((mouthW * 0.3) / ry4, 1);
       const g4 = ctx.createRadialGradient(0, 0, 0, 0, 0, ry4);
-      g4.addColorStop(0, `rgba(255,255,255,${settings.lipGloss * 0.55})`);
+      g4.addColorStop(0, `rgba(255,255,255,${ga * 0.7})`);
+      g4.addColorStop(0.5, `rgba(255,255,255,${ga * 0.3})`);
       g4.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.fillStyle = g4;
       ctx.beginPath();
       ctx.arc(0, 0, ry4, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
-      ctx.globalCompositeOperation = 'multiply'; // 後続のメイク描画用に戻す
+      const subRy = ry4 * 0.7;
+      const subOff = mouthW * 0.18;
+      for (const sign of [-1, 1]) {
+        ctx.save();
+        ctx.translate(cx4, cy4);
+        ctx.rotate(mAngle);
+        ctx.translate(sign * subOff, 0);
+        ctx.scale((mouthW * 0.15) / subRy, 1);
+        const gs = ctx.createRadialGradient(0, 0, 0, 0, 0, subRy);
+        gs.addColorStop(0, `rgba(255,255,255,${ga * 0.45})`);
+        gs.addColorStop(0.6, `rgba(255,255,255,${ga * 0.15})`);
+        gs.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = gs;
+        ctx.beginPath();
+        ctx.arc(0, 0, subRy, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+      ctx.globalCompositeOperation = 'multiply';
     }
 
     if (settings.blushA > 0) {
