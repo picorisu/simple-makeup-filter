@@ -812,7 +812,8 @@ void main() {
           }
           // 眉尻の高さ: 眉尻に近いほど強く上下にずらす（t^2 で眉頭側は動かない）
           if (settings.browTail !== 0) {
-            const lift = faceW * 0.035 * settings.browTail * Math.min(t * t, 0.85);
+            const k = settings.browTail >= 0 ? 0.02 : 0.035;
+            const lift = faceW * k * settings.browTail * Math.min(t * t, 0.85);
             px += upX * lift;
             py += upY * lift;
           }
