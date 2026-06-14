@@ -21,6 +21,7 @@ rm -f "$OUT"
 # ストアに必要なファイルだけを含める（開発用ファイルは除外）
 zip -r "$OUT" \
   manifest.json \
+  defaults.js \
   override.js \
   bridge.js \
   popup.html \
