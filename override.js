@@ -394,8 +394,11 @@ void main() {
       cx /= p.length; cy /= p.length;
       const eyeW = Math.hypot(p[p.length - 1][0] - p[0][0], p[p.length - 1][1] - p[0][1]);
       // 目の真下に少し下げて配置（目にパッチが掛かるとぼやけた目になるため）
-      cx += downX * faceW * 0.055;
-      cy += downY * faceW * 0.055;
+      cx += downX * faceW * (0.055 + settings.eyebagY * 0.08);
+      cy += downY * faceW * (0.055 + settings.eyebagY * 0.08);
+      const sideX = Math.cos(roll), sideYv = Math.sin(roll);
+      cx += sideX * faceW * settings.eyebagX * 0.08;
+      cy += sideYv * faceW * settings.eyebagX * 0.08;
 
       const ry = faceW * 0.035 * boost * settings.eyebagH;
       mctx.save();
@@ -418,58 +421,6 @@ void main() {
     // ぼかしで線を消し、brightness でクマの暗さを持ち上げる（それぞれ独立に効く）
     const blurPx = line > 0 ? Math.max(2, faceW * 0.015 * boost) : 0;
     pctx.filter = `blur(${blurPx}px) brightness(${1 + 0.16 * bright})`;
-    pctx.drawImage(srcCanvas, 0, 0);
-    pctx.filter = 'none';
-    pctx.globalCompositeOperation = 'destination-in';
-    pctx.drawImage(mask, 0, 0);
-    pctx.globalCompositeOperation = 'source-over';
-
-    ctx.drawImage(patch, 0, 0);
-  }
-
-  function drawCrowsFeetFix(ctx, srcCanvas, patch, mask, lm, W, H) {
-    const raw = settings.crowA;
-    if (raw <= 0) return;
-    const a = Math.min(1, raw);
-    const boost = Math.max(1, raw);
-
-    const faceW = Math.hypot(
-      (lm[FACE_RIGHT].x - lm[FACE_LEFT].x) * W,
-      (lm[FACE_RIGHT].y - lm[FACE_LEFT].y) * H
-    );
-    const roll = Math.atan2(
-      (lm[FACE_RIGHT].y - lm[FACE_LEFT].y) * H,
-      (lm[FACE_RIGHT].x - lm[FACE_LEFT].x) * W
-    );
-    const sideX = Math.cos(roll), sideY = Math.sin(roll);
-
-    const mctx = mask.getContext('2d');
-    mctx.clearRect(0, 0, W, H);
-
-    for (const [eyeCorner, dir] of [[33, 1], [263, -1]]) {
-      const ex = lm[eyeCorner].x * W, ey = lm[eyeCorner].y * H;
-      const cx = ex + sideX * faceW * 0.04 * dir;
-      const cy = ey + sideY * faceW * 0.04 * dir;
-
-      const ry = faceW * 0.04 * boost;
-      mctx.save();
-      mctx.translate(cx, cy);
-      mctx.rotate(roll);
-      mctx.scale(1.5, 1);
-      const g = mctx.createRadialGradient(0, 0, 0, 0, 0, ry);
-      g.addColorStop(0, `rgba(0,0,0,${a})`);
-      g.addColorStop(0.7, `rgba(0,0,0,${a * 0.6})`);
-      g.addColorStop(1, 'rgba(0,0,0,0)');
-      mctx.fillStyle = g;
-      mctx.beginPath();
-      mctx.arc(0, 0, ry, 0, Math.PI * 2);
-      mctx.fill();
-      mctx.restore();
-    }
-
-    const pctx = patch.getContext('2d');
-    pctx.clearRect(0, 0, W, H);
-    pctx.filter = `blur(${Math.max(2, faceW * 0.015 * boost)}px)`;
     pctx.drawImage(srcCanvas, 0, 0);
     pctx.filter = 'none';
     pctx.globalCompositeOperation = 'destination-in';
@@ -541,7 +492,7 @@ void main() {
       traceLip();
       ctx.clip('evenodd');
       ctx.globalCompositeOperation = 'screen';
-      ctx.filter = `blur(${Math.max(1, faceW * 0.004)}px)`;
+      ctx.filter = `blur(${Math.max(1, faceW * 0.006)}px)`;
       const cx4 = ((lm[17].x + lm[14].x) / 2) * W;
       const cy4 = ((lm[17].y + lm[14].y) / 2) * H;
       const mAngle = Math.atan2(
@@ -553,38 +504,16 @@ void main() {
         (lm[MOUTH_R].y - lm[MOUTH_L].y) * H
       );
       const ry4 = faceW * 0.013;
-      const ga = settings.lipGloss;
-      ctx.save();
       ctx.translate(cx4, cy4);
       ctx.rotate(mAngle);
       ctx.scale((mouthW * 0.3) / ry4, 1);
       const g4 = ctx.createRadialGradient(0, 0, 0, 0, 0, ry4);
-      g4.addColorStop(0, `rgba(255,255,255,${ga * 0.7})`);
-      g4.addColorStop(0.5, `rgba(255,255,255,${ga * 0.3})`);
+      g4.addColorStop(0, `rgba(255,255,255,${settings.lipGloss * 0.55})`);
       g4.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.fillStyle = g4;
       ctx.beginPath();
       ctx.arc(0, 0, ry4, 0, Math.PI * 2);
       ctx.fill();
-      ctx.restore();
-      const subRy = ry4 * 0.7;
-      const subOff = mouthW * 0.18;
-      for (const sign of [-1, 1]) {
-        ctx.save();
-        ctx.translate(cx4, cy4);
-        ctx.rotate(mAngle);
-        ctx.translate(sign * subOff, 0);
-        ctx.scale((mouthW * 0.15) / subRy, 1);
-        const gs = ctx.createRadialGradient(0, 0, 0, 0, 0, subRy);
-        gs.addColorStop(0, `rgba(255,255,255,${ga * 0.45})`);
-        gs.addColorStop(0.6, `rgba(255,255,255,${ga * 0.15})`);
-        gs.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = gs;
-        ctx.beginPath();
-        ctx.arc(0, 0, subRy, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
       ctx.restore();
       ctx.globalCompositeOperation = 'multiply';
     }
@@ -999,7 +928,6 @@ void main() {
         const makeupOn = on &&
           (settings.lipA > 0 || settings.lipGloss > 0 || settings.blushA > 0 || settings.browA > 0 ||
            settings.nasoA > 0 || settings.marioA > 0 || settings.eyebagLine > 0 || settings.eyebagBright > 0 ||
-           settings.crowA > 0 ||
            settings.shadowA > 0 || settings.linerA > 0 ||
            settings.noseA > 0 || settings.jawA > 0 ||
            settings.hiA > 0 || settings.hiCheekA > 0 || settings.hiChinA > 0);
@@ -1020,7 +948,6 @@ void main() {
           if (landmarks) {
             drawNasoFix(ctx, glCanvas, patchCanvas, maskCanvas, landmarks, W, H);
             drawEyebagFix(ctx, glCanvas, patchCanvas, maskCanvas, landmarks, W, H);
-            drawCrowsFeetFix(ctx, glCanvas, patchCanvas, maskCanvas, landmarks, W, H);
             drawMakeup(ctx, landmarks, W, H);
           }
         }
