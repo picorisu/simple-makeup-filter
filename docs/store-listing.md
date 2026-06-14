@@ -57,6 +57,45 @@ https://picorisu.github.io/simple-makeup-filter/privacy.html
     ストリームを返します。外部送信はありません
 - リモートコード: 使用しない（MediaPipe は拡張パッケージに同梱）
 
+---
+
+## English
+
+### Summary (132 chars max)
+Natural beauty, ON. Real-time skin smoothing & makeup for Google Meet — 100% local processing. Your video never leaves your computer.
+
+### Detailed Description
+
+A Chrome extension that applies natural skin smoothing and makeup filters to your Google Meet video. Fine-tune every detail with sliders and create your perfect look.
+
+✨ Features
+• Skin smoothing: Keeps eyes and edges sharp while smoothing only skin (lips auto-excluded).
+• Reduces nasolabial lines, under-eye lines, and dark circles.
+• Lip (color, gloss, fullness) / Blush (shape, position, softness) / Brow (thickness, arch, tail).
+• Eyeshadow (up to 3-color gradient) / Eyeliner (adjustable wing angle).
+• Contouring (nose, jawline) / Highlight (nose bridge, cheekbone, chin).
+• Real-time 468-point face tracking — follows your every move, blink, and head tilt.
+• Save presets. Export & import to share with friends.
+
+🔒 Privacy First
+• No video or face data is ever sent externally. All processing stays in your browser.
+• Face detection model (Google MediaPipe) is bundled — the extension has no network permissions.
+• Only two permissions: "save settings" and "run on meet.google.com."
+
+💡 How to Use
+1. Install, then open Google Meet (reload if already open).
+2. Click the heart icon in the toolbar.
+3. Adjust skin smoothing under "Skin," then explore makeup sliders.
+4. Save your favorite look as a preset.
+
+⚠️ Notes
+• Desktop Chrome only (not available on mobile).
+• Demo screenshots use AI-generated faces.
+• This extension is unofficial. Google Meet is a trademark of Google LLC.
+• Face-tracking features (makeup, etc.) may vary in performance depending on your PC.
+
+---
+
 ## スクリーンショット（1280x800、最低1枚・推奨5枚）※要準備
 1. ポップアップ UI 全体（アコーディオンを開いた状態）
 2. 美肌 before/after の比較
