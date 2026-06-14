@@ -262,7 +262,8 @@ void main() {
   // ソフトマスク付きで上書きする。領域外は一切触らないので全体のシャープさは保たれる
   function drawNasoFix(ctx, srcCanvas, patch, mask, lm, W, H) {
     const raw = settings.nasoA;
-    if (raw <= 0) return;
+    const rawM = settings.marioA;
+    if (raw <= 0 && rawM <= 0) return;
     // 1.0 までは不透明度、それ以上はぼかしの強さとパッチの太さを増やして消す力を上げる
     const a = Math.min(1, raw);
     const boost = Math.max(1, raw);
@@ -315,6 +316,52 @@ void main() {
     pctx.globalCompositeOperation = 'source-over';
 
     ctx.drawImage(patch, 0, 0);
+
+    if (rawM > 0) {
+      const aM = Math.min(1, rawM);
+      const boostM = Math.max(1, rawM);
+
+      mctx.clearRect(0, 0, W, H);
+      for (const [mouthI, jawI] of [[MOUTH_L, 149], [MOUTH_R, 378]]) {
+        const mx = lm[mouthI].x * W, my = lm[mouthI].y * H;
+        const jx = lm[jawI].x * W, jy = lm[jawI].y * H;
+        const len = Math.hypot(jx - mx, jy - my);
+        const angle = Math.atan2(jy - my, jx - mx);
+        let px = -(jy - my) / len, py = (jx - mx) / len;
+        const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
+        let cx = (mx + jx) / 2, cy = (my + jy) / 2;
+        if ((cx + px - nx) ** 2 + (cy + py - ny) ** 2 < (cx - px - nx) ** 2 + (cy - py - ny) ** 2) {
+          px = -px; py = -py;
+        }
+        cx += px * faceW * 0.02;
+        cy += py * faceW * 0.02;
+
+        mctx.save();
+        mctx.translate(cx, cy);
+        mctx.rotate(angle);
+        const ry = faceW * 0.05 * boostM;
+        mctx.scale((len * 0.7) / ry, 1);
+        const g = mctx.createRadialGradient(0, 0, 0, 0, 0, ry);
+        g.addColorStop(0, `rgba(0,0,0,${aM})`);
+        g.addColorStop(0.7, `rgba(0,0,0,${aM * 0.6})`);
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        mctx.fillStyle = g;
+        mctx.beginPath();
+        mctx.arc(0, 0, ry, 0, Math.PI * 2);
+        mctx.fill();
+        mctx.restore();
+      }
+
+      pctx.clearRect(0, 0, W, H);
+      pctx.filter = `blur(${Math.max(2, faceW * 0.02 * boostM)}px)`;
+      pctx.drawImage(srcCanvas, 0, 0);
+      pctx.filter = 'none';
+      pctx.globalCompositeOperation = 'destination-in';
+      pctx.drawImage(mask, 0, 0);
+      pctx.globalCompositeOperation = 'source-over';
+
+      ctx.drawImage(patch, 0, 0);
+    }
   }
 
   // クマ・目の下の線消し: 下まぶたの少し下の楕円領域に、ぼかし + 明るさを少し
@@ -899,7 +946,7 @@ void main() {
         // 2) メイク・ほうれい線消し: いずれかが有効なときだけ顔検出を回す（不要時は負荷ゼロ）
         const makeupOn = on &&
           (settings.lipA > 0 || settings.lipGloss > 0 || settings.blushA > 0 || settings.browA > 0 ||
-           settings.nasoA > 0 || settings.eyebagLine > 0 || settings.eyebagBright > 0 ||
+           settings.nasoA > 0 || settings.marioA > 0 || settings.eyebagLine > 0 || settings.eyebagBright > 0 ||
            settings.shadowA > 0 || settings.linerA > 0 ||
            settings.noseA > 0 || settings.jawA > 0 ||
            settings.hiA > 0 || settings.hiCheekA > 0 || settings.hiChinA > 0);
