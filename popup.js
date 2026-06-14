@@ -1,6 +1,6 @@
 const DEFAULTS = MBF_DEFAULTS; // 初期値は defaults.js が単一情報源
 
-const RANGES = ['smooth', 'bright', 'warmth', 'sat', 'nasoA', 'marioA', 'eyebagLine', 'eyebagBright', 'eyebagW', 'eyebagH', 'lipThresh', 'skinRange', 'lipA', 'lipGloss', 'lipW', 'blushA', 'blushShape', 'blushX', 'blushY', 'blushSoft', 'browA', 'browW', 'browTaper', 'browArch', 'browPeak', 'browTail', 'shadowA', 'shadowH', 'shadowW', 'shadowSoft', 'shadowBias', 'linerA', 'linerW', 'linerY', 'linerWing', 'linerWingUp', 'linerWingW', 'noseA', 'noseW', 'noseIn', 'noseSoft', 'jawA', 'jawSoft', 'hiA', 'hiW', 'hiSoft', 'hiCheekA', 'hiCheekW', 'hiCheekX', 'hiCheekY', 'hiCheekSoft', 'hiChinA', 'hiChinW', 'hiChinY', 'hiChinSoft'];
+const RANGES = ['smooth', 'bright', 'warmth', 'sat', 'nasoA', 'marioA', 'eyebagLine', 'eyebagBright', 'eyebagW', 'eyebagH', 'crowA', 'lipThresh', 'skinRange', 'lipA', 'lipGloss', 'lipW', 'blushA', 'blushShape', 'blushX', 'blushY', 'blushSoft', 'browA', 'browW', 'browTaper', 'browArch', 'browPeak', 'browTail', 'shadowA', 'shadowH', 'shadowW', 'shadowSoft', 'shadowBias', 'linerA', 'linerW', 'linerY', 'linerWing', 'linerWingUp', 'linerWingW', 'noseA', 'noseW', 'noseIn', 'noseSoft', 'jawA', 'jawSoft', 'hiA', 'hiW', 'hiSoft', 'hiCheekA', 'hiCheekW', 'hiCheekX', 'hiCheekY', 'hiCheekSoft', 'hiChinA', 'hiChinW', 'hiChinY', 'hiChinSoft'];
 const COLORS = ['lipColor', 'blushColor', 'browColor', 'shadowColor', 'shadowColor2', 'shadowColor3', 'linerColor', 'shadeColor', 'hiColor'];
 
 const CHECKS = ['enabled', 'shadowUse2', 'shadowUse3'];
@@ -13,7 +13,7 @@ for (const el of document.querySelectorAll('summary input')) {
 
 // 見出しのハート: ♥ピンク=そのカテゴリの効果が効いてる、♡グレー=オフ
 const FX_KEYS = {
-  skin: ['smooth', 'bright', 'warmth', 'nasoA', 'marioA', 'eyebagLine', 'eyebagBright'],
+  skin: ['smooth', 'bright', 'warmth', 'nasoA', 'marioA', 'eyebagLine', 'eyebagBright', 'crowA'],
   lip: ['lipA', 'lipGloss'],
   blush: ['blushA'],
   brow: ['browA'],
