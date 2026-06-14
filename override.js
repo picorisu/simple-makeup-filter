@@ -350,11 +350,11 @@ void main() {
       cx += downX * faceW * 0.055;
       cy += downY * faceW * 0.055;
 
-      const ry = faceW * 0.035 * boost;
+      const ry = faceW * 0.035 * boost * settings.eyebagH;
       mctx.save();
       mctx.translate(cx, cy);
       mctx.rotate(roll);
-      mctx.scale((eyeW * 0.65) / ry, 1);
+      mctx.scale((eyeW * 0.65 * settings.eyebagW) / ry, 1);
       const g = mctx.createRadialGradient(0, 0, 0, 0, 0, ry);
       g.addColorStop(0, `rgba(0,0,0,${a})`);
       g.addColorStop(0.7, `rgba(0,0,0,${a * 0.6})`);
