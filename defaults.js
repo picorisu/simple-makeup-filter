@@ -45,7 +45,7 @@ globalThis.MBF_DEFAULTS = {
   browTaper: 0,  // 眉尻の細さ 0-1
   browArch: 0,   // アーチの高さ -1〜1
   browPeak: 0.6, // アーチの位置 0.2-0.9
-  browTail: 0,   // 眉尻の高さ -1〜1
+  browTail: 0,   // 眉尻の高さ -2〜1
 
   // --- アイシャドウ ---
   shadowColor: '#9e5a73',  // 際
