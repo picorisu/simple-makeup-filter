@@ -1,13 +1,10 @@
 # Chrome ウェブストア掲載情報（下書き）
 
-## 名前（ja）
-シンプルメイクフィルター for Google Meet
-
-## 名前（en）
+## 名前（ja/en共通）
 Simple Makeup Filter for Google Meet
 
 ## 概要（132文字以内・_locales で出し分け）
-- ja: ナチュラルな綺麗を ON。Google Meet のカメラ映像に美肌とメイクを。全てあなたのPC内で完結。リモートワークやオンライン会議の必須アイテム。
+- ja: ナチュラルな綺麗を ON。Google Meet のカメラ映像に美肌とメイクのフィルターを。全てあなたのPC内で完結。リモートワークやオンライン会議の必須アイテム。
 - en: Natural beauty, ON. Skin smoothing & makeup for your Google Meet camera. All on your PC. Essential for remote meetings.
 
 ## 詳細説明

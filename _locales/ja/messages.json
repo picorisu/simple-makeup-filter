@@ -1,6 +1,6 @@
 {
-  "extName": { "message": "シンプルメイクフィルター for Google Meet" },
-  "extDescription": { "message": "ナチュラルな綺麗を ON。Google Meet のカメラ映像に美肌とメイクを。全てあなたのPC内で完結。リモートワークやオンライン会議の必須アイテム。" },
+  "extName": { "message": "Simple Makeup Filter for Google Meet" },
+  "extDescription": { "message": "ナチュラルな綺麗を ON。Google Meet のカメラ映像に美肌とメイクのフィルターを。全てあなたのPC内で完結。リモートワークやオンライン会議の必須アイテム。" },
 
   "enabled_title": { "message": "フィルターの有効/無効" },
   "status_checking": { "message": "○ Meet のタブを確認中…" },
