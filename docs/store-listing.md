@@ -1,7 +1,7 @@
 # Chrome ウェブストア掲載情報（下書き）
 
 ## 名前（ja）
-シンプル メイクフィルター for Google Meet
+シンプルメイクフィルター for Google Meet
 
 ## 名前（en）
 Simple Makeup Filter for Google Meet
