@@ -176,11 +176,14 @@ for (const btn of document.querySelectorAll('[data-quick]')) {
   btn.addEventListener('click', () => {
     const customized = Object.values(FX_KEYS).flat()
       .some((k) => parseFloat(document.getElementById(k).value) > 0);
+    // 既にメイクをカスタマイズしている人が誤タップで全消ししないよう確認を挟む
     if (customized && !confirm(M('confirm_quick'))) return;
     chrome.storage.local.get(DEFAULTS, (cur) => {
       const s = {
         ...DEFAULTS,
         ...QUICK_PRESETS[btn.dataset.quick],
+        // キャリブレーション（顔・照明への校正）はメイクの濃さとは別物なので、
+        // クイックプリセットでは現在値を維持する
         lipThresh: cur.lipThresh,
         skinRange: cur.skinRange,
         enabled: true
@@ -193,7 +196,7 @@ for (const btn of document.querySelectorAll('[data-quick]')) {
 for (const k of CHECKS) {
   document.getElementById(k).addEventListener('change', (e) => {
     chrome.storage.local.set({ [k]: e.target.checked });
-    if (k === 'enabled') updateStatus();
+    if (k === 'enabled') updateStatus(); // ON/OFF とステータス表示を連動させる
   });
 }
 for (const k of RANGES) {
@@ -204,6 +207,7 @@ for (const k of RANGES) {
   });
 }
 
+// すべて初期値に戻す（プリセット一覧は消さない）
 document.getElementById('resetAll').addEventListener('click', () => {
   if (!confirm(M('confirm_reset'))) return;
   chrome.storage.local.set({ ...DEFAULTS }, () => refreshUI(DEFAULTS));
@@ -225,6 +229,7 @@ function sanitize(obj) {
     let v = obj[k];
     if (RANGES.includes(k)) {
       const el = document.getElementById(k);
+      // スライダーの min/max に収める（壊れた JSON の異常値で映像が崩壊するのを防ぐ）
       v = Math.min(parseFloat(el.max), Math.max(parseFloat(el.min), v));
       if (Number.isNaN(v)) continue;
     } else if (COLORS.includes(k)) {
@@ -268,6 +273,7 @@ document.getElementById('presetName').addEventListener('input', (e) => {
 document.getElementById('presetSave').addEventListener('click', () => {
   const nameEl = document.getElementById('presetName');
   const name = nameEl.value.trim();
+  // 無反応だと「壊れてる」と思われるため、名前が必要なことを視覚的に伝える
   if (!name) {
     nameEl.classList.add('err');
     nameEl.focus();
@@ -292,6 +298,7 @@ document.getElementById('presetApply').addEventListener('click', () => {
   chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
     if (!__presets[name]) return;
     const s = sanitize(__presets[name]);
+    // ON/OFF（マスタースイッチ）はプリセットの対象外。今の状態を維持する
     delete s.enabled;
     chrome.storage.local.set(s, () => {
       chrome.storage.local.get(DEFAULTS, (cur) => {
@@ -314,6 +321,7 @@ document.getElementById('presetDelete').addEventListener('click', () => {
 
 document.getElementById('presetExport').addEventListener('click', () => {
   const name = document.getElementById('presetList').value;
+  // 書き出すのは「選択中のプリセット」。編集途中の無名状態は対象外
   if (!name) {
     alert(M('alert_export_save_first'));
     return;
@@ -322,6 +330,8 @@ document.getElementById('presetExport').addEventListener('click', () => {
     if (!__presets[name]) return;
     const preset = sanitize(__presets[name]);
     currentSettings((live) => {
+      // 現在の設定が保存内容と違う＝未保存の編集中。そのまま書き出すと
+      // 画面の見た目と違う中身が配られるため、確認を挟む
       const dirty = JSON.stringify(preset) !== JSON.stringify(sanitize(live));
       if (dirty && !confirm(M('confirm_export_dirty', name))) return;
       const blob = new Blob([JSON.stringify(preset, null, 2)], { type: 'application/json' });
@@ -346,6 +356,7 @@ document.getElementById('presetFile').addEventListener('change', (e) => {
     try {
       const s = sanitize(JSON.parse(reader.result));
       if (Object.keys(s).length === 0) throw new Error(M('alert_no_valid_settings'));
+      // 即適用せず、ファイル名のプリセットとして一覧に追加する（適用はユーザーが選ぶ）
       const name = file.name.replace(/\.json$/i, '') || 'Import';
       chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
         if (__presets[name] && !confirm(M('confirm_overwrite', name))) return;
