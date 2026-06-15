@@ -99,138 +99,138 @@
 </head>
 <body>
 <div class="panel">
-  <h1><img src="icons/icon48.png" alt="">Simple Makeup Filter<input type="checkbox" id="enabled" title="フィルターの有効/無効" aria-label="フィルターの有効/無効"></h1>
-  <p class="status" id="status">○ Meet のタブを確認中…</p>
+  <h1><img src="icons/icon48.png" alt="">Simple Makeup Filter<input type="checkbox" id="enabled" data-i18n-title="enabled_title" data-i18n-aria="enabled_title"></h1>
+  <p class="status" id="status" data-i18n="status_checking"></p>
   <details id="intro">
-    <summary>🌸 はじめに（使い方）</summary>
-    <p class="guide">Google Meet を開いてカメラON → 下の項目のスライダーを動かすと、すぐ映像に反映されます💄 まずはボタンでベースを選ぶのがおすすめ：</p>
+    <summary data-i18n="intro_title"></summary>
+    <p class="guide" data-i18n="intro_guide"></p>
     <div class="quick">
-      <button class="btn" data-quick="natural">ナチュラル</button>
-      <button class="btn" data-quick="full">しっかり</button>
-      <button class="btn" data-quick="healthy">血色感</button>
+      <button class="btn" data-quick="natural" data-i18n="quick_natural"></button>
+      <button class="btn" data-quick="full" data-i18n="quick_full"></button>
+      <button class="btn" data-quick="healthy" data-i18n="quick_healthy"></button>
     </div>
   </details>
 
   <details data-fx="skin">
-    <summary>✨ 肌</summary>
-    <label>美肌 <input type="range" id="smooth" min="0" max="1" step="0.05"></label>
-    <label>明るさ <input type="range" id="bright" min="0" max="0.3" step="0.01"></label>
-    <label>血色 <input type="range" id="warmth" min="0" max="0.2" step="0.01"></label>
-    <label>鮮やかさ <input type="range" id="sat" min="0.5" max="1.5" step="0.05"></label>
-    <p class="sub">うまく反映されないとき</p>
-    <label>唇の保護範囲（唇までぼやける→左へ／頬がまだらになる→右へ） <input type="range" id="lipThresh" min="0.52" max="0.65" step="0.005"></label>
-    <label>肌と判定する色の範囲（肌に効かない→右へ／髪や背景までぼける→左へ） <input type="range" id="skinRange" min="0.6" max="1.6" step="0.05"></label>
+    <summary data-i18n="skin_title"></summary>
+    <label><span data-i18n="skin_smooth"></span> <input type="range" id="smooth" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="skin_bright"></span> <input type="range" id="bright" min="0" max="0.3" step="0.01"></label>
+    <label><span data-i18n="skin_warmth"></span> <input type="range" id="warmth" min="0" max="0.2" step="0.01"></label>
+    <label><span data-i18n="skin_sat"></span> <input type="range" id="sat" min="0.5" max="1.5" step="0.05"></label>
+    <p class="sub" data-i18n="skin_calib"></p>
+    <label><span data-i18n="skin_lipThresh"></span> <input type="range" id="lipThresh" min="0.52" max="0.65" step="0.005"></label>
+    <label><span data-i18n="skin_skinRange"></span> <input type="range" id="skinRange" min="0.6" max="1.6" step="0.05"></label>
   </details>
 
   <details data-fx="wrinkle">
-    <summary>🩹 しわ・クマ</summary>
-    <label>ほうれい線うすめ（右ほど強力） <input type="range" id="nasoA" min="0" max="3" step="0.05"></label>
-    <label>口角のしわうすめ（右ほど強力） <input type="range" id="marioA" min="0" max="2" step="0.05"></label>
-    <p class="sub">クマ</p>
-    <label>目の下の線うすめ（右ほど強力） <input type="range" id="eyebagLine" min="0" max="2" step="0.05"></label>
-    <label>クマを明るく <input type="range" id="eyebagBright" min="0" max="1" step="0.05"></label>
-    <label>クマの横幅 <input type="range" id="eyebagW" min="0.5" max="2" step="0.05"></label>
-    <label>クマの高さ <input type="range" id="eyebagH" min="0.5" max="2" step="0.05"></label>
-    <label>クマ横位置（内 ⇔ 外） <input type="range" id="eyebagX" min="-1" max="1" step="0.05"></label>
-    <label>クマ縦位置（上 ⇔ 下） <input type="range" id="eyebagY" min="-1" max="1" step="0.05"></label>
+    <summary data-i18n="wrinkle_title"></summary>
+    <label><span data-i18n="wrinkle_nasoA"></span> <input type="range" id="nasoA" min="0" max="3" step="0.05"></label>
+    <label><span data-i18n="wrinkle_marioA"></span> <input type="range" id="marioA" min="0" max="2" step="0.05"></label>
+    <p class="sub" data-i18n="wrinkle_sub"></p>
+    <label><span data-i18n="wrinkle_eyebagLine"></span> <input type="range" id="eyebagLine" min="0" max="2" step="0.05"></label>
+    <label><span data-i18n="wrinkle_eyebagBright"></span> <input type="range" id="eyebagBright" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="wrinkle_eyebagW"></span> <input type="range" id="eyebagW" min="0.5" max="2" step="0.05"></label>
+    <label><span data-i18n="wrinkle_eyebagH"></span> <input type="range" id="eyebagH" min="0.5" max="2" step="0.05"></label>
+    <label><span data-i18n="wrinkle_eyebagX"></span> <input type="range" id="eyebagX" min="-1" max="1" step="0.05"></label>
+    <label><span data-i18n="wrinkle_eyebagY"></span> <input type="range" id="eyebagY" min="-1" max="1" step="0.05"></label>
   </details>
 
   <details data-fx="lip">
-    <summary>💋 リップ<input type="color" id="lipColor" class="hdr-color" title="リップ色" aria-label="リップ色"></summary>
-    <label>濃さ <input type="range" id="lipA" min="0" max="1" step="0.05"></label>
-    <label>ツヤ（マット ⇔ グロス） <input type="range" id="lipGloss" min="0" max="1" step="0.05"></label>
-    <label>太さ（細め ⇔ オーバーリップ） <input type="range" id="lipW" min="0.8" max="1.3" step="0.02"></label>
+    <summary><span data-i18n="lip_title"></span><input type="color" id="lipColor" class="hdr-color" data-i18n-title="lip_color_title" data-i18n-aria="lip_color_title"></summary>
+    <label><span data-i18n="lip_a"></span> <input type="range" id="lipA" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="lip_gloss"></span> <input type="range" id="lipGloss" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="lip_w"></span> <input type="range" id="lipW" min="0.8" max="1.3" step="0.02"></label>
   </details>
 
   <details data-fx="blush">
-    <summary>🍑 チーク<input type="color" id="blushColor" class="hdr-color"></summary>
-    <label>濃さ <input type="range" id="blushA" min="0" max="1" step="0.05"></label>
-    <label>形状（丸 ⇔ 横長） <input type="range" id="blushShape" min="1" max="2.5" step="0.1"></label>
-    <label>横位置（内 ⇔ 外） <input type="range" id="blushX" min="-0.08" max="0.08" step="0.01"></label>
-    <label>縦位置（下 ⇔ 上） <input type="range" id="blushY" min="-0.08" max="0.2" step="0.01"></label>
-    <label>ぼかし（標準 ⇔ 広くふんわり） <input type="range" id="blushSoft" min="1" max="2.2" step="0.05"></label>
+    <summary><span data-i18n="blush_title"></span><input type="color" id="blushColor" class="hdr-color"></summary>
+    <label><span data-i18n="blush_a"></span> <input type="range" id="blushA" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="blush_shape"></span> <input type="range" id="blushShape" min="1" max="2.5" step="0.1"></label>
+    <label><span data-i18n="blush_x"></span> <input type="range" id="blushX" min="-0.08" max="0.08" step="0.01"></label>
+    <label><span data-i18n="blush_y"></span> <input type="range" id="blushY" min="-0.08" max="0.2" step="0.01"></label>
+    <label><span data-i18n="blush_soft"></span> <input type="range" id="blushSoft" min="1" max="2.2" step="0.05"></label>
   </details>
 
   <details data-fx="brow">
-    <summary>🖌 眉<input type="color" id="browColor" class="hdr-color"></summary>
-    <label>濃さ <input type="range" id="browA" min="0" max="1" step="0.05"></label>
-    <label>太さ（細 ⇔ 太） <input type="range" id="browW" min="0.25" max="1.05" step="0.05"></label>
-    <label>眉尻の細さ（均一 ⇔ 先細り） <input type="range" id="browTaper" min="0" max="1" step="0.05"></label>
-    <label>アーチの高さ（垂れ ⇔ 上げ） <input type="range" id="browArch" min="-1" max="1" step="0.05"></label>
-    <label>アーチの位置（眉頭寄り ⇔ 眉尻寄り） <input type="range" id="browPeak" min="0.2" max="0.9" step="0.05"></label>
-    <label>眉尻の高さ（下げ ⇔ 上げ） <input type="range" id="browTail" min="-1.5" max="1" step="0.05"></label>
+    <summary><span data-i18n="brow_title"></span><input type="color" id="browColor" class="hdr-color"></summary>
+    <label><span data-i18n="brow_a"></span> <input type="range" id="browA" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="brow_w"></span> <input type="range" id="browW" min="0.25" max="1.05" step="0.05"></label>
+    <label><span data-i18n="brow_taper"></span> <input type="range" id="browTaper" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="brow_arch"></span> <input type="range" id="browArch" min="-1" max="1" step="0.05"></label>
+    <label><span data-i18n="brow_peak"></span> <input type="range" id="browPeak" min="0.2" max="0.9" step="0.05"></label>
+    <label><span data-i18n="brow_tail"></span> <input type="range" id="browTail" min="-1.5" max="1" step="0.05"></label>
   </details>
 
   <details data-fx="shadow">
-    <summary>🎨 アイシャドウ<input type="color" id="shadowColor" class="hdr-color" title="際色" aria-label="際色"><input type="checkbox" id="shadowUse2" class="hdr-check" title="中間色を使う" aria-label="中間色を使う"><input type="color" id="shadowColor2" class="hdr-color" style="margin-left:0" title="中間色" aria-label="中間色"><input type="checkbox" id="shadowUse3" class="hdr-check" title="上色を使う" aria-label="上色を使う"><input type="color" id="shadowColor3" class="hdr-color" style="margin-left:0" title="上色" aria-label="上色"></summary>
-    <label>濃さ <input type="range" id="shadowA" min="0" max="1" step="0.05"></label>
-    <label>高さ（低 ⇔ 高） <input type="range" id="shadowH" min="0.5" max="2" step="0.05"></label>
-    <label>幅（狭 ⇔ 広） <input type="range" id="shadowW" min="0.8" max="1.4" step="0.05"></label>
-    <label>ぼかし（くっきり ⇔ ふんわり） <input type="range" id="shadowSoft" min="0.5" max="3" step="0.1"></label>
-    <label>際色の量（均等 ⇔ 際多め） <input type="range" id="shadowBias" min="1" max="3" step="0.1"></label>
+    <summary><span data-i18n="shadow_title"></span><input type="color" id="shadowColor" class="hdr-color" data-i18n-title="shadow_color1_title" data-i18n-aria="shadow_color1_title"><input type="checkbox" id="shadowUse2" class="hdr-check" data-i18n-title="shadow_use2_title" data-i18n-aria="shadow_use2_title"><input type="color" id="shadowColor2" class="hdr-color" style="margin-left:0" data-i18n-title="shadow_color2_title" data-i18n-aria="shadow_color2_title"><input type="checkbox" id="shadowUse3" class="hdr-check" data-i18n-title="shadow_use3_title" data-i18n-aria="shadow_use3_title"><input type="color" id="shadowColor3" class="hdr-color" style="margin-left:0" data-i18n-title="shadow_color3_title" data-i18n-aria="shadow_color3_title"></summary>
+    <label><span data-i18n="shadow_a"></span> <input type="range" id="shadowA" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="shadow_h"></span> <input type="range" id="shadowH" min="0.5" max="2" step="0.05"></label>
+    <label><span data-i18n="shadow_w"></span> <input type="range" id="shadowW" min="0.8" max="1.4" step="0.05"></label>
+    <label><span data-i18n="shadow_soft"></span> <input type="range" id="shadowSoft" min="0.5" max="3" step="0.1"></label>
+    <label><span data-i18n="shadow_bias"></span> <input type="range" id="shadowBias" min="1" max="3" step="0.1"></label>
   </details>
 
   <details data-fx="liner">
-    <summary>✒️ アイライン<input type="color" id="linerColor" class="hdr-color" title="アイライン色" aria-label="アイライン色"></summary>
-    <label>濃さ <input type="range" id="linerA" min="0" max="1" step="0.05"></label>
-    <label>ラインの太さ（細 ⇔ 太） <input type="range" id="linerW" min="0.4" max="2" step="0.05"></label>
-    <label>ラインの位置（まつげ側 ⇔ 上） <input type="range" id="linerY" min="-0.006" max="0.01" step="0.001"></label>
-    <label>目尻ハネの長さ（0でなし） <input type="range" id="linerWing" min="0" max="1" step="0.05"></label>
-    <label>ハネの角度（下向き ⇔ 上向き） <input type="range" id="linerWingUp" min="-60" max="60" step="1"></label>
-    <label>ハネの太さ（細 ⇔ 太） <input type="range" id="linerWingW" min="0.5" max="3" step="0.1"></label>
+    <summary><span data-i18n="liner_title"></span><input type="color" id="linerColor" class="hdr-color" data-i18n-title="liner_color_title" data-i18n-aria="liner_color_title"></summary>
+    <label><span data-i18n="liner_a"></span> <input type="range" id="linerA" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="liner_w"></span> <input type="range" id="linerW" min="0.4" max="2" step="0.05"></label>
+    <label><span data-i18n="liner_y"></span> <input type="range" id="linerY" min="-0.006" max="0.01" step="0.001"></label>
+    <label><span data-i18n="liner_wing"></span> <input type="range" id="linerWing" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="liner_wingUp"></span> <input type="range" id="linerWingUp" min="-60" max="60" step="1"></label>
+    <label><span data-i18n="liner_wingW"></span> <input type="range" id="linerWingW" min="0.5" max="3" step="0.1"></label>
   </details>
 
   <details data-fx="shade">
-    <summary>🌘 シェーディング<input type="color" id="shadeColor" class="hdr-color" title="影色（ノーズ・輪郭共通）" aria-label="影色（ノーズ・輪郭共通）"></summary>
-    <p class="sub">ノーズシャドウ</p>
-    <label>濃さ（0で無効） <input type="range" id="noseA" min="0" max="1" step="0.05"></label>
-    <label>幅（細 ⇔ 太） <input type="range" id="noseW" min="0.5" max="2" step="0.05"></label>
-    <label>位置（外 ⇔ 内） <input type="range" id="noseIn" min="0" max="0.6" step="0.05"></label>
-    <label>ぼかし（くっきり ⇔ ふんわり） <input type="range" id="noseSoft" min="0.5" max="3" step="0.1"></label>
-    <p class="sub">輪郭</p>
-    <label>濃さ（0で無効） <input type="range" id="jawA" min="0" max="1" step="0.05"></label>
-    <label>ぼかし（くっきり ⇔ ふんわり） <input type="range" id="jawSoft" min="0.5" max="3" step="0.1"></label>
+    <summary><span data-i18n="shade_title"></span><input type="color" id="shadeColor" class="hdr-color" data-i18n-title="shade_color_title" data-i18n-aria="shade_color_title"></summary>
+    <p class="sub" data-i18n="shade_nose_sub"></p>
+    <label><span data-i18n="shade_noseA"></span> <input type="range" id="noseA" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="shade_noseW"></span> <input type="range" id="noseW" min="0.5" max="2" step="0.05"></label>
+    <label><span data-i18n="shade_noseIn"></span> <input type="range" id="noseIn" min="0" max="0.6" step="0.05"></label>
+    <label><span data-i18n="shade_noseSoft"></span> <input type="range" id="noseSoft" min="0.5" max="3" step="0.1"></label>
+    <p class="sub" data-i18n="shade_jaw_sub"></p>
+    <label><span data-i18n="shade_jawA"></span> <input type="range" id="jawA" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="shade_jawSoft"></span> <input type="range" id="jawSoft" min="0.5" max="3" step="0.1"></label>
   </details>
 
   <details data-fx="hi">
-    <summary>🌟 ハイライト<input type="color" id="hiColor" class="hdr-color" title="光色（鼻筋・頬骨・顎先共通）" aria-label="光色（鼻筋・頬骨・顎先共通）"></summary>
-    <p class="sub">鼻筋</p>
-    <label>濃さ（0で無効） <input type="range" id="hiA" min="0" max="1" step="0.05"></label>
-    <label>幅（細 ⇔ 太） <input type="range" id="hiW" min="0.5" max="2" step="0.05"></label>
-    <label>ぼかし（くっきり ⇔ ふんわり） <input type="range" id="hiSoft" min="0.5" max="3" step="0.1"></label>
-    <p class="sub">頬骨（Cゾーン）</p>
-    <label>濃さ（0で無効） <input type="range" id="hiCheekA" min="0" max="1" step="0.05"></label>
-    <label>大きさ（小 ⇔ 大） <input type="range" id="hiCheekW" min="0.5" max="2" step="0.05"></label>
-    <label>横位置（内 ⇔ 外） <input type="range" id="hiCheekX" min="-0.08" max="0.08" step="0.01"></label>
-    <label>縦位置（下 ⇔ 上） <input type="range" id="hiCheekY" min="-0.08" max="0.08" step="0.01"></label>
-    <label>ぼかし（くっきり ⇔ ふんわり） <input type="range" id="hiCheekSoft" min="0.5" max="3" step="0.1"></label>
-    <p class="sub">顎先</p>
-    <label>濃さ（0で無効） <input type="range" id="hiChinA" min="0" max="1" step="0.05"></label>
-    <label>大きさ（小 ⇔ 大） <input type="range" id="hiChinW" min="0.5" max="2" step="0.05"></label>
-    <label>縦位置（下 ⇔ 上） <input type="range" id="hiChinY" min="-0.06" max="0.06" step="0.01"></label>
-    <label>ぼかし（くっきり ⇔ ふんわり） <input type="range" id="hiChinSoft" min="0.5" max="3" step="0.1"></label>
+    <summary><span data-i18n="hi_title"></span><input type="color" id="hiColor" class="hdr-color" data-i18n-title="hi_color_title" data-i18n-aria="hi_color_title"></summary>
+    <p class="sub" data-i18n="hi_nose_sub"></p>
+    <label><span data-i18n="hi_noseA"></span> <input type="range" id="hiA" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="hi_noseW"></span> <input type="range" id="hiW" min="0.5" max="2" step="0.05"></label>
+    <label><span data-i18n="hi_noseSoft"></span> <input type="range" id="hiSoft" min="0.5" max="3" step="0.1"></label>
+    <p class="sub" data-i18n="hi_cheek_sub"></p>
+    <label><span data-i18n="hi_cheekA"></span> <input type="range" id="hiCheekA" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="hi_cheekW"></span> <input type="range" id="hiCheekW" min="0.5" max="2" step="0.05"></label>
+    <label><span data-i18n="hi_cheekX"></span> <input type="range" id="hiCheekX" min="-0.08" max="0.08" step="0.01"></label>
+    <label><span data-i18n="hi_cheekY"></span> <input type="range" id="hiCheekY" min="-0.08" max="0.08" step="0.01"></label>
+    <label><span data-i18n="hi_cheekSoft"></span> <input type="range" id="hiCheekSoft" min="0.5" max="3" step="0.1"></label>
+    <p class="sub" data-i18n="hi_chin_sub"></p>
+    <label><span data-i18n="hi_chinA"></span> <input type="range" id="hiChinA" min="0" max="1" step="0.05"></label>
+    <label><span data-i18n="hi_chinW"></span> <input type="range" id="hiChinW" min="0.5" max="2" step="0.05"></label>
+    <label><span data-i18n="hi_chinY"></span> <input type="range" id="hiChinY" min="-0.06" max="0.06" step="0.01"></label>
+    <label><span data-i18n="hi_chinSoft"></span> <input type="range" id="hiChinSoft" min="0.5" max="3" step="0.1"></label>
   </details>
 
 
 
   <details>
-    <summary>💾 プリセット</summary>
+    <summary data-i18n="preset_title"></summary>
     <div class="row">
-      <input type="text" id="presetName" placeholder="プリセット名" class="txt">
-      <button id="presetSave" class="btn">保存</button>
+      <input type="text" id="presetName" data-i18n-placeholder="preset_name_placeholder" class="txt">
+      <button id="presetSave" class="btn" data-i18n="preset_save"></button>
     </div>
     <div class="row">
       <select id="presetList" class="sel"></select>
-      <button id="presetApply" class="btn">適用</button>
-      <button id="presetDelete" class="btn btn-sub">削除</button>
+      <button id="presetApply" class="btn" data-i18n="preset_apply"></button>
+      <button id="presetDelete" class="btn btn-sub" data-i18n="preset_delete"></button>
     </div>
     <div class="row">
-      <button id="presetExport" class="btn" style="flex:1">書き出し（DL）</button>
-      <button id="presetImport" class="btn" style="flex:1">読み込み</button>
+      <button id="presetExport" class="btn" style="flex:1" data-i18n="preset_export"></button>
+      <button id="presetImport" class="btn" style="flex:1" data-i18n="preset_import"></button>
       <input type="file" id="presetFile" accept=".json" style="display:none">
     </div>
     <div class="row">
-      <button id="resetAll" class="btn btn-sub" style="flex:1">すべて初期値に戻す</button>
+      <button id="resetAll" class="btn btn-sub" style="flex:1" data-i18n="preset_reset"></button>
     </div>
   </details>
 
