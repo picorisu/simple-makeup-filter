@@ -5,6 +5,28 @@ const COLORS = ['lipColor', 'blushColor', 'browColor', 'shadowColor', 'shadowCol
 
 const CHECKS = ['enabled', 'shadowUse2', 'shadowUse3'];
 
+function M(key, subs) {
+  return chrome.i18n.getMessage(key, subs != null ? [].concat(subs) : undefined);
+}
+
+// i18n: data-i18n 属性を持つ要素のテキストを差し替える
+document.querySelectorAll('[data-i18n]').forEach(el => {
+  const msg = M(el.dataset.i18n);
+  if (msg) el.textContent = msg;
+});
+document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+  const msg = M(el.dataset.i18nPlaceholder);
+  if (msg) el.placeholder = msg;
+});
+document.querySelectorAll('[data-i18n-title]').forEach(el => {
+  const msg = M(el.dataset.i18nTitle);
+  if (msg) el.title = msg;
+});
+document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+  const msg = M(el.dataset.i18nAria);
+  if (msg) el.setAttribute('aria-label', msg);
+});
+
 // summary 内の色チップ: クリックでアコーディオンが開閉しないようにする
 // （カラーピッカー自体は input の既定動作で開く）
 for (const el of document.querySelectorAll('summary input')) {
@@ -81,12 +103,12 @@ function flashStatus(text) {
 function updateStatus() {
   statusEl.classList.remove('ok');
   if (!document.getElementById('enabled').checked) {
-    statusEl.textContent = '○ フィルターはオフです（右上のチェックで ON）';
+    statusEl.textContent = M('status_off');
     return;
   }
   chrome.tabs.query({ url: 'https://meet.google.com/*' }, (tabs) => {
     if (!tabs || tabs.length === 0) {
-      statusEl.textContent = '○ Meet のタブが見つかりません（meet.google.com を開いてね）';
+      statusEl.textContent = M('status_no_tab');
       return;
     }
     // 複数タブがあればどれか1つでも応答すれば動作中とみなす
@@ -97,10 +119,10 @@ function updateStatus() {
         if (!chrome.runtime.lastError && resp === 'pong') alive = true;
         if (--pending === 0) {
           if (alive) {
-            statusEl.textContent = '● Meet で動作中';
+            statusEl.textContent = M('status_active');
             statusEl.classList.add('ok');
           } else {
-            statusEl.textContent = '○ Meet のタブを再読み込みすると有効になります';
+            statusEl.textContent = M('status_reload');
           }
         }
       });
@@ -152,12 +174,9 @@ const QUICK_PRESETS = {
 
 for (const btn of document.querySelectorAll('[data-quick]')) {
   btn.addEventListener('click', () => {
-    // 既にメイクをカスタマイズしている人が誤タップで全消ししないよう確認を挟む
     const customized = Object.values(FX_KEYS).flat()
       .some((k) => parseFloat(document.getElementById(k).value) > 0);
-    if (customized && !confirm('今の設定はこのプリセットで上書きされます。続けますか？\n（大事な設定は先に「プリセット」で保存してください）')) return;
-    // キャリブレーション（顔・照明への校正）はメイクの濃さとは別物なので、
-    // クイックプリセットでは現在値を維持する
+    if (customized && !confirm(M('confirm_quick'))) return;
     chrome.storage.local.get(DEFAULTS, (cur) => {
       const s = {
         ...DEFAULTS,
@@ -174,7 +193,7 @@ for (const btn of document.querySelectorAll('[data-quick]')) {
 for (const k of CHECKS) {
   document.getElementById(k).addEventListener('change', (e) => {
     chrome.storage.local.set({ [k]: e.target.checked });
-    if (k === 'enabled') updateStatus(); // ON/OFF とステータス表示を連動させる
+    if (k === 'enabled') updateStatus();
   });
 }
 for (const k of RANGES) {
@@ -185,9 +204,8 @@ for (const k of RANGES) {
   });
 }
 
-// すべて初期値に戻す（プリセット一覧は消さない）
 document.getElementById('resetAll').addEventListener('click', () => {
-  if (!confirm('すべての設定を初期値に戻しますか？（保存済みプリセットは残ります）')) return;
+  if (!confirm(M('confirm_reset'))) return;
   chrome.storage.local.set({ ...DEFAULTS }, () => refreshUI(DEFAULTS));
 });
 for (const k of COLORS) {
@@ -206,7 +224,6 @@ function sanitize(obj) {
     if (!(k in obj) || typeof obj[k] !== typeof DEFAULTS[k]) continue;
     let v = obj[k];
     if (RANGES.includes(k)) {
-      // スライダーの min/max に収める（壊れた JSON の異常値で映像が崩壊するのを防ぐ）
       const el = document.getElementById(k);
       v = Math.min(parseFloat(el.max), Math.max(parseFloat(el.min), v));
       if (Number.isNaN(v)) continue;
@@ -229,7 +246,7 @@ function refreshPresetList() {
     const names = Object.keys(__presets);
     if (names.length === 0) {
       const o = document.createElement('option');
-      o.textContent = '（保存なし）';
+      o.textContent = M('preset_none');
       o.value = '';
       sel.appendChild(o);
       return;
@@ -252,14 +269,13 @@ document.getElementById('presetSave').addEventListener('click', () => {
   const nameEl = document.getElementById('presetName');
   const name = nameEl.value.trim();
   if (!name) {
-    // 無反応だと「壊れてる」と思われるため、名前が必要なことを視覚的に伝える
     nameEl.classList.add('err');
     nameEl.focus();
     return;
   }
   currentSettings((s) => {
     chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
-      if (__presets[name] && !confirm(`「${name}」は既にあります。上書きしますか？`)) return;
+      if (__presets[name] && !confirm(M('confirm_overwrite', name))) return;
       __presets[name] = sanitize(s);
       chrome.storage.local.set({ __presets }, () => {
         document.getElementById('presetName').value = '';
@@ -276,12 +292,11 @@ document.getElementById('presetApply').addEventListener('click', () => {
   chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
     if (!__presets[name]) return;
     const s = sanitize(__presets[name]);
-    // ON/OFF（マスタースイッチ）はプリセットの対象外。今の状態を維持する
     delete s.enabled;
     chrome.storage.local.set(s, () => {
       chrome.storage.local.get(DEFAULTS, (cur) => {
         refreshUI(cur);
-        flashStatus(`✓ 「${name}」を適用しました`);
+        flashStatus(M('flash_applied', name));
       });
     });
   });
@@ -290,7 +305,7 @@ document.getElementById('presetApply').addEventListener('click', () => {
 document.getElementById('presetDelete').addEventListener('click', () => {
   const name = document.getElementById('presetList').value;
   if (!name) return;
-  if (!confirm(`「${name}」を削除しますか？`)) return;
+  if (!confirm(M('confirm_delete', name))) return;
   chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
     delete __presets[name];
     chrome.storage.local.set({ __presets }, refreshPresetList);
@@ -298,22 +313,17 @@ document.getElementById('presetDelete').addEventListener('click', () => {
 });
 
 document.getElementById('presetExport').addEventListener('click', () => {
-  // 書き出すのは「選択中のプリセット」。編集途中の無名状態は対象外
   const name = document.getElementById('presetList').value;
   if (!name) {
-    alert('先にプリセットとして保存してから書き出してください');
+    alert(M('alert_export_save_first'));
     return;
   }
   chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
     if (!__presets[name]) return;
     const preset = sanitize(__presets[name]);
     currentSettings((live) => {
-      // 現在の設定が保存内容と違う＝未保存の編集中。そのまま書き出すと
-      // 画面の見た目と違う中身が配られるため、確認を挟む
       const dirty = JSON.stringify(preset) !== JSON.stringify(sanitize(live));
-      if (dirty && !confirm(
-        `未保存の変更があります。\n書き出されるのは保存済みの「${name}」の内容で、今の画面の状態は含まれません。\n続けますか？（今の状態を出したい場合は先に保存してください）`
-      )) return;
+      if (dirty && !confirm(M('confirm_export_dirty', name))) return;
       const blob = new Blob([JSON.stringify(preset, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -335,20 +345,19 @@ document.getElementById('presetFile').addEventListener('change', (e) => {
   reader.onload = () => {
     try {
       const s = sanitize(JSON.parse(reader.result));
-      if (Object.keys(s).length === 0) throw new Error('有効な設定がありません');
-      // 即適用せず、ファイル名のプリセットとして一覧に追加する（適用はユーザーが選ぶ）
-      const name = file.name.replace(/\.json$/i, '') || 'インポート';
+      if (Object.keys(s).length === 0) throw new Error(M('alert_no_valid_settings'));
+      const name = file.name.replace(/\.json$/i, '') || 'Import';
       chrome.storage.local.get({ __presets: {} }, ({ __presets }) => {
-        if (__presets[name] && !confirm(`「${name}」は既にあります。上書きしますか？`)) return;
+        if (__presets[name] && !confirm(M('confirm_overwrite', name))) return;
         __presets[name] = s;
         chrome.storage.local.set({ __presets }, () => {
           refreshPresetList();
           document.getElementById('presetList').value = name;
-          alert(`「${name}」を追加しました。隣の「適用」を押すと反映されます`);
+          alert(M('alert_imported', name));
         });
       });
     } catch (err) {
-      alert('読み込めませんでした: ' + err.message);
+      alert(M('alert_import_error', err.message));
     }
     e.target.value = '';
   };
