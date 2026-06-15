@@ -3,3 +3,4 @@ vendor/
 .local/
 .DS_Store
 dist/
+logs/
