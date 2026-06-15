@@ -1,6 +1,6 @@
 {
   "extName": { "message": "Simple Makeup Filter for Google Meet" },
-  "extDescription": { "message": "Natural beauty, ON. Real-time skin smoothing & makeup for Google Meet — 100% local processing. Look great in remote meetings, even without makeup. Your video never leaves your computer." },
+  "extDescription": { "message": "Natural beauty, ON. Skin smoothing & makeup for your Google Meet camera. All on your PC. Essential for remote meetings." },
 
   "enabled_title": { "message": "Enable / Disable filter" },
   "status_checking": { "message": "○ Checking Meet tab…" },
