@@ -1,6 +1,6 @@
 {
   "extName": { "message": "Simple Makeup Filter for Google Meet" },
-  "extDescription": { "message": "Natural beauty, ON. Skin smoothing & makeup for your Google Meet camera. All on your PC. Essential for remote meetings." },
+  "extDescription": { "message": "Natural beauty, ON. Skin smoothing & makeup for your Google Meet camera. Nothing leaves your PC. Essential for remote meetings." },
 
   "enabled_title": { "message": "Enable / Disable filter" },
   "status_checking": { "message": "○ Checking Meet tab…" },

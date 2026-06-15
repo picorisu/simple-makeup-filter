@@ -5,7 +5,7 @@ Simple Makeup Filter for Google Meet
 
 ## 概要（132文字以内・_locales で出し分け）
 - ja: ナチュラルな綺麗を ON。Google Meet のカメラ映像に美肌とメイクのフィルターを。全てあなたのPC内で完結。リモートワークやオンライン会議の必須アイテム。
-- en: Natural beauty, ON. Skin smoothing & makeup for your Google Meet camera. All on your PC. Essential for remote meetings.
+- en: Natural beauty, ON. Skin smoothing & makeup for your Google Meet camera. Nothing leaves your PC. Essential for remote meetings.
 
 ## 詳細説明
 
@@ -65,7 +65,7 @@ https://picorisu.github.io/simple-makeup-filter/privacy.html
 ## English
 
 ### Summary (132 chars max)
-Natural beauty, ON. Skin smoothing & makeup for your Google Meet camera. All on your PC. Essential for remote meetings.
+Natural beauty, ON. Skin smoothing & makeup for your Google Meet camera. Nothing leaves your PC. Essential for remote meetings.
 
 ### Detailed Description
 
