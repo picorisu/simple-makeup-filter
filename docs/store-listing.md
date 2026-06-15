@@ -7,7 +7,7 @@
 Simple Makeup Filter for Google Meet
 
 ## 概要（132文字以内・ja）
-ナチュラルな綺麗を ON。Google Meet のカメラ映像に美肌とメイクを、全てあなたのPC内で完結。リモートワークやオンライン会議で、すっぴんでも安心。
+ナチュラルな綺麗を ON。Google Meet のカメラ映像に美肌とメイクを。全てあなたのPC内で完結。リモートワークやオンライン会議で、すっぴんでも安心。
 
 ## 概要（132文字以内・en）
 Natural beauty, ON. Real-time skin smoothing & makeup for Google Meet — 100% local processing. Look great in remote meetings, even without makeup. Your video never leaves your computer.
