@@ -99,11 +99,14 @@ void main() {
   float shadow = max(0.0, dot(blurred - c.rgb, vec3(0.333)));
   col = mix(col, blurred, clamp(shadow * 15.0, 0.0, 1.0) * strength);
 
-  col += uBright;
-  col.r += uWarmth;
-  col.b -= uWarmth * 0.5;
-  float l = dot(col, vec3(0.299, 0.587, 0.114));
-  col = mix(vec3(l), col, uSat);
+  // brightness / warmth / saturation も肌色領域にだけ適用
+  vec3 adj = col;
+  adj += uBright;
+  adj.r += uWarmth;
+  adj.b -= uWarmth * 0.5;
+  float l = dot(adj, vec3(0.299, 0.587, 0.114));
+  adj = mix(vec3(l), adj, uSat);
+  col = mix(col, adj, skin);
 
   gl_FragColor = vec4(clamp(col, 0.0, 1.0), c.a);
 }`;
