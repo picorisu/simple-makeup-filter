@@ -50,6 +50,7 @@ void main() {
 precision mediump float;
 varying vec2 vUv;
 uniform sampler2D uTex;
+uniform sampler2D uFaceMask;
 uniform vec2 uTexel;
 uniform float uSmooth;
 uniform float uBright;
@@ -99,14 +100,16 @@ void main() {
   float shadow = max(0.0, dot(blurred - c.rgb, vec3(0.333)));
   col = mix(col, blurred, clamp(shadow * 15.0, 0.0, 1.0) * strength);
 
-  // brightness / warmth / saturation も肌色領域にだけ適用
+  // brightness / warmth / saturation はランドマーク顔マスク内にだけ適用
+  float face = texture2D(uFaceMask, uv).r;
+  float colorMask = face * skin;
   vec3 adj = col;
   adj += uBright;
   adj.r += uWarmth;
   adj.b -= uWarmth * 0.5;
   float l = dot(adj, vec3(0.299, 0.587, 0.114));
   adj = mix(vec3(l), adj, uSat);
-  col = mix(col, adj, skin);
+  col = mix(col, adj, colorMask);
 
   gl_FragColor = vec4(clamp(col, 0.0, 1.0), c.a);
 }`;
@@ -145,8 +148,20 @@ void main() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
+    const maskTex = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, maskTex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.activeTexture(gl.TEXTURE0);
+
+    gl.uniform1i(gl.getUniformLocation(prog, 'uFaceMask'), 1);
+
     return {
       gl,
+      maskTex,
       uniforms: {
         texel: gl.getUniformLocation(prog, 'uTexel'),
         smooth: gl.getUniformLocation(prog, 'uSmooth'),
@@ -157,6 +172,42 @@ void main() {
         skinRange: gl.getUniformLocation(prog, 'uSkinRange')
       }
     };
+  }
+
+  // ---------- 顔領域マスク（ランドマークベース） ----------
+
+  // MediaPipe Face Mesh の face oval（顔輪郭）インデックス
+  const FACE_OVAL = [
+    10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288,
+    397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136,
+    172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109
+  ];
+
+  const faceMaskCanvas = document.createElement('canvas');
+  const faceMaskCtx = faceMaskCanvas.getContext('2d');
+
+  function drawFaceMask(lm, W, H) {
+    if (faceMaskCanvas.width !== W || faceMaskCanvas.height !== H) {
+      faceMaskCanvas.width = W;
+      faceMaskCanvas.height = H;
+    }
+    faceMaskCtx.clearRect(0, 0, W, H);
+    faceMaskCtx.fillStyle = '#fff';
+    faceMaskCtx.beginPath();
+    const p0 = lm[FACE_OVAL[0]];
+    faceMaskCtx.moveTo(p0.x * W, p0.y * H);
+    for (let i = 1; i < FACE_OVAL.length; i++) {
+      const p = lm[FACE_OVAL[i]];
+      faceMaskCtx.lineTo(p.x * W, p.y * H);
+    }
+    faceMaskCtx.closePath();
+    faceMaskCtx.fill();
+    // 境界をぼかしてパキッと切れるのを防ぐ
+    faceMaskCtx.filter = 'blur(12px)';
+    faceMaskCtx.globalCompositeOperation = 'copy';
+    faceMaskCtx.drawImage(faceMaskCanvas, 0, 0);
+    faceMaskCtx.filter = 'none';
+    faceMaskCtx.globalCompositeOperation = 'source-over';
   }
 
   // ---------- MediaPipe Face Mesh（メイク用ランドマーク） ----------
@@ -898,7 +949,7 @@ void main() {
 
     const render = () => {
       if (!running) return;
-      const { gl, uniforms } = GLS;
+      const { gl, maskTex, uniforms } = GLS;
       if (video.readyState >= 2 && video.videoWidth > 0) {
         const W = video.videoWidth;
         const H = video.videoHeight;
@@ -916,6 +967,20 @@ void main() {
 
         // 1) WebGL: 美肌・明るさ・血色・彩度
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+        // 前フレームのランドマークから顔マスクをアップロード（なければ全白=全域適用）
+        if (landmarks) {
+          drawFaceMask(landmarks, W, H);
+          gl.activeTexture(gl.TEXTURE1);
+          gl.bindTexture(gl.TEXTURE_2D, maskTex);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, faceMaskCanvas);
+          gl.activeTexture(gl.TEXTURE0);
+        } else {
+          gl.activeTexture(gl.TEXTURE1);
+          gl.bindTexture(gl.TEXTURE_2D, maskTex);
+          const white = new Uint8Array([255, 255, 255, 255]);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, white);
+          gl.activeTexture(gl.TEXTURE0);
+        }
         // ?? は bridge の初回送信が届く前の一瞬のフォールバック（素通し相当の値）
         const on = settings.enabled ?? true;
         gl.uniform2f(uniforms.texel, 1 / W, 1 / H);
@@ -928,9 +993,10 @@ void main() {
         gl.drawArrays(gl.TRIANGLES, 0, 3);
         ctx.drawImage(glCanvas, 0, 0);
 
-        // 2) メイク・ほうれい線消し: いずれかが有効なときだけ顔検出を回す（不要時は負荷ゼロ）
+        // 2) メイク・ほうれい線消し・色調補正: いずれかが有効なときだけ顔検出を回す（不要時は負荷ゼロ）
+        const needsColor = (settings.bright ?? 0) !== 0 || (settings.warmth ?? 0) !== 0 || (settings.sat ?? 1) !== 1;
         const makeupOn = on &&
-          (settings.lipA > 0 || settings.lipGloss > 0 || settings.blushA > 0 || settings.browA > 0 ||
+          (needsColor || settings.lipA > 0 || settings.lipGloss > 0 || settings.blushA > 0 || settings.browA > 0 ||
            settings.nasoA > 0 || settings.marioA > 0 || settings.eyebagLine > 0 || settings.eyebagBright > 0 ||
            settings.shadowA > 0 || settings.linerA > 0 ||
            settings.noseA > 0 || settings.jawA > 0 ||
