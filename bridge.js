@@ -13,6 +13,7 @@ function sendCurrent() {
   chrome.storage.local.get(DEFAULTS, (s) => {
     // MAIN world には chrome.runtime が無いので、vendor/ の URL をここから渡す
     s.__base = chrome.runtime.getURL('');
+    s.guideOn = false;
     send(s);
   });
 }
@@ -33,7 +34,8 @@ chrome.storage.onChanged.addListener((changes) => {
   if (Object.keys(s).length > 0) send(s);
 });
 
-// 位置ガイドはページ読み込みのたびに必ず OFF から始める（OFF の伝達は上の onChanged が拾う）。
+// 位置ガイドはページ読み込みのたびに必ず OFF から始める（この set は永続化のみ。
+// MAIN world への OFF は sendCurrent が常に false を送ることで到着順に依らず成立する）。
 // sendCurrent を set のコールバックに入れないこと。失敗時に __base が届かずメイクが無音で止まる
 chrome.storage.local.set({ guideOn: false });
 sendCurrent();
