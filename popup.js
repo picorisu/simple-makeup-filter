@@ -27,9 +27,9 @@ document.querySelectorAll('[data-i18n-aria]').forEach(el => {
   if (msg) el.setAttribute('aria-label', msg);
 });
 
-// summary 内の色チップ・ガイドトグル: クリックでアコーディオンが開閉しないようにする
+// summary 内の色チップ: クリックでアコーディオンが開閉しないようにする
 // （カラーピッカー自体は input の既定動作で開く）
-for (const el of document.querySelectorAll('summary input, summary button')) {
+for (const el of document.querySelectorAll('summary input')) {
   el.addEventListener('click', (e) => e.stopPropagation());
 }
 
@@ -99,18 +99,18 @@ guideEl.addEventListener('change', (e) => {
   chrome.storage.local.set({ guideOn: true });
 });
 
-// パーツごとの表示トグル。調整するスライダーのそばに置き、
-// ON の塗り色はガイド線の色と同じで凡例を兼ねる
+// パーツごとの表示チェック。調整するスライダーのそばに置き、
+// チェックの塗り色はガイド線の色と同じで凡例を兼ねる
 const guideToggles = {};
 for (const el of document.querySelectorAll('[data-guide]')) {
   const name = el.dataset.guide;
   const label = M(`guide_part_${name}`);
   el.title = label;
   el.setAttribute('aria-label', label);
-  el.addEventListener('click', () => {
+  el.addEventListener('change', (e) => {
     chrome.storage.local.get(DEFAULTS, (s) => {
       const next = { ...DEFAULTS.guideParts, ...s.guideParts };
-      next[name] = !(next[name] !== false);
+      next[name] = e.target.checked;
       chrome.storage.local.set({ guideParts: next }, () => showParts(next));
     });
   });
@@ -130,12 +130,11 @@ function relLuminance(hex) {
 
 function showParts(parts) {
   for (const [name, el] of Object.entries(guideToggles)) {
-    const on = !parts || parts[name] !== false;
     const color = MBF_GUIDE_COLORS[name];
-    el.setAttribute('aria-pressed', String(on));
-    el.style.background = on ? color : '';
-    // 明るい色は塗りが背景に溶けるため既定の枠線を残す
-    el.style.borderColor = on && relLuminance(color) < LIGHT_LUM ? color : '';
+    el.checked = !parts || parts[name] !== false;
+    el.style.accentColor = color;
+    // 明るい色のチェックは白背景に溶けるため輪郭を足す
+    el.style.outline = relLuminance(color) >= LIGHT_LUM ? '1px solid #d9c3cc' : '';
   }
 }
 
