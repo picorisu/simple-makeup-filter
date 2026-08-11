@@ -123,7 +123,7 @@
 
   "confirm_quick": { "message": "Your current settings will be overwritten by this preset. Continue?\n(Save your settings as a preset first if you want to keep them)" },
   "confirm_reset": { "message": "Reset all settings to defaults? (Saved presets will be kept)" },
-  "confirm_guide": { "message": "Guide lines are also visible to the other participants. Use this while adjusting on your own.\nClosing this control panel turns it back off automatically.\nTurn it on?" },
+  "confirm_guide": { "message": "Guide lines are also visible to the other participants.\nTurn it on?" },
   "confirm_overwrite": { "message": "\"$name$\" already exists. Overwrite?", "placeholders": { "name": { "content": "$1" } } },
   "confirm_export_dirty": { "message": "You have unsaved changes.\nThe export will contain the saved \"$name$\" preset, not your current screen settings.\nContinue? (Save first if you want to export current settings)", "placeholders": { "name": { "content": "$1" } } },
   "confirm_delete": { "message": "Delete \"$name$\"?", "placeholders": { "name": { "content": "$1" } } },
