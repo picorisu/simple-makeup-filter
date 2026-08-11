@@ -214,6 +214,8 @@ for (const btn of document.querySelectorAll('[data-quick]')) {
         // クイックプリセットでは現在値を維持する
         lipThresh: cur.lipThresh,
         skinRange: cur.skinRange,
+        // 位置ガイドの表示状態はメイクの内容と無関係（見比べ中に消えると邪魔）
+        guideOn: cur.guideOn,
         enabled: true
       };
       chrome.storage.local.set(s, () => refreshUI(s));

@@ -18,7 +18,10 @@ function sendCurrent() {
 }
 
 window.addEventListener('mbf-ready', sendCurrent);
-sendCurrent();
+
+// 位置ガイドは通話相手にも見えるため、ページ読み込みのたびに必ず OFF から始める。
+// popup の pagehide が取りこぼしても ON が永続化しない唯一の構造的な保証
+chrome.storage.local.set({ guideOn: false }, sendCurrent);
 
 // popup からの死活確認に応答する（「Meet で動作中」表示用）
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {

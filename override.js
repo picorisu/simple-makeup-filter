@@ -273,6 +273,26 @@ void main() {
     return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
   }
 
+  // ほうれい線・口角の消し込み楕円（2点を結ぶ溝に沿った細長い楕円）。
+  // 消し込みの描画と位置ガイドで同じ中心・角度・半径を使う
+  function grooveEllipse(lm, W, H, faceW, fromI, toI, boost) {
+    const ax = lm[fromI].x * W, ay = lm[fromI].y * H;
+    const mx = lm[toI].x * W, my = lm[toI].y * H;
+    const len = Math.hypot(mx - ax, my - ay);
+    const angle = Math.atan2(my - ay, mx - ax);
+    // 中点を鼻先と反対方向（頬側）へ少し逃がす＝実際の溝の位置に寄せる
+    let px = -(my - ay) / len, py = (mx - ax) / len;
+    const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
+    let cx = (ax + mx) / 2, cy = (ay + my) / 2;
+    if ((cx + px - nx) ** 2 + (cy + py - ny) ** 2 < (cx - px - nx) ** 2 + (cy - py - ny) ** 2) {
+      px = -px; py = -py;
+    }
+    cx += px * faceW * 0.02;
+    cy += py * faceW * 0.02;
+    // boost でパッチの太さも広がる
+    return { cx, cy, rx: len * 0.7, ry: faceW * 0.05 * boost, angle };
+  }
+
   // ほうれい線消し: 小鼻→口角のラインに沿った楕円領域だけ、強くぼかした画像を
   // ソフトマスク付きで上書きする。領域外は一切触らないので全体のシャープさは保たれる
   function drawNasoFix(ctx, srcCanvas, patch, mask, lm, W, H) {
@@ -291,25 +311,11 @@ void main() {
     mctx.clearRect(0, 0, W, H);
 
     for (const [alaI, mouthI] of [[ALA_L, MOUTH_L], [ALA_R, MOUTH_R]]) {
-      const ax = lm[alaI].x * W, ay = lm[alaI].y * H;
-      const mx = lm[mouthI].x * W, my = lm[mouthI].y * H;
-      const len = Math.hypot(mx - ax, my - ay);
-      const angle = Math.atan2(my - ay, mx - ax);
-      // 中点を鼻先と反対方向（頬側）へ少し逃がす＝実際の溝の位置に寄せる
-      let px = -(my - ay) / len, py = (mx - ax) / len;
-      const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
-      let cx = (ax + mx) / 2, cy = (ay + my) / 2;
-      if ((cx + px - nx) ** 2 + (cy + py - ny) ** 2 < (cx - px - nx) ** 2 + (cy - py - ny) ** 2) {
-        px = -px; py = -py;
-      }
-      cx += px * faceW * 0.02;
-      cy += py * faceW * 0.02;
-
+      const { cx, cy, rx, ry, angle } = grooveEllipse(lm, W, H, faceW, alaI, mouthI, boost);
       mctx.save();
       mctx.translate(cx, cy);
       mctx.rotate(angle);
-      const ry = faceW * 0.05 * boost; // boost でパッチの太さも広がる
-      mctx.scale((len * 0.7) / ry, 1); // 溝に沿った細長い楕円
+      mctx.scale(rx / ry, 1); // 溝に沿った細長い楕円
       const g = mctx.createRadialGradient(0, 0, 0, 0, 0, ry);
       g.addColorStop(0, `rgba(0,0,0,${a})`);
       g.addColorStop(0.7, `rgba(0,0,0,${a * 0.6})`);
@@ -338,24 +344,11 @@ void main() {
 
       mctx.clearRect(0, 0, W, H);
       for (const [mouthI, jawI] of [[MOUTH_L, 149], [MOUTH_R, 378]]) {
-        const mx = lm[mouthI].x * W, my = lm[mouthI].y * H;
-        const jx = lm[jawI].x * W, jy = lm[jawI].y * H;
-        const len = Math.hypot(jx - mx, jy - my);
-        const angle = Math.atan2(jy - my, jx - mx);
-        let px = -(jy - my) / len, py = (jx - mx) / len;
-        const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
-        let cx = (mx + jx) / 2, cy = (my + jy) / 2;
-        if ((cx + px - nx) ** 2 + (cy + py - ny) ** 2 < (cx - px - nx) ** 2 + (cy - py - ny) ** 2) {
-          px = -px; py = -py;
-        }
-        cx += px * faceW * 0.02;
-        cy += py * faceW * 0.02;
-
+        const { cx, cy, rx, ry, angle } = grooveEllipse(lm, W, H, faceW, mouthI, jawI, boostM);
         mctx.save();
         mctx.translate(cx, cy);
         mctx.rotate(angle);
-        const ry = faceW * 0.05 * boostM;
-        mctx.scale((len * 0.7) / ry, 1);
+        mctx.scale(rx / ry, 1);
         const g = mctx.createRadialGradient(0, 0, 0, 0, 0, ry);
         g.addColorStop(0, `rgba(0,0,0,${aM})`);
         g.addColorStop(0.7, `rgba(0,0,0,${aM * 0.6})`);
@@ -451,6 +444,97 @@ void main() {
     ctx.drawImage(patch, 0, 0);
   }
 
+  // リップの外周。lipW > 1 なら唇の中心から外側へ拡大（オーバーリップ）。
+  // 実描画と位置ガイドで同じ輪郭を使う
+  function lipOuterPoints(lm, W, H) {
+    let lipOuterPts = LIPS_OUTER.map((i) => [lm[i].x * W, lm[i].y * H]);
+    if (settings.lipW !== 1) {
+      let lcx = 0, lcy = 0;
+      for (const p of lipOuterPts) { lcx += p[0]; lcy += p[1]; }
+      lcx /= lipOuterPts.length; lcy /= lipOuterPts.length;
+      // 口角を結ぶ向き（横）と直交方向（縦）に分解し、縦をメインに伸縮する。
+      // 横は 1/4 だけ追従（完全固定だと口角の形が崩れるため）
+      let mdx = (lm[MOUTH_R].x - lm[MOUTH_L].x) * W;
+      let mdy = (lm[MOUTH_R].y - lm[MOUTH_L].y) * H;
+      const ml = Math.hypot(mdx, mdy) || 1;
+      mdx /= ml; mdy /= ml;
+      const sV = settings.lipW;
+      const sH = 1 + (settings.lipW - 1) * 0.25;
+      lipOuterPts = lipOuterPts.map(([x, y]) => {
+        const dx = x - lcx, dy = y - lcy;
+        const h = dx * mdx + dy * mdy;   // 横成分
+        const vx = dx - h * mdx, vy = dy - h * mdy; // 縦成分
+        return [lcx + h * sH * mdx + vx * sV, lcy + h * sH * mdy + vy * sV];
+      });
+    }
+    return lipOuterPts;
+  }
+
+  // 眉の点列。太さ・眉尻の絞り・アーチ・眉尻の高さを適用した最終形を返す。
+  // 実描画と位置ガイドで同じ形を使う
+  function browPoints(brow, lm, W, H, faceW, upX, upY) {
+    const bw = settings.browW;
+    const taper = settings.browTaper;
+    const noseX3 = lm[NOSE_TIP].x * W, noseY3 = lm[NOSE_TIP].y * H;
+    let pts = brow.map((i) => [lm[i].x * W, lm[i].y * H]);
+
+    // 鼻からの距離で眉頭（近）→眉尻（遠）の進行度を点ごとに出す
+    const ds = pts.map(([x, y]) => Math.hypot(x - noseX3, y - noseY3));
+    const dmin = Math.min(...ds), dmax = Math.max(...ds);
+
+    // 太さ: 重心を基準に縦方向だけ伸縮。眉尻に向かって taper 分だけ絞る
+    let cy = 0;
+    for (const p of pts) cy += p[1];
+    cy /= pts.length;
+    pts = pts.map(([x, y], i) => {
+      const t = (ds[i] - dmin) / (dmax - dmin || 1);
+      const s = bw * (1 - 0.85 * taper * t);
+      let px = x, py = cy + (y - cy) * s;
+      // アーチ: 山の位置（browPeak）を中心とした釣鐘カーブで上下にずらす
+      if (settings.browArch !== 0) {
+        const bell = Math.exp(-((t - settings.browPeak) ** 2) / 0.06);
+        const lift = faceW * 0.05 * settings.browArch * bell;
+        px += upX * lift;
+        py += upY * lift;
+      }
+      // 眉尻の高さ: 眉尻に近いほど強く上下にずらす（t^2 で眉頭側は動かない）
+      if (settings.browTail !== 0) {
+        const k = settings.browTail >= 0 ? 0.02 : 0.035;
+        const lift = faceW * k * settings.browTail * Math.min(t * t, 0.85);
+        px += upX * lift;
+        py += upY * lift;
+      }
+      return [px, py];
+    });
+    return pts;
+  }
+
+  // アイラインの跳ね上げ三角形の3点（根元2点 + 先端）。実描画と位置ガイドで共有
+  function linerWingPoints(eye, lm, W, H, faceW, upX, upY, lw) {
+    const ox = lm[eye[0]].x * W, oy = lm[eye[0]].y * H;          // 目尻
+    const ix = lm[eye[eye.length - 1]].x * W, iy = lm[eye[eye.length - 1]].y * H; // 目頭
+    let dx = ox - ix, dy = oy - iy;
+    const dl = Math.hypot(dx, dy) || 1;
+    dx /= dl; dy /= dl;
+    // 上方向（upX, upY）へ linerWingUp 度ぶん回転
+    const rad = (settings.linerWingUp * Math.PI) / 180;
+    const wx = dx * Math.cos(rad) + upX * Math.sin(rad);
+    const wy = dy * Math.cos(rad) + upY * Math.sin(rad);
+    const len = faceW * 0.06 * settings.linerWing;
+    // 根元は ライン幅 × linerWingW、先端は点＝自然な先細り
+    const hw = lw * 0.6 * settings.linerWingW;
+    return [
+      [ox - upX * hw, oy - upY * hw],
+      [ox + upX * hw, oy + upY * hw],
+      [ox + wx * len, oy + wy * len]
+    ];
+  }
+
+  // アイラインの線幅。跳ね上げの根元幅にも使うため実描画とガイドで共有
+  function linerWidth(faceW) {
+    return Math.max(0.8, faceW * 0.008 * settings.linerW);
+  }
+
   function drawMakeup(ctx, lm, W, H) {
     const faceW = Math.hypot(
       (lm[FACE_RIGHT].x - lm[FACE_LEFT].x) * W,
@@ -468,29 +552,9 @@ void main() {
     // multiply 合成 = 元の肌の陰影や唇の質感を残したまま色だけ重なる（口紅っぽい質感）
     ctx.globalCompositeOperation = 'multiply';
 
-    // リップの輪郭: lipW > 1 なら唇の中心から外側へ拡大（オーバーリップ）
     let lipOuterPts = null;
     if (settings.lipA > 0 || settings.lipGloss > 0) {
-      lipOuterPts = LIPS_OUTER.map((i) => [lm[i].x * W, lm[i].y * H]);
-      if (settings.lipW !== 1) {
-        let lcx = 0, lcy = 0;
-        for (const p of lipOuterPts) { lcx += p[0]; lcy += p[1]; }
-        lcx /= lipOuterPts.length; lcy /= lipOuterPts.length;
-        // 口角を結ぶ向き（横）と直交方向（縦）に分解し、縦をメインに伸縮する。
-        // 横は 1/4 だけ追従（完全固定だと口角の形が崩れるため）
-        let mdx = (lm[MOUTH_R].x - lm[MOUTH_L].x) * W;
-        let mdy = (lm[MOUTH_R].y - lm[MOUTH_L].y) * H;
-        const ml = Math.hypot(mdx, mdy) || 1;
-        mdx /= ml; mdy /= ml;
-        const sV = settings.lipW;
-        const sH = 1 + (settings.lipW - 1) * 0.25;
-        lipOuterPts = lipOuterPts.map(([x, y]) => {
-          const dx = x - lcx, dy = y - lcy;
-          const h = dx * mdx + dy * mdy;   // 横成分
-          const vx = dx - h * mdx, vy = dy - h * mdy; // 縦成分
-          return [lcx + h * sH * mdx + vx * sV, lcy + h * sH * mdy + vy * sV];
-        });
-      }
+      lipOuterPts = lipOuterPoints(lm, W, H);
     }
     const traceLip = () => {
       ctx.moveTo(lipOuterPts[0][0], lipOuterPts[0][1]);
@@ -636,7 +700,7 @@ void main() {
       ctx.strokeStyle = hexToRgba(settings.linerColor, settings.linerA * 0.85);
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      const lw = Math.max(0.8, faceW * 0.008 * settings.linerW);
+      const lw = linerWidth(faceW);
       ctx.lineWidth = lw;
       for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
         // [0] が目尻、末尾が目頭。上下位置はスライダーで調整可能（目・メガネによりズレるため）
@@ -658,23 +722,12 @@ void main() {
         // 目尻の跳ね上げ: 目頭→目尻の向きを基準に、指定角度だけ上へ振った
         // 先細りの三角形を描き足す
         if (settings.linerWing > 0) {
-          const ox = lm[eye[0]].x * W, oy = lm[eye[0]].y * H;          // 目尻
-          const ix = lm[eye[eye.length - 1]].x * W, iy = lm[eye[eye.length - 1]].y * H; // 目頭
-          let dx = ox - ix, dy = oy - iy;
-          const dl = Math.hypot(dx, dy) || 1;
-          dx /= dl; dy /= dl;
-          // 上方向（upX, upY）へ linerWingUp 度ぶん回転
-          const rad = (settings.linerWingUp * Math.PI) / 180;
-          const wx = dx * Math.cos(rad) + upX * Math.sin(rad);
-          const wy = dy * Math.cos(rad) + upY * Math.sin(rad);
-          const len = faceW * 0.06 * settings.linerWing;
+          const wing = linerWingPoints(eye, lm, W, H, faceW, upX, upY, lw);
           ctx.fillStyle = hexToRgba(settings.linerColor, settings.linerA * 0.85);
           ctx.beginPath();
-          // 根元は ライン幅 × linerWingW、先端は点＝自然な先細り
-          const hw = lw * 0.6 * settings.linerWingW;
-          ctx.moveTo(ox - upX * hw, oy - upY * hw);
-          ctx.lineTo(ox + upX * hw, oy + upY * hw);
-          ctx.lineTo(ox + wx * len, oy + wy * len);
+          ctx.moveTo(wing[0][0], wing[0][1]);
+          ctx.lineTo(wing[1][0], wing[1][1]);
+          ctx.lineTo(wing[2][0], wing[2][1]);
           ctx.closePath();
           ctx.fill();
         }
@@ -806,41 +859,8 @@ void main() {
     if (settings.browA > 0) {
       ctx.filter = `blur(${Math.max(1, faceW * 0.01)}px)`;
       ctx.fillStyle = hexToRgba(settings.browColor, settings.browA * 0.5);
-      const bw = settings.browW;
-      const taper = settings.browTaper;
-      const noseX3 = lm[NOSE_TIP].x * W, noseY3 = lm[NOSE_TIP].y * H;
       for (const brow of [BROW_L, BROW_R]) {
-        let pts = brow.map((i) => [lm[i].x * W, lm[i].y * H]);
-
-        // 鼻からの距離で眉頭（近）→眉尻（遠）の進行度を点ごとに出す
-        const ds = pts.map(([x, y]) => Math.hypot(x - noseX3, y - noseY3));
-        const dmin = Math.min(...ds), dmax = Math.max(...ds);
-
-        // 太さ: 重心を基準に縦方向だけ伸縮。眉尻に向かって taper 分だけ絞る
-        let cy = 0;
-        for (const p of pts) cy += p[1];
-        cy /= pts.length;
-        pts = pts.map(([x, y], i) => {
-          const t = (ds[i] - dmin) / (dmax - dmin || 1);
-          const s = bw * (1 - 0.85 * taper * t);
-          let px = x, py = cy + (y - cy) * s;
-          // アーチ: 山の位置（browPeak）を中心とした釣鐘カーブで上下にずらす
-          if (settings.browArch !== 0) {
-            const bell = Math.exp(-((t - settings.browPeak) ** 2) / 0.06);
-            const lift = faceW * 0.05 * settings.browArch * bell;
-            px += upX * lift;
-            py += upY * lift;
-          }
-          // 眉尻の高さ: 眉尻に近いほど強く上下にずらす（t^2 で眉頭側は動かない）
-          if (settings.browTail !== 0) {
-            const k = settings.browTail >= 0 ? 0.02 : 0.035;
-            const lift = faceW * k * settings.browTail * Math.min(t * t, 0.85);
-            px += upX * lift;
-            py += upY * lift;
-          }
-          return [px, py];
-        });
-
+        const pts = browPoints(brow, lm, W, H, faceW, upX, upY);
         ctx.beginPath();
         ctx.moveTo(pts[0][0], pts[0][1]);
         for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k][0], pts[k][1]);
@@ -852,22 +872,23 @@ void main() {
     ctx.restore();
   }
 
-  // ほうれい線・口角の消し込み楕円（2点を結ぶ溝に沿った細長い楕円）。
-  // 中心・角度・半径は drawNasoFix と同じ式で求める
-  function grooveEllipse(lm, W, H, faceW, fromI, toI, boost) {
-    const ax = lm[fromI].x * W, ay = lm[fromI].y * H;
-    const mx = lm[toI].x * W, my = lm[toI].y * H;
-    const len = Math.hypot(mx - ax, my - ay);
-    const angle = Math.atan2(my - ay, mx - ax);
-    let px = -(my - ay) / len, py = (mx - ax) / len;
-    const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
-    let cx = (ax + mx) / 2, cy = (ay + my) / 2;
-    if ((cx + px - nx) ** 2 + (cy + py - ny) ** 2 < (cx - px - nx) ** 2 + (cy - py - ny) ** 2) {
-      px = -px; py = -py;
+  // 折れ線を法線方向へ d だけ平行移動する。各頂点では前後のセグメントの法線を
+  // 平均して角が途切れないようにする
+  function offsetPolyline(pts, d) {
+    const normals = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const dx = pts[i + 1][0] - pts[i][0], dy = pts[i + 1][1] - pts[i][1];
+      const l = Math.hypot(dx, dy) || 1;
+      normals.push([-dy / l, dx / l]);
     }
-    cx += px * faceW * 0.02;
-    cy += py * faceW * 0.02;
-    return { cx, cy, rx: len * 0.7, ry: faceW * 0.05 * boost, angle };
+    return pts.map((p, i) => {
+      const a = normals[Math.max(0, i - 1)];
+      const b = normals[Math.min(normals.length - 1, i)];
+      let nx = a[0] + b[0], ny = a[1] + b[1];
+      const l = Math.hypot(nx, ny) || 1;
+      nx /= l; ny /= l;
+      return [p[0] + nx * d, p[1] + ny * d];
+    });
   }
 
   // 有効なパーツの適用領域を輪郭線で重ねて描く（位置調整の目視用）。
@@ -890,13 +911,6 @@ void main() {
     ctx.lineWidth = Math.max(1, faceW * 0.004);
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
-
-    const strokeIndices = (color, indices) => {
-      ctx.strokeStyle = color;
-      ctx.beginPath();
-      tracePath(ctx, lm, indices, W, H);
-      ctx.stroke();
-    };
 
     const strokePoints = (color, pts, close) => {
       ctx.strokeStyle = color;
@@ -924,7 +938,7 @@ void main() {
     }
 
     if (settings.lipA > 0 || settings.lipGloss > 0) {
-      strokeIndices(GUIDE_COLORS.lip, LIPS_OUTER);
+      strokePoints(GUIDE_COLORS.lip, lipOuterPoints(lm, W, H), true);
     }
 
     if (settings.blushA > 0) {
@@ -948,8 +962,9 @@ void main() {
     }
 
     if (settings.browA > 0) {
-      strokeIndices(GUIDE_COLORS.brow, BROW_L);
-      strokeIndices(GUIDE_COLORS.brow, BROW_R);
+      for (const brow of [BROW_L, BROW_R]) {
+        strokePoints(GUIDE_COLORS.brow, browPoints(brow, lm, W, H, faceW, upX, upY), true);
+      }
     }
 
     if (settings.shadowA > 0) {
@@ -978,9 +993,13 @@ void main() {
 
     if (settings.linerA > 0) {
       const off = faceW * (settings.linerY ?? 0.002);
+      const lw = linerWidth(faceW);
       for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
         const pts = eye.map((i) => [lm[i].x * W + upX * off, lm[i].y * H + upY * off]);
         strokePoints(GUIDE_COLORS.liner, pts, false);
+        if (settings.linerWing > 0) {
+          strokePoints(GUIDE_COLORS.liner, linerWingPoints(eye, lm, W, H, faceW, upX, upY, lw), true);
+        }
       }
     }
 
@@ -1019,6 +1038,8 @@ void main() {
     }
 
     if (settings.jawA > 0) {
+      // 実描画は太い帯（lineWidth = faceW * 0.05）なので、中心線ではなく帯の両縁を描く
+      const half = faceW * 0.025;
       const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
       for (const jaw of [JAW_L, JAW_R]) {
         const pts = jaw.map((i) => {
@@ -1029,7 +1050,9 @@ void main() {
           y += (dy / dl) * faceW * 0.03;
           return [x, y];
         });
-        strokePoints(GUIDE_COLORS.jaw, pts, false);
+        for (const sign of [1, -1]) {
+          strokePoints(GUIDE_COLORS.jaw, offsetPolyline(pts, half * sign), false);
+        }
       }
     }
 
