@@ -107,7 +107,7 @@
   "hi_chinSoft": { "message": "Softness (sharp ⇔ diffused)" },
 
   "guide_title": { "message": "📐 Position guides" },
-  "guide_desc": { "message": "Overlays color-coded outlines showing where each active makeup part is applied. Use it to check positioning. Guide lines are visible to the other participants, so closing this control panel turns them back off automatically." },
+  "guide_desc": { "message": "Overlays color-coded outlines showing where each active makeup part is applied. Use it to check positioning. Guide lines are visible to the other participants. Reloading Meet turns them back off automatically." },
   "guide_check": { "message": "Show position guides" },
   "guide_check_title": { "message": "Show position guides (also visible to other participants)" },
 

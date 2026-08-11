@@ -82,14 +82,9 @@ function refreshUI(s) {
 }
 
 // ---------- 位置ガイド ----------
-// 通話相手にも見えるため「popup を開いている間だけ ON」に限定する。
-// pagehide が取りこぼしても、次に popup を開いた時点で必ず OFF に戻る
+// 通話相手にも見えるため ON にする前に承諾を取る。
+// OFF の契機は手動 OFF と Meet の再読み込みの2つ（操作パネルの開閉では変わらない）
 const guideEl = document.getElementById('guideOn');
-
-function resetGuide() {
-  guideEl.checked = false;
-  chrome.storage.local.set({ guideOn: false });
-}
 
 guideEl.addEventListener('change', (e) => {
   if (!e.target.checked) {
@@ -103,13 +98,8 @@ guideEl.addEventListener('change', (e) => {
   chrome.storage.local.set({ guideOn: true });
 });
 
-window.addEventListener('pagehide', () => {
-  chrome.storage.local.set({ guideOn: false });
-});
-
 chrome.storage.local.get(DEFAULTS, (s) => {
   refreshUI(s);
-  resetGuide();
   updateStatus();
 });
 
