@@ -27,9 +27,9 @@ document.querySelectorAll('[data-i18n-aria]').forEach(el => {
   if (msg) el.setAttribute('aria-label', msg);
 });
 
-// summary 内の色チップ: クリックでアコーディオンが開閉しないようにする
+// summary 内の色チップ・ガイドトグル: クリックでアコーディオンが開閉しないようにする
 // （カラーピッカー自体は input の既定動作で開く）
-for (const el of document.querySelectorAll('summary input')) {
+for (const el of document.querySelectorAll('summary input, summary button')) {
   el.addEventListener('click', (e) => e.stopPropagation());
 }
 
@@ -99,44 +99,32 @@ guideEl.addEventListener('change', (e) => {
   chrome.storage.local.set({ guideOn: true });
 });
 
-// パーツごとの表示チップ。ON の塗り色はガイド線の色と同じで凡例を兼ねる
-const chipEls = {};
-const partsHost = document.getElementById('guideParts');
-for (const name of Object.keys(DEFAULTS.guideParts)) {
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.className = 'chip';
-  b.textContent = M(`guide_part_${name}`);
-  b.title = b.textContent;
-  b.setAttribute('aria-label', b.textContent);
-  b.addEventListener('click', () => {
+// パーツごとの表示トグル。調整するスライダーのそばに置き、
+// ON の塗り色はガイド線の色と同じで凡例を兼ねる
+const guideToggles = {};
+for (const el of document.querySelectorAll('[data-guide]')) {
+  const name = el.dataset.guide;
+  const label = M(`guide_part_${name}`);
+  el.title = label;
+  el.setAttribute('aria-label', label);
+  el.addEventListener('click', () => {
     chrome.storage.local.get(DEFAULTS, (s) => {
       const next = { ...DEFAULTS.guideParts, ...s.guideParts };
       next[name] = !(next[name] !== false);
       chrome.storage.local.set({ guideParts: next }, () => showParts(next));
     });
   });
-  partsHost.appendChild(b);
-  chipEls[name] = b;
-}
-
-// 明るい塗り色（黄・シアン・白など）の上では白文字が読めないため、
-// 相対輝度で文字色を選ぶ。閾値は sRGB の中間グレー相当
-function chipTextColor(hex) {
-  const n = parseInt(hex.slice(1), 16);
-  const lin = (c) => (c / 255 <= 0.03928 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4);
-  const lum = 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
-  return lum > 0.35 ? '#5c4a50' : '#fff';
+  guideToggles[name] = el;
 }
 
 function showParts(parts) {
-  for (const [name, el] of Object.entries(chipEls)) {
+  for (const [name, el] of Object.entries(guideToggles)) {
     const on = !parts || parts[name] !== false;
     const color = MBF_GUIDE_COLORS[name];
-    el.classList.toggle('on', on);
     el.setAttribute('aria-pressed', String(on));
     el.style.background = on ? color : '';
-    el.style.color = on ? chipTextColor(color) : '';
+    // 白系（ハイライト）は塗りが背景に溶けるため枠線を残す
+    el.style.borderColor = on && color !== '#ffffff' ? color : '';
   }
 }
 

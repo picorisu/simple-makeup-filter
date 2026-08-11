@@ -8,16 +8,18 @@
 // 落ちることがある）ため、同じ値を GUIDE_COLORS として保持している。変更時は両方直す
 globalThis.MBF_GUIDE_COLORS = {
   eyebag: '#00e5ff',
+  naso: '#ffd400',
+  mario: '#ff8c1a',
   lip: '#ff3b30',
   blush: '#ff7fbf',
   brow: '#8b5a2b',
   shadow: '#b14cff',
   liner: '#2f6bff',
-  naso: '#ffd400',
-  mario: '#ff8c1a',
   nose: '#00c853',
   jaw: '#a8e000',
-  hi: '#ffffff'
+  hiNose: '#ffffff',
+  hiCheek: '#ffffff',
+  hiChin: '#ffffff'
 };
 
 globalThis.MBF_DEFAULTS = {
@@ -27,16 +29,18 @@ globalThis.MBF_DEFAULTS = {
   // 位置ガイドで表示するパーツ。guideOn と違い永続化する
   guideParts: {
     eyebag: true,
+    naso: true,
+    mario: true,
     lip: true,
     blush: true,
     brow: true,
     shadow: true,
     liner: true,
-    naso: true,
-    mario: true,
     nose: true,
     jaw: true,
-    hi: true
+    hiNose: true,
+    hiCheek: true,
+    hiChin: true
   },
 
   // --- 肌 ---
