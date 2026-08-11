@@ -71,6 +71,7 @@ function showVal(k, v) {
 
 function refreshUI(s) {
   for (const k of CHECKS) document.getElementById(k).checked = s[k];
+  document.getElementById('guideOn').checked = s.guideOn ?? false;
   for (const k of RANGES) {
     const el = document.getElementById(k);
     el.value = s[k];
@@ -80,8 +81,35 @@ function refreshUI(s) {
   updateBadges();
 }
 
+// ---------- 位置ガイド ----------
+// 通話相手にも見えるため「popup を開いている間だけ ON」に限定する。
+// pagehide が取りこぼしても、次に popup を開いた時点で必ず OFF に戻る
+const guideEl = document.getElementById('guideOn');
+
+function resetGuide() {
+  guideEl.checked = false;
+  chrome.storage.local.set({ guideOn: false });
+}
+
+guideEl.addEventListener('change', (e) => {
+  if (!e.target.checked) {
+    chrome.storage.local.set({ guideOn: false });
+    return;
+  }
+  if (!confirm(M('confirm_guide'))) {
+    e.target.checked = false;
+    return;
+  }
+  chrome.storage.local.set({ guideOn: true });
+});
+
+window.addEventListener('pagehide', () => {
+  chrome.storage.local.set({ guideOn: false });
+});
+
 chrome.storage.local.get(DEFAULTS, (s) => {
   refreshUI(s);
+  resetGuide();
   updateStatus();
 });
 
@@ -225,6 +253,9 @@ for (const k of COLORS) {
 function sanitize(obj) {
   const out = {};
   for (const k of Object.keys(DEFAULTS)) {
+    // 位置ガイドは popup を開いている間だけの一時表示。プリセットに乗せると
+    // 取り込み時に確認ダイアログを通さず ON になってしまう
+    if (k === 'guideOn') continue;
     if (!(k in obj) || typeof obj[k] !== typeof DEFAULTS[k]) continue;
     let v = obj[k];
     if (RANGES.includes(k)) {

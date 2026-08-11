@@ -5,6 +5,8 @@
 // const だとファイル間で見えない環境があるため、globalThis に明示的に生やす
 globalThis.MBF_DEFAULTS = {
   enabled: true,
+  // 位置ガイド。通話相手にも見えるため popup を開いている間だけ true になる（popup 側で false へ戻す）
+  guideOn: false,
 
   // --- 肌 ---
   smooth: 0,       // 美肌の強さ 0-1
