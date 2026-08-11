@@ -13,6 +13,14 @@ for f in vendor/vision_bundle.mjs vendor/wasm/vision_wasm_internal.js vendor/was
   fi
 done
 
+# _locales が揃っているか確認（default_locale 宣言があるのに _locales が無い zip はストアに弾かれる）
+for f in _locales/ja/messages.json _locales/en/messages.json; do
+  if [ ! -f "$f" ]; then
+    echo "ERROR: $f がありません" >&2
+    exit 1
+  fi
+done
+
 VERSION=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
 OUT="dist/simple-makeup-filter-v${VERSION}.zip"
 mkdir -p dist
@@ -28,6 +36,7 @@ zip -r "$OUT" \
   popup.js \
   icons \
   vendor \
+  _locales \
   -x "*.DS_Store"
 
 echo ""
