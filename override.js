@@ -254,7 +254,7 @@ void main() {
   }
 
   // 位置ガイドの線色。隣接・重複するパーツを見分けられるよう対照的な色を割り当てる。
-  // popup のチップが凡例を兼ねるため defaults.js の MBF_GUIDE_COLORS と同じ値を保つ
+  // popup のガイドトグルが凡例を兼ねるため defaults.js の MBF_GUIDE_COLORS と同じ値を保つ
   const GUIDE_COLORS = {
     eyebag: '#00e5ff',
     naso: '#ffd400',

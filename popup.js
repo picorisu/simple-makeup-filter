@@ -117,14 +117,25 @@ for (const el of document.querySelectorAll('[data-guide]')) {
   guideToggles[name] = el;
 }
 
+const LIGHT_LUM = 0.85;
+
+function relLuminance(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const [r, g, b] = [16, 8, 0].map((s) => {
+    const v = ((n >> s) & 255) / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
 function showParts(parts) {
   for (const [name, el] of Object.entries(guideToggles)) {
     const on = !parts || parts[name] !== false;
     const color = MBF_GUIDE_COLORS[name];
     el.setAttribute('aria-pressed', String(on));
     el.style.background = on ? color : '';
-    // 白系（ハイライト）は塗りが背景に溶けるため枠線を残す
-    el.style.borderColor = on && color !== '#ffffff' ? color : '';
+    // 明るい色は塗りが背景に溶けるため既定の枠線を残す
+    el.style.borderColor = on && relLuminance(color) < LIGHT_LUM ? color : '';
   }
 }
 
