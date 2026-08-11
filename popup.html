@@ -109,6 +109,14 @@
   .status.ok { color: #4caf7d; }
   .quick { display: flex; gap: 6px; margin-top: 10px; }
   .quick .btn { flex: 1; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+  .chip {
+    font-size: 10.5px; font-weight: 600; padding: 3px 8px;
+    border-radius: 999px; cursor: pointer;
+    border: 1.5px solid #d9c3cc; background: #fff; color: #b9a3ac;
+  }
+  /* ON の塗り色・文字色はガイド線の色から JS が style で当てる（凡例を兼ねる） */
+  .chip.on { border-color: transparent; }
 </style>
 </head>
 <body>
@@ -234,6 +242,8 @@
       <label for="guideOn" style="flex:1" data-i18n="guide_check"></label>
       <input type="checkbox" id="guideOn" class="hdr-check" data-i18n-title="guide_check_title" data-i18n-aria="guide_check_title">
     </div>
+    <p class="sub" data-i18n="guide_parts_sub"></p>
+    <div class="chips" id="guideParts"></div>
   </details>
 
   <details>

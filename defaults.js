@@ -3,10 +3,41 @@
 // 3コンテキストすべてで、このファイルを先に読み込んで MBF_DEFAULTS を共有する。
 // 項目を追加するときはここだけ更新すればよい（popup.html の input 追加は別途必要）。
 // const だとファイル間で見えない環境があるため、globalThis に明示的に生やす
+// 位置ガイドの線色。popup のチップが凡例を兼ねるため、色は必ずガイド線と一致させる。
+// override.js は defaults.js に依存できない（MAIN world への複数ファイル注入で
+// 落ちることがある）ため、同じ値を GUIDE_COLORS として保持している。変更時は両方直す
+globalThis.MBF_GUIDE_COLORS = {
+  eyebag: '#00e5ff',
+  lip: '#ff3b30',
+  blush: '#ff7fbf',
+  brow: '#8b5a2b',
+  shadow: '#b14cff',
+  liner: '#2f6bff',
+  naso: '#ffd400',
+  mario: '#ff8c1a',
+  nose: '#00c853',
+  jaw: '#a8e000',
+  hi: '#ffffff'
+};
+
 globalThis.MBF_DEFAULTS = {
   enabled: true,
   // 位置ガイド。通話相手にも見える（Meet のページ読み込み時に bridge が必ず false へ戻す）
   guideOn: false,
+  // 位置ガイドで表示するパーツ。guideOn と違い永続化する
+  guideParts: {
+    eyebag: true,
+    lip: true,
+    blush: true,
+    brow: true,
+    shadow: true,
+    liner: true,
+    naso: true,
+    mario: true,
+    nose: true,
+    jaw: true,
+    hi: true
+  },
 
   // --- 肌 ---
   smooth: 0,       // 美肌の強さ 0-1

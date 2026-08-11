@@ -253,7 +253,8 @@ void main() {
     ctx.closePath();
   }
 
-  // 位置ガイドの線色。隣接・重複するパーツを見分けられるよう対照的な色を割り当てる
+  // 位置ガイドの線色。隣接・重複するパーツを見分けられるよう対照的な色を割り当てる。
+  // popup のチップが凡例を兼ねるため defaults.js の MBF_GUIDE_COLORS と同じ値を保つ
   const GUIDE_COLORS = {
     eyebag: '#00e5ff',
     lip: '#ff3b30',
@@ -903,6 +904,9 @@ void main() {
       (lm[FACE_RIGHT].x - lm[FACE_LEFT].x) * W
     );
     const upX = Math.sin(roll), upY = -Math.cos(roll);
+    // guideParts が未設定の旧環境ではガイドが全消灯しないよう全 ON として扱う
+    const parts = settings.guideParts;
+    const partOn = (name) => !parts || parts[name] !== false;
 
     ctx.save();
     // drawMakeup が multiply を残したまま抜けるため、線色が肌に沈まないよう明示的に戻す
@@ -929,7 +933,7 @@ void main() {
       ctx.stroke();
     };
 
-    if (settings.eyebagLine > 0 || settings.eyebagBright > 0) {
+    if ((settings.eyebagLine > 0 || settings.eyebagBright > 0) && partOn('eyebag')) {
       const boost = Math.max(1, settings.eyebagLine);
       for (const eye of [EYE_BOT_L, EYE_BOT_R]) {
         const { cx, cy, ry, scale } = eyebagEllipse(eye, lm, W, H, faceW, roll, boost);
@@ -937,11 +941,11 @@ void main() {
       }
     }
 
-    if (settings.lipA > 0 || settings.lipGloss > 0) {
+    if ((settings.lipA > 0 || settings.lipGloss > 0) && partOn('lip')) {
       strokePoints(GUIDE_COLORS.lip, lipOuterPoints(lm, W, H), true);
     }
 
-    if (settings.blushA > 0) {
+    if (settings.blushA > 0 && partOn('blush')) {
       const r = faceW * 0.13;
       const aspect = Math.max(1, settings.blushShape);
       const soft = Math.min(2.2, Math.max(1, settings.blushSoft));
@@ -961,13 +965,13 @@ void main() {
       }
     }
 
-    if (settings.browA > 0) {
+    if (settings.browA > 0 && partOn('brow')) {
       for (const brow of [BROW_L, BROW_R]) {
         strokePoints(GUIDE_COLORS.brow, browPoints(brow, lm, W, H, faceW, upX, upY), true);
       }
     }
 
-    if (settings.shadowA > 0) {
+    if (settings.shadowA > 0 && partOn('shadow')) {
       const lift = faceW * 0.055 * settings.shadowH;
       const dirX = Math.cos(roll), dirY = Math.sin(roll);
       const widen = settings.shadowW - 1;
@@ -991,7 +995,7 @@ void main() {
       }
     }
 
-    if (settings.linerA > 0) {
+    if (settings.linerA > 0 && partOn('liner')) {
       const off = faceW * (settings.linerY ?? 0.002);
       const lw = linerWidth(faceW);
       for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
@@ -1003,7 +1007,7 @@ void main() {
       }
     }
 
-    if (settings.nasoA > 0) {
+    if (settings.nasoA > 0 && partOn('naso')) {
       const boost = Math.max(1, settings.nasoA);
       for (const [alaI, mouthI] of [[ALA_L, MOUTH_L], [ALA_R, MOUTH_R]]) {
         const e = grooveEllipse(lm, W, H, faceW, alaI, mouthI, boost);
@@ -1011,7 +1015,7 @@ void main() {
       }
     }
 
-    if (settings.marioA > 0) {
+    if (settings.marioA > 0 && partOn('mario')) {
       const boostM = Math.max(1, settings.marioA);
       for (const [mouthI, jawI] of [[MOUTH_L, 149], [MOUTH_R, 378]]) {
         const e = grooveEllipse(lm, W, H, faceW, mouthI, jawI, boostM);
@@ -1019,7 +1023,7 @@ void main() {
       }
     }
 
-    if (settings.noseA > 0) {
+    if (settings.noseA > 0 && partOn('nose')) {
       const bx = lm[168].x * W, by = lm[168].y * H;
       const tipX = lm[NOSE_TIP].x * W, tipY = lm[NOSE_TIP].y * H;
       const inn = settings.noseIn;
@@ -1037,7 +1041,7 @@ void main() {
       }
     }
 
-    if (settings.jawA > 0) {
+    if (settings.jawA > 0 && partOn('jaw')) {
       // 実描画は太い帯（lineWidth = faceW * 0.05）なので、中心線ではなく帯の両縁を描く
       const half = faceW * 0.025;
       const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
@@ -1056,38 +1060,40 @@ void main() {
       }
     }
 
-    if (settings.hiA > 0) {
-      const tx = lm[168].x * W, ty = lm[168].y * H;
-      const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
-      const len = Math.hypot(nx - tx, ny - ty);
-      strokeEllipse(
-        GUIDE_COLORS.hi, (tx + nx) / 2, (ty + ny) / 2,
-        len * 0.55, faceW * 0.012 * settings.hiW, Math.atan2(ny - ty, nx - tx)
-      );
-    }
-
-    if (settings.hiCheekA > 0) {
-      const rightX = Math.cos(roll), rightY = Math.sin(roll);
-      const noseX = lm[NOSE_TIP].x * W, noseY = lm[NOSE_TIP].y * H;
-      for (const idx of [117, 346]) {
-        let x = lm[idx].x * W, y = lm[idx].y * H;
-        const side = Math.sign((x - noseX) * rightX + (y - noseY) * rightY) || 1;
-        x += (rightX * side * settings.hiCheekX + upX * settings.hiCheekY) * faceW;
-        y += (rightY * side * settings.hiCheekX + upY * settings.hiCheekY) * faceW;
+    if (partOn('hi')) {
+      if (settings.hiA > 0) {
+        const tx = lm[168].x * W, ty = lm[168].y * H;
+        const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
+        const len = Math.hypot(nx - tx, ny - ty);
         strokeEllipse(
-          GUIDE_COLORS.hi, x, y,
-          faceW * 0.09 * settings.hiCheekW, faceW * 0.035 * settings.hiCheekW, roll
+          GUIDE_COLORS.hi, (tx + nx) / 2, (ty + ny) / 2,
+          len * 0.55, faceW * 0.012 * settings.hiW, Math.atan2(ny - ty, nx - tx)
         );
       }
-    }
 
-    if (settings.hiChinA > 0) {
-      const chinX = lm[152].x * W + upX * faceW * (0.035 + settings.hiChinY);
-      const chinY = lm[152].y * H + upY * faceW * (0.035 + settings.hiChinY);
-      strokeEllipse(
-        GUIDE_COLORS.hi, chinX, chinY,
-        faceW * 0.05 * settings.hiChinW, faceW * 0.035 * settings.hiChinW, roll
-      );
+      if (settings.hiCheekA > 0) {
+        const rightX = Math.cos(roll), rightY = Math.sin(roll);
+        const noseX = lm[NOSE_TIP].x * W, noseY = lm[NOSE_TIP].y * H;
+        for (const idx of [117, 346]) {
+          let x = lm[idx].x * W, y = lm[idx].y * H;
+          const side = Math.sign((x - noseX) * rightX + (y - noseY) * rightY) || 1;
+          x += (rightX * side * settings.hiCheekX + upX * settings.hiCheekY) * faceW;
+          y += (rightY * side * settings.hiCheekX + upY * settings.hiCheekY) * faceW;
+          strokeEllipse(
+            GUIDE_COLORS.hi, x, y,
+            faceW * 0.09 * settings.hiCheekW, faceW * 0.035 * settings.hiCheekW, roll
+          );
+        }
+      }
+
+      if (settings.hiChinA > 0) {
+        const chinX = lm[152].x * W + upX * faceW * (0.035 + settings.hiChinY);
+        const chinY = lm[152].y * H + upY * faceW * (0.035 + settings.hiChinY);
+        strokeEllipse(
+          GUIDE_COLORS.hi, chinX, chinY,
+          faceW * 0.05 * settings.hiChinW, faceW * 0.035 * settings.hiChinW, roll
+        );
+      }
     }
 
     ctx.restore();

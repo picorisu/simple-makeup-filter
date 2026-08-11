@@ -72,6 +72,7 @@ function showVal(k, v) {
 function refreshUI(s) {
   for (const k of CHECKS) document.getElementById(k).checked = s[k];
   document.getElementById('guideOn').checked = s.guideOn ?? false;
+  showParts(s.guideParts);
   for (const k of RANGES) {
     const el = document.getElementById(k);
     el.value = s[k];
@@ -97,6 +98,47 @@ guideEl.addEventListener('change', (e) => {
   }
   chrome.storage.local.set({ guideOn: true });
 });
+
+// パーツごとの表示チップ。ON の塗り色はガイド線の色と同じで凡例を兼ねる
+const chipEls = {};
+const partsHost = document.getElementById('guideParts');
+for (const name of Object.keys(DEFAULTS.guideParts)) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'chip';
+  b.textContent = M(`guide_part_${name}`);
+  b.title = b.textContent;
+  b.setAttribute('aria-label', b.textContent);
+  b.addEventListener('click', () => {
+    chrome.storage.local.get(DEFAULTS, (s) => {
+      const next = { ...DEFAULTS.guideParts, ...s.guideParts };
+      next[name] = !(next[name] !== false);
+      chrome.storage.local.set({ guideParts: next }, () => showParts(next));
+    });
+  });
+  partsHost.appendChild(b);
+  chipEls[name] = b;
+}
+
+// 明るい塗り色（黄・シアン・白など）の上では白文字が読めないため、
+// 相対輝度で文字色を選ぶ。閾値は sRGB の中間グレー相当
+function chipTextColor(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const lin = (c) => (c / 255 <= 0.03928 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4);
+  const lum = 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+  return lum > 0.35 ? '#5c4a50' : '#fff';
+}
+
+function showParts(parts) {
+  for (const [name, el] of Object.entries(chipEls)) {
+    const on = !parts || parts[name] !== false;
+    const color = MBF_GUIDE_COLORS[name];
+    el.classList.toggle('on', on);
+    el.setAttribute('aria-pressed', String(on));
+    el.style.background = on ? color : '';
+    el.style.color = on ? chipTextColor(color) : '';
+  }
+}
 
 chrome.storage.local.get(DEFAULTS, (s) => {
   refreshUI(s);
@@ -206,6 +248,7 @@ for (const btn of document.querySelectorAll('[data-quick]')) {
         skinRange: cur.skinRange,
         // 位置ガイドの表示状態はメイクの内容と無関係（見比べ中に消えると邪魔）
         guideOn: cur.guideOn,
+        guideParts: cur.guideParts,
         enabled: true
       };
       chrome.storage.local.set(s, () => refreshUI(s));
@@ -246,7 +289,7 @@ function sanitize(obj) {
   const out = {};
   for (const k of Object.keys(DEFAULTS)) {
     // 位置ガイドをプリセットに乗せると、取り込み時に確認ダイアログを通さず ON になってしまう
-    if (k === 'guideOn') continue;
+    if (k === 'guideOn' || k === 'guideParts') continue;
     if (!(k in obj) || typeof obj[k] !== typeof DEFAULTS[k]) continue;
     let v = obj[k];
     if (RANGES.includes(k)) {
