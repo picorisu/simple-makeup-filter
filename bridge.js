@@ -19,10 +19,6 @@ function sendCurrent() {
 
 window.addEventListener('mbf-ready', sendCurrent);
 
-// 位置ガイドは通話相手にも見えるため、ページ読み込みのたびに必ず OFF から始める。
-// popup の pagehide が取りこぼしても ON が永続化しない唯一の構造的な保証
-chrome.storage.local.set({ guideOn: false }, sendCurrent);
-
 // popup からの死活確認に応答する（「Meet で動作中」表示用）
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg === 'mbf-ping') sendResponse('pong');
@@ -36,3 +32,8 @@ chrome.storage.onChanged.addListener((changes) => {
   }
   if (Object.keys(s).length > 0) send(s);
 });
+
+// 位置ガイドはページ読み込みのたびに必ず OFF から始める（OFF の伝達は上の onChanged が拾う）。
+// sendCurrent を set のコールバックに入れないこと。失敗時に __base が届かずメイクが無音で止まる
+chrome.storage.local.set({ guideOn: false });
+sendCurrent();
