@@ -5,7 +5,7 @@
 // const だとファイル間で見えない環境があるため、globalThis に明示的に生やす
 globalThis.MBF_DEFAULTS = {
   enabled: true,
-  // 位置ガイド。通話相手にも見えるため popup を開いている間だけ true になる（popup 側で false へ戻す）
+  // 位置ガイド。通話相手にも見える（Meet のページ読み込み時に bridge が必ず false へ戻す）
   guideOn: false,
 
   // --- 肌 ---

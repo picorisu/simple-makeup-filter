@@ -245,8 +245,7 @@ for (const k of COLORS) {
 function sanitize(obj) {
   const out = {};
   for (const k of Object.keys(DEFAULTS)) {
-    // 位置ガイドは popup を開いている間だけの一時表示。プリセットに乗せると
-    // 取り込み時に確認ダイアログを通さず ON になってしまう
+    // 位置ガイドをプリセットに乗せると、取り込み時に確認ダイアログを通さず ON になってしまう
     if (k === 'guideOn') continue;
     if (!(k in obj) || typeof obj[k] !== typeof DEFAULTS[k]) continue;
     let v = obj[k];
