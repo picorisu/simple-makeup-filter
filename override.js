@@ -271,6 +271,11 @@ void main() {
     hiChin: '#ffffff'
   };
 
+  function anyGuideOn() {
+    const parts = settings.guideParts;
+    return !!parts && Object.values(parts).some((v) => v === true);
+  }
+
   function hexToRgba(hex, a) {
     const n = parseInt(hex.slice(1), 16);
     return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
@@ -906,9 +911,8 @@ void main() {
       (lm[FACE_RIGHT].x - lm[FACE_LEFT].x) * W
     );
     const upX = Math.sin(roll), upY = -Math.cos(roll);
-    // guideParts が未設定の旧環境ではガイドが全消灯しないよう全 ON として扱う
     const parts = settings.guideParts;
-    const partOn = (name) => !parts || parts[name] !== false;
+    const partOn = (name) => parts?.[name] === true;
 
     ctx.save();
     // drawMakeup が multiply を残したまま抜けるため、線色が肌に沈まないよう明示的に戻す
@@ -1200,7 +1204,7 @@ void main() {
            settings.shadowA > 0 || settings.linerA > 0 ||
            settings.noseA > 0 || settings.jawA > 0 ||
            settings.hiA > 0 || settings.hiCheekA > 0 || settings.hiChinA > 0 ||
-           settings.guideOn);
+           anyGuideOn());
         if (makeupOn && !landmarkerRequested && settings.__base) {
           landmarkerRequested = true;
           getLandmarker().then((l) => { landmarker = l; });
@@ -1219,7 +1223,7 @@ void main() {
             drawNasoFix(ctx, glCanvas, patchCanvas, maskCanvas, landmarks, W, H);
             drawEyebagFix(ctx, glCanvas, patchCanvas, maskCanvas, landmarks, W, H);
             drawMakeup(ctx, landmarks, W, H);
-            if (settings.guideOn) drawGuide(ctx, landmarks, W, H);
+            if (anyGuideOn()) drawGuide(ctx, landmarks, W, H);
           }
         }
       }

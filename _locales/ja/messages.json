@@ -108,10 +108,6 @@
   "hi_chinY": { "message": "縦位置（下 ⇔ 上）" },
   "hi_chinSoft": { "message": "ぼかし（くっきり ⇔ ふんわり）" },
 
-  "guide_title": { "message": "📐 位置ガイド" },
-  "guide_desc": { "message": "有効なメイクパーツの適用範囲を、色分けした線で映像に重ねます。位置調整の確認用です。ガイド線は通話相手にも見えます。Meet を再読み込みすると自動でオフに戻ります。" },
-  "guide_check": { "message": "各項目に位置ガイドを表示" },
-  "guide_check_title": { "message": "各項目に位置ガイドを表示（通話相手にも見えます）" },
   "guide_line": { "message": "ガイド線" },
   "guide_part_eyebag": { "message": "クマ消しのガイド線" },
   "guide_part_naso": { "message": "ほうれい線のガイド線" },
@@ -139,7 +135,7 @@
 
   "confirm_quick": { "message": "今の設定はこのプリセットで上書きされます。続けますか？\n（大事な設定は先に「プリセット」で保存してください）" },
   "confirm_reset": { "message": "すべての設定を初期値に戻しますか？（保存済みプリセットは残ります）" },
-  "confirm_guide": { "message": "ガイド線は通話相手にも表示されます。\nオンにしますか？" },
+  "confirm_guide": { "message": "ガイド線は通話相手にも表示されます。\nチェックを外せばオフにできます。消し忘れても Meet の再読み込みで自動的にオフに戻ります。\nオンにしますか？" },
   "confirm_overwrite": { "message": "「$name$」は既にあります。上書きしますか？", "placeholders": { "name": { "content": "$1" } } },
   "confirm_export_dirty": { "message": "未保存の変更があります。\n書き出されるのは保存済みの「$name$」の内容で、今の画面の状態は含まれません。\n続けますか？（今の状態を出したい場合は先に保存してください）", "placeholders": { "name": { "content": "$1" } } },
   "confirm_delete": { "message": "「$name$」を削除しますか？", "placeholders": { "name": { "content": "$1" } } },

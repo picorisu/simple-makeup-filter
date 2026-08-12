@@ -24,23 +24,22 @@ globalThis.MBF_GUIDE_COLORS = {
 
 globalThis.MBF_DEFAULTS = {
   enabled: true,
-  // 位置ガイド。通話相手にも見える（Meet のページ読み込み時に bridge が必ず false へ戻す）
-  guideOn: false,
-  // 位置ガイドで表示するパーツ。guideOn と違い永続化する
+  // 位置ガイドを表示するパーツ。true のパーツだけ描く（通話相手にも見えるため既定は全 OFF。
+  // Meet のページ読み込み時に bridge が {} へ戻す）
   guideParts: {
-    eyebag: true,
-    naso: true,
-    mario: true,
-    lip: true,
-    blush: true,
-    brow: true,
-    shadow: true,
-    liner: true,
-    nose: true,
-    jaw: true,
-    hiNose: true,
-    hiCheek: true,
-    hiChin: true
+    eyebag: false,
+    naso: false,
+    mario: false,
+    lip: false,
+    blush: false,
+    brow: false,
+    shadow: false,
+    liner: false,
+    nose: false,
+    jaw: false,
+    hiNose: false,
+    hiCheek: false,
+    hiChin: false
   },
 
   // --- 肌 ---

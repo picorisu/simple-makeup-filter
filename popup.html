@@ -112,8 +112,6 @@
   /* ガイド表示チェック。チェック時の塗り色はガイド線の色を JS が accent-color で当てる（凡例を兼ねる） */
   .gt { margin: 0 5px 0 0; flex-shrink: 0; width: 12px; height: 12px; cursor: pointer; vertical-align: -2px; }
   .guide-row { border-bottom: 1px dashed #f3cdd9; padding-bottom: 8px; }
-  /* ガイドのマスターが OFF の間はパーツ選択を出さない（body.guide-on は popup.js が同期） */
-  body:not(.guide-on) .gt, body:not(.guide-on) .guide-row { display: none; }
 </style>
 </head>
 <body>
@@ -246,15 +244,6 @@
   </details>
 
 
-
-  <details>
-    <summary data-i18n="guide_title"></summary>
-    <p class="guide" data-i18n="guide_desc"></p>
-    <div class="row">
-      <input type="checkbox" id="guideOn" class="hdr-check" style="margin:0" data-i18n-title="guide_check_title" data-i18n-aria="guide_check_title">
-      <label for="guideOn" style="flex:1" data-i18n="guide_check"></label>
-    </div>
-  </details>
 
   <details>
     <summary data-i18n="preset_title"></summary>

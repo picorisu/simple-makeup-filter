@@ -108,10 +108,6 @@
   "hi_chinY": { "message": "Vertical (lower ⇔ upper)" },
   "hi_chinSoft": { "message": "Softness (sharp ⇔ diffused)" },
 
-  "guide_title": { "message": "📐 Position guides" },
-  "guide_desc": { "message": "Overlays color-coded outlines showing where each active makeup part is applied. Use it to check positioning. Guide lines are visible to the other participants. Reloading Meet turns them back off automatically." },
-  "guide_check": { "message": "Show position guides for each part" },
-  "guide_check_title": { "message": "Show position guides for each part (also visible to other participants)" },
   "guide_line": { "message": "Guide line" },
   "guide_part_eyebag": { "message": "Under-eye guide line" },
   "guide_part_naso": { "message": "Smile lines guide line" },
@@ -139,7 +135,7 @@
 
   "confirm_quick": { "message": "Your current settings will be overwritten by this preset. Continue?\n(Save your settings as a preset first if you want to keep them)" },
   "confirm_reset": { "message": "Reset all settings to defaults? (Saved presets will be kept)" },
-  "confirm_guide": { "message": "Guide lines are also visible to the other participants.\nTurn it on?" },
+  "confirm_guide": { "message": "Guide lines are also visible to the other participants.\nUncheck to turn them off anytime; even if you forget, reloading Meet turns them off automatically.\nTurn it on?" },
   "confirm_overwrite": { "message": "\"$name$\" already exists. Overwrite?", "placeholders": { "name": { "content": "$1" } } },
   "confirm_export_dirty": { "message": "You have unsaved changes.\nThe export will contain the saved \"$name$\" preset, not your current screen settings.\nContinue? (Save first if you want to export current settings)", "placeholders": { "name": { "content": "$1" } } },
   "confirm_delete": { "message": "Delete \"$name$\"?", "placeholders": { "name": { "content": "$1" } } },

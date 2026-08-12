@@ -71,8 +71,6 @@ function showVal(k, v) {
 
 function refreshUI(s) {
   for (const k of CHECKS) document.getElementById(k).checked = s[k];
-  document.getElementById('guideOn').checked = s.guideOn ?? false;
-  document.body.classList.toggle('guide-on', s.guideOn ?? false);
   showParts(s.guideParts);
   for (const k of RANGES) {
     const el = document.getElementById(k);
@@ -84,26 +82,9 @@ function refreshUI(s) {
 }
 
 // ---------- 位置ガイド ----------
-// 通話相手にも見えるため ON にする前に承諾を取る。
-// OFF の契機は手動 OFF と Meet の再読み込みの2つ（操作パネルの開閉では変わらない）
-const guideEl = document.getElementById('guideOn');
-
-guideEl.addEventListener('change', (e) => {
-  if (!e.target.checked) {
-    document.body.classList.remove('guide-on');
-    chrome.storage.local.set({ guideOn: false });
-    return;
-  }
-  if (!confirm(M('confirm_guide'))) {
-    e.target.checked = false;
-    return;
-  }
-  document.body.classList.add('guide-on');
-  chrome.storage.local.set({ guideOn: true });
-});
-
 // パーツごとの表示チェック。調整するスライダーのそばに置き、
-// チェックの塗り色はガイド線の色と同じで凡例を兼ねる
+// チェックの塗り色はガイド線の色と同じで凡例を兼ねる。
+// 通話相手にも見えるため ON にするたびに承諾を取る
 const guideToggles = {};
 for (const el of document.querySelectorAll('[data-guide]')) {
   const name = el.dataset.guide;
@@ -111,9 +92,14 @@ for (const el of document.querySelectorAll('[data-guide]')) {
   el.title = label;
   el.setAttribute('aria-label', label);
   el.addEventListener('change', (e) => {
+    if (e.target.checked && !confirm(M('confirm_guide'))) {
+      e.target.checked = false;
+      return;
+    }
+    const on = e.target.checked;
     chrome.storage.local.get(DEFAULTS, (s) => {
       const next = { ...DEFAULTS.guideParts, ...s.guideParts };
-      next[name] = e.target.checked;
+      next[name] = on;
       chrome.storage.local.set({ guideParts: next }, () => showParts(next));
     });
   });
@@ -134,7 +120,7 @@ function relLuminance(hex) {
 function showParts(parts) {
   for (const [name, el] of Object.entries(guideToggles)) {
     const color = MBF_GUIDE_COLORS[name];
-    el.checked = !parts || parts[name] !== false;
+    el.checked = parts?.[name] === true;
     el.style.accentColor = color;
     // 明るい色のチェックは白背景に溶けるため輪郭を足す
     el.style.outline = relLuminance(color) >= LIGHT_LUM ? '1px solid #d9c3cc' : '';
@@ -248,7 +234,6 @@ for (const btn of document.querySelectorAll('[data-quick]')) {
         lipThresh: cur.lipThresh,
         skinRange: cur.skinRange,
         // 位置ガイドの表示状態はメイクの内容と無関係（見比べ中に消えると邪魔）
-        guideOn: cur.guideOn,
         guideParts: cur.guideParts,
         enabled: true
       };
@@ -290,7 +275,7 @@ function sanitize(obj) {
   const out = {};
   for (const k of Object.keys(DEFAULTS)) {
     // 位置ガイドをプリセットに乗せると、取り込み時に確認ダイアログを通さず ON になってしまう
-    if (k === 'guideOn' || k === 'guideParts') continue;
+    if (k === 'guideParts') continue;
     if (!(k in obj) || typeof obj[k] !== typeof DEFAULTS[k]) continue;
     let v = obj[k];
     if (RANGES.includes(k)) {
