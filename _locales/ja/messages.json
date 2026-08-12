@@ -110,8 +110,8 @@
 
   "guide_title": { "message": "📐 位置ガイド" },
   "guide_desc": { "message": "有効なメイクパーツの適用範囲を、色分けした線で映像に重ねます。位置調整の確認用です。ガイド線は通話相手にも見えます。Meet を再読み込みすると自動でオフに戻ります。" },
-  "guide_check": { "message": "位置ガイドを表示" },
-  "guide_check_title": { "message": "位置ガイドの表示（通話相手にも見えます）" },
+  "guide_check": { "message": "各項目に位置ガイドを表示" },
+  "guide_check_title": { "message": "各項目に位置ガイドを表示（通話相手にも見えます）" },
   "guide_line": { "message": "ガイド線" },
   "guide_part_eyebag": { "message": "クマ消しのガイド線" },
   "guide_part_naso": { "message": "ほうれい線のガイド線" },

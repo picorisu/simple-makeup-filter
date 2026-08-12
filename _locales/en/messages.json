@@ -110,8 +110,8 @@
 
   "guide_title": { "message": "📐 Position guides" },
   "guide_desc": { "message": "Overlays color-coded outlines showing where each active makeup part is applied. Use it to check positioning. Guide lines are visible to the other participants. Reloading Meet turns them back off automatically." },
-  "guide_check": { "message": "Show position guides" },
-  "guide_check_title": { "message": "Show position guides (also visible to other participants)" },
+  "guide_check": { "message": "Show position guides for each part" },
+  "guide_check_title": { "message": "Show position guides for each part (also visible to other participants)" },
   "guide_line": { "message": "Guide line" },
   "guide_part_eyebag": { "message": "Under-eye guide line" },
   "guide_part_naso": { "message": "Smile lines guide line" },
