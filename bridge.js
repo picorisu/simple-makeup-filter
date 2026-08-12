@@ -13,12 +13,12 @@ function sendCurrent() {
   chrome.storage.local.get(DEFAULTS, (s) => {
     // MAIN world には chrome.runtime が無いので、vendor/ の URL をここから渡す
     s.__base = chrome.runtime.getURL('');
+    s.guideParts = {};
     send(s);
   });
 }
 
 window.addEventListener('mbf-ready', sendCurrent);
-sendCurrent();
 
 // popup からの死活確認に応答する（「Meet で動作中」表示用）
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -33,3 +33,9 @@ chrome.storage.onChanged.addListener((changes) => {
   }
   if (Object.keys(s).length > 0) send(s);
 });
+
+// 位置ガイドはページ読み込みのたびに必ず全 OFF から始める（この set は永続化のみ。
+// MAIN world への OFF は sendCurrent が常に {} を送ることで到着順に依らず成立する）。
+// sendCurrent を set のコールバックに入れないこと。失敗時に __base が届かずメイクが無音で止まる
+chrome.storage.local.set({ guideParts: {} });
+sendCurrent();

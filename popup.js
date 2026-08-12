@@ -71,6 +71,7 @@ function showVal(k, v) {
 
 function refreshUI(s) {
   for (const k of CHECKS) document.getElementById(k).checked = s[k];
+  showParts(s.guideParts);
   for (const k of RANGES) {
     const el = document.getElementById(k);
     el.value = s[k];
@@ -78,6 +79,54 @@ function refreshUI(s) {
   }
   for (const k of COLORS) document.getElementById(k).value = s[k];
   updateBadges();
+}
+
+// ---------- 位置ガイド ----------
+// パーツごとの表示チェック。調整するスライダーのそばに置き、
+// 隣の線スウォッチ（.gl）がガイド線の色の凡例を兼ねる。
+// 通話相手にも見えるため ON にするたびに承諾を取る
+const LIGHT_LUM = 0.85;
+
+function relLuminance(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const [r, g, b] = [16, 8, 0].map((s) => {
+    const v = ((n >> s) & 255) / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+const guideToggles = {};
+for (const el of document.querySelectorAll('[data-guide]')) {
+  const name = el.dataset.guide;
+  const label = M(`guide_part_${name}`);
+  el.title = label;
+  el.setAttribute('aria-label', label);
+  const swatch = document.createElement('span');
+  swatch.className = 'gl';
+  swatch.style.background = MBF_GUIDE_COLORS[name];
+  // 明るい色は白背景に溶けるため輪郭を足す
+  if (relLuminance(MBF_GUIDE_COLORS[name]) >= LIGHT_LUM) swatch.style.outline = '1px solid #d9c3cc';
+  el.parentElement.appendChild(swatch);
+  el.addEventListener('change', (e) => {
+    if (e.target.checked && !confirm(M('confirm_guide'))) {
+      e.target.checked = false;
+      return;
+    }
+    const on = e.target.checked;
+    chrome.storage.local.get(DEFAULTS, (s) => {
+      const next = { ...DEFAULTS.guideParts, ...s.guideParts };
+      next[name] = on;
+      chrome.storage.local.set({ guideParts: next }, () => showParts(next));
+    });
+  });
+  guideToggles[name] = el;
+}
+
+function showParts(parts) {
+  for (const [name, el] of Object.entries(guideToggles)) {
+    el.checked = parts?.[name] === true;
+  }
 }
 
 chrome.storage.local.get(DEFAULTS, (s) => {
@@ -186,6 +235,8 @@ for (const btn of document.querySelectorAll('[data-quick]')) {
         // クイックプリセットでは現在値を維持する
         lipThresh: cur.lipThresh,
         skinRange: cur.skinRange,
+        // 位置ガイドの表示状態はメイクの内容と無関係（見比べ中に消えると邪魔）
+        guideParts: cur.guideParts,
         enabled: true
       };
       chrome.storage.local.set(s, () => refreshUI(s));
@@ -225,6 +276,8 @@ for (const k of COLORS) {
 function sanitize(obj) {
   const out = {};
   for (const k of Object.keys(DEFAULTS)) {
+    // 位置ガイドをプリセットに乗せると、取り込み時に確認ダイアログを通さず ON になってしまう
+    if (k === 'guideParts') continue;
     if (!(k in obj) || typeof obj[k] !== typeof DEFAULTS[k]) continue;
     let v = obj[k];
     if (RANGES.includes(k)) {
