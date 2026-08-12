@@ -129,6 +129,11 @@ function showParts(parts) {
   }
 }
 
+// 別コンテキストの変更（bridge がページ読み込みで書く全 OFF 等）をチェック表示に反映する
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.guideParts) showParts(changes.guideParts.newValue);
+});
+
 chrome.storage.local.get(DEFAULTS, (s) => {
   refreshUI(s);
   updateStatus();
