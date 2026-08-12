@@ -25,8 +25,10 @@
   "skin_skinRange": { "message": "肌と判定する色の範囲（肌に効かない→右へ／髪や背景までぼける→左へ）" },
 
   "wrinkle_title": { "message": "🩹 しわ・クマ" },
-  "wrinkle_nasoA": { "message": "ほうれい線うすめ（右ほど強力）" },
-  "wrinkle_marioA": { "message": "口角のしわうすめ（右ほど強力）" },
+  "wrinkle_naso_sub": { "message": "ほうれい線" },
+  "wrinkle_nasoA": { "message": "うすめ（右ほど強力）" },
+  "wrinkle_mario_sub": { "message": "口角のしわ" },
+  "wrinkle_marioA": { "message": "うすめ（右ほど強力）" },
   "wrinkle_sub": { "message": "クマ" },
   "wrinkle_eyebagLine": { "message": "目の下の線うすめ（右ほど強力）" },
   "wrinkle_eyebagBright": { "message": "クマを明るく" },

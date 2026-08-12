@@ -112,6 +112,7 @@
   /* ガイド表示チェック。チェック時の塗り色はガイド線の色を JS が accent-color で当てる（凡例を兼ねる） */
   .gt { margin: 0 0 0 5px; flex-shrink: 0; width: 12px; height: 12px; cursor: pointer; }
   label .gt { float: right; }
+  .guide-row { border-bottom: 1px dashed #f3cdd9; padding-bottom: 8px; }
   /* ガイドのマスターが OFF の間はパーツ選択を出さない（body.guide-on は popup.js が同期） */
   body:not(.guide-on) .gt, body:not(.guide-on) .guide-row { display: none; }
   /* 右フロートのチェックで行の高さが潰れないようにする */
@@ -145,10 +146,12 @@
 
   <details data-fx="wrinkle">
     <summary data-i18n="wrinkle_title"></summary>
-    <label><span data-i18n="wrinkle_nasoA"></span> <input type="range" id="nasoA" min="0" max="3" step="0.05"></label>
+    <p class="sub" data-i18n="wrinkle_naso_sub"></p>
     <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="naso"></label>
-    <label><span data-i18n="wrinkle_marioA"></span> <input type="range" id="marioA" min="0" max="2" step="0.05"></label>
+    <label><span data-i18n="wrinkle_nasoA"></span> <input type="range" id="nasoA" min="0" max="3" step="0.05"></label>
+    <p class="sub" data-i18n="wrinkle_mario_sub"></p>
     <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="mario"></label>
+    <label><span data-i18n="wrinkle_marioA"></span> <input type="range" id="marioA" min="0" max="2" step="0.05"></label>
     <p class="sub" data-i18n="wrinkle_sub"></p>
     <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="eyebag"></label>
     <label><span data-i18n="wrinkle_eyebagLine"></span> <input type="range" id="eyebagLine" min="0" max="2" step="0.05"></label>

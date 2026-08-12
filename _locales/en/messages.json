@@ -25,8 +25,10 @@
   "skin_skinRange": { "message": "Skin detection range (no effect → right / hair blurred → left)" },
 
   "wrinkle_title": { "message": "🩹 Lines & Dark Circles" },
-  "wrinkle_nasoA": { "message": "Nasolabial lines (right = stronger)" },
-  "wrinkle_marioA": { "message": "Mouth corner lines (right = stronger)" },
+  "wrinkle_naso_sub": { "message": "Nasolabial lines" },
+  "wrinkle_nasoA": { "message": "Reduce (right = stronger)" },
+  "wrinkle_mario_sub": { "message": "Mouth corner lines" },
+  "wrinkle_marioA": { "message": "Reduce (right = stronger)" },
   "wrinkle_sub": { "message": "Dark circles" },
   "wrinkle_eyebagLine": { "message": "Under-eye lines (right = stronger)" },
   "wrinkle_eyebagBright": { "message": "Brighten dark circles" },
