@@ -111,11 +111,11 @@
   .quick .btn { flex: 1; }
   /* ガイド表示チェック。チェック時の塗り色はガイド線の色を JS が accent-color で当てる（凡例を兼ねる） */
   .gt { margin: 0 0 0 5px; flex-shrink: 0; width: 12px; height: 12px; cursor: pointer; }
-  label .gt, .sub .gt { float: right; }
+  label .gt { float: right; }
   /* ガイドのマスターが OFF の間はパーツ選択を出さない（body.guide-on は popup.js が同期） */
   body:not(.guide-on) .gt, body:not(.guide-on) .guide-row { display: none; }
   /* 右フロートのチェックで行の高さが潰れないようにする */
-  .sub, label:has(.gt) { display: flow-root; }
+  label:has(.gt) { display: flow-root; }
 </style>
 </head>
 <body>
@@ -145,9 +145,12 @@
 
   <details data-fx="wrinkle">
     <summary data-i18n="wrinkle_title"></summary>
-    <label><span data-i18n="wrinkle_nasoA"></span><input type="checkbox" class="gt" data-guide="naso"> <input type="range" id="nasoA" min="0" max="3" step="0.05"></label>
-    <label><span data-i18n="wrinkle_marioA"></span><input type="checkbox" class="gt" data-guide="mario"> <input type="range" id="marioA" min="0" max="2" step="0.05"></label>
-    <p class="sub"><span data-i18n="wrinkle_sub"></span><input type="checkbox" class="gt" data-guide="eyebag"></p>
+    <label><span data-i18n="wrinkle_nasoA"></span> <input type="range" id="nasoA" min="0" max="3" step="0.05"></label>
+    <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="naso"></label>
+    <label><span data-i18n="wrinkle_marioA"></span> <input type="range" id="marioA" min="0" max="2" step="0.05"></label>
+    <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="mario"></label>
+    <p class="sub" data-i18n="wrinkle_sub"></p>
+    <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="eyebag"></label>
     <label><span data-i18n="wrinkle_eyebagLine"></span> <input type="range" id="eyebagLine" min="0" max="2" step="0.05"></label>
     <label><span data-i18n="wrinkle_eyebagBright"></span> <input type="range" id="eyebagBright" min="0" max="1" step="0.05"></label>
     <label><span data-i18n="wrinkle_eyebagW"></span> <input type="range" id="eyebagW" min="0.5" max="2" step="0.05"></label>
@@ -208,29 +211,34 @@
 
   <details data-fx="shade">
     <summary><span data-i18n="shade_title"></span><input type="color" id="shadeColor" class="hdr-color" data-i18n-title="shade_color_title" data-i18n-aria="shade_color_title"></summary>
-    <p class="sub"><span data-i18n="shade_nose_sub"></span><input type="checkbox" class="gt" data-guide="nose"></p>
+    <p class="sub" data-i18n="shade_nose_sub"></p>
+    <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="nose"></label>
     <label><span data-i18n="shade_noseA"></span> <input type="range" id="noseA" min="0" max="1" step="0.05"></label>
     <label><span data-i18n="shade_noseW"></span> <input type="range" id="noseW" min="0.5" max="2" step="0.05"></label>
     <label><span data-i18n="shade_noseIn"></span> <input type="range" id="noseIn" min="0" max="0.6" step="0.05"></label>
     <label><span data-i18n="shade_noseSoft"></span> <input type="range" id="noseSoft" min="0.5" max="3" step="0.1"></label>
-    <p class="sub"><span data-i18n="shade_jaw_sub"></span><input type="checkbox" class="gt" data-guide="jaw"></p>
+    <p class="sub" data-i18n="shade_jaw_sub"></p>
+    <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="jaw"></label>
     <label><span data-i18n="shade_jawA"></span> <input type="range" id="jawA" min="0" max="1" step="0.05"></label>
     <label><span data-i18n="shade_jawSoft"></span> <input type="range" id="jawSoft" min="0.5" max="3" step="0.1"></label>
   </details>
 
   <details data-fx="hi">
     <summary><span data-i18n="hi_title"></span><input type="color" id="hiColor" class="hdr-color" data-i18n-title="hi_color_title" data-i18n-aria="hi_color_title"></summary>
-    <p class="sub"><span data-i18n="hi_nose_sub"></span><input type="checkbox" class="gt" data-guide="hiNose"></p>
+    <p class="sub" data-i18n="hi_nose_sub"></p>
+    <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="hiNose"></label>
     <label><span data-i18n="hi_noseA"></span> <input type="range" id="hiA" min="0" max="1" step="0.05"></label>
     <label><span data-i18n="hi_noseW"></span> <input type="range" id="hiW" min="0.5" max="2" step="0.05"></label>
     <label><span data-i18n="hi_noseSoft"></span> <input type="range" id="hiSoft" min="0.5" max="3" step="0.1"></label>
-    <p class="sub"><span data-i18n="hi_cheek_sub"></span><input type="checkbox" class="gt" data-guide="hiCheek"></p>
+    <p class="sub" data-i18n="hi_cheek_sub"></p>
+    <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="hiCheek"></label>
     <label><span data-i18n="hi_cheekA"></span> <input type="range" id="hiCheekA" min="0" max="1" step="0.05"></label>
     <label><span data-i18n="hi_cheekW"></span> <input type="range" id="hiCheekW" min="0.5" max="2" step="0.05"></label>
     <label><span data-i18n="hi_cheekX"></span> <input type="range" id="hiCheekX" min="-0.08" max="0.08" step="0.01"></label>
     <label><span data-i18n="hi_cheekY"></span> <input type="range" id="hiCheekY" min="-0.08" max="0.08" step="0.01"></label>
     <label><span data-i18n="hi_cheekSoft"></span> <input type="range" id="hiCheekSoft" min="0.5" max="3" step="0.1"></label>
-    <p class="sub"><span data-i18n="hi_chin_sub"></span><input type="checkbox" class="gt" data-guide="hiChin"></p>
+    <p class="sub" data-i18n="hi_chin_sub"></p>
+    <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="hiChin"></label>
     <label><span data-i18n="hi_chinA"></span> <input type="range" id="hiChinA" min="0" max="1" step="0.05"></label>
     <label><span data-i18n="hi_chinW"></span> <input type="range" id="hiChinW" min="0.5" max="2" step="0.05"></label>
     <label><span data-i18n="hi_chinY"></span> <input type="range" id="hiChinY" min="-0.06" max="0.06" step="0.01"></label>
