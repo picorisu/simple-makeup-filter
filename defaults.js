@@ -16,6 +16,7 @@ globalThis.MBF_GUIDE_COLORS = {
   shadow: '#b14cff',
   liner: '#2f6bff',
   nose: '#00c853',
+  jaw: '#a8e000',
   hiNose: '#cfd8dc',
   hiCheek: '#cfd8dc',
   hiChin: '#cfd8dc'
@@ -35,6 +36,7 @@ globalThis.MBF_DEFAULTS = {
     shadow: false,
     liner: false,
     nose: false,
+    jaw: false,
     hiNose: false,
     hiCheek: false,
     hiChin: false

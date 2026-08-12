@@ -265,6 +265,7 @@ void main() {
     shadow: '#b14cff',
     liner: '#2f6bff',
     nose: '#00c853',
+    jaw: '#a8e000',
     hiNose: '#cfd8dc',
     hiCheek: '#cfd8dc',
     hiChin: '#cfd8dc'
@@ -879,6 +880,24 @@ void main() {
     ctx.restore();
   }
 
+  // 折れ線を法線方向へ d だけ平行移動する。各頂点では前後のセグメントの法線を
+  // 平均して角が途切れないようにする
+  function offsetPolyline(pts, d) {
+    const normals = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const dx = pts[i + 1][0] - pts[i][0], dy = pts[i + 1][1] - pts[i][1];
+      const l = Math.hypot(dx, dy) || 1;
+      normals.push([-dy / l, dx / l]);
+    }
+    return pts.map((p, i) => {
+      const a = normals[Math.max(0, i - 1)];
+      const b = normals[Math.min(normals.length - 1, i)];
+      let nx = a[0] + b[0], ny = a[1] + b[1];
+      const l = Math.hypot(nx, ny) || 1;
+      nx /= l; ny /= l;
+      return [p[0] + nx * d, p[1] + ny * d];
+    });
+  }
 
   // 有効なパーツの適用領域を輪郭線で重ねて描く（位置調整の目視用）。
   // outCanvas に直接描くため通話相手にも見える
@@ -1025,6 +1044,25 @@ void main() {
           GUIDE_COLORS.nose, (tx + ax) / 2, (ty + ay) / 2,
           len * 0.55, ry, Math.atan2(ay - ty, ax - tx)
         );
+      }
+    }
+
+    if (settings.jawA > 0 && partOn('jaw')) {
+      // 実描画は太い帯（lineWidth = faceW * 0.05）なので、中心線ではなく帯の両縁を描く
+      const half = faceW * 0.025;
+      const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
+      for (const jaw of [JAW_L, JAW_R]) {
+        const pts = jaw.map((i) => {
+          let x = lm[i].x * W, y = lm[i].y * H;
+          const dx = nx - x, dy = ny - y;
+          const dl = Math.hypot(dx, dy) || 1;
+          x += (dx / dl) * faceW * 0.03;
+          y += (dy / dl) * faceW * 0.03;
+          return [x, y];
+        });
+        for (const sign of [1, -1]) {
+          strokePoints(GUIDE_COLORS.jaw, offsetPolyline(pts, half * sign), false);
+        }
       }
     }
 
