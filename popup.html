@@ -112,6 +112,8 @@
   /* ガイド表示チェック。チェック時の塗り色はガイド線の色を JS が accent-color で当てる（凡例を兼ねる） */
   .gt { margin: 0 0 0 5px; flex-shrink: 0; width: 12px; height: 12px; cursor: pointer; }
   label .gt, .sub .gt { float: right; }
+  /* ガイドのマスターが OFF の間はパーツ選択を出さない（body.guide-on は popup.js が同期） */
+  body:not(.guide-on) .gt, body:not(.guide-on) .guide-row { display: none; }
   /* 右フロートのチェックで行の高さが潰れないようにする */
   .sub, label:has(.gt) { display: flow-root; }
 </style>
@@ -156,7 +158,7 @@
 
   <details data-fx="lip">
     <summary><span data-i18n="lip_title"></span><input type="color" id="lipColor" class="hdr-color" data-i18n-title="lip_color_title" data-i18n-aria="lip_color_title"></summary>
-    <label><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="lip"></label>
+    <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="lip"></label>
     <label><span data-i18n="lip_a"></span> <input type="range" id="lipA" min="0" max="1" step="0.05"></label>
     <label><span data-i18n="lip_gloss"></span> <input type="range" id="lipGloss" min="0" max="1" step="0.05"></label>
     <label><span data-i18n="lip_w"></span> <input type="range" id="lipW" min="0.8" max="1.3" step="0.02"></label>
@@ -164,7 +166,7 @@
 
   <details data-fx="blush">
     <summary><span data-i18n="blush_title"></span><input type="color" id="blushColor" class="hdr-color"></summary>
-    <label><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="blush"></label>
+    <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="blush"></label>
     <label><span data-i18n="blush_a"></span> <input type="range" id="blushA" min="0" max="1" step="0.05"></label>
     <label><span data-i18n="blush_shape"></span> <input type="range" id="blushShape" min="1" max="2.5" step="0.1"></label>
     <label><span data-i18n="blush_x"></span> <input type="range" id="blushX" min="-0.08" max="0.08" step="0.01"></label>
@@ -174,7 +176,7 @@
 
   <details data-fx="brow">
     <summary><span data-i18n="brow_title"></span><input type="color" id="browColor" class="hdr-color"></summary>
-    <label><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="brow"></label>
+    <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="brow"></label>
     <label><span data-i18n="brow_a"></span> <input type="range" id="browA" min="0" max="1" step="0.05"></label>
     <label><span data-i18n="brow_w"></span> <input type="range" id="browW" min="0.25" max="1.05" step="0.05"></label>
     <label><span data-i18n="brow_taper"></span> <input type="range" id="browTaper" min="0" max="1" step="0.05"></label>
@@ -185,7 +187,7 @@
 
   <details data-fx="shadow">
     <summary><span data-i18n="shadow_title"></span><input type="color" id="shadowColor" class="hdr-color" data-i18n-title="shadow_color1_title" data-i18n-aria="shadow_color1_title"><input type="checkbox" id="shadowUse2" class="hdr-check" data-i18n-title="shadow_use2_title" data-i18n-aria="shadow_use2_title"><input type="color" id="shadowColor2" class="hdr-color" style="margin-left:0" data-i18n-title="shadow_color2_title" data-i18n-aria="shadow_color2_title"><input type="checkbox" id="shadowUse3" class="hdr-check" data-i18n-title="shadow_use3_title" data-i18n-aria="shadow_use3_title"><input type="color" id="shadowColor3" class="hdr-color" style="margin-left:0" data-i18n-title="shadow_color3_title" data-i18n-aria="shadow_color3_title"></summary>
-    <label><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="shadow"></label>
+    <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="shadow"></label>
     <label><span data-i18n="shadow_a"></span> <input type="range" id="shadowA" min="0" max="1" step="0.05"></label>
     <label><span data-i18n="shadow_h"></span> <input type="range" id="shadowH" min="0.5" max="2" step="0.05"></label>
     <label><span data-i18n="shadow_w"></span> <input type="range" id="shadowW" min="0.8" max="1.4" step="0.05"></label>
@@ -195,7 +197,7 @@
 
   <details data-fx="liner">
     <summary><span data-i18n="liner_title"></span><input type="color" id="linerColor" class="hdr-color" data-i18n-title="liner_color_title" data-i18n-aria="liner_color_title"></summary>
-    <label><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="liner"></label>
+    <label class="guide-row"><span data-i18n="guide_line"></span><input type="checkbox" class="gt" data-guide="liner"></label>
     <label><span data-i18n="liner_a"></span> <input type="range" id="linerA" min="0" max="1" step="0.05"></label>
     <label><span data-i18n="liner_w"></span> <input type="range" id="linerW" min="0.4" max="2" step="0.05"></label>
     <label><span data-i18n="liner_y"></span> <input type="range" id="linerY" min="-0.006" max="0.01" step="0.001"></label>

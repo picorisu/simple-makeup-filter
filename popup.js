@@ -72,6 +72,7 @@ function showVal(k, v) {
 function refreshUI(s) {
   for (const k of CHECKS) document.getElementById(k).checked = s[k];
   document.getElementById('guideOn').checked = s.guideOn ?? false;
+  document.body.classList.toggle('guide-on', s.guideOn ?? false);
   showParts(s.guideParts);
   for (const k of RANGES) {
     const el = document.getElementById(k);
@@ -89,6 +90,7 @@ const guideEl = document.getElementById('guideOn');
 
 guideEl.addEventListener('change', (e) => {
   if (!e.target.checked) {
+    document.body.classList.remove('guide-on');
     chrome.storage.local.set({ guideOn: false });
     return;
   }
@@ -96,6 +98,7 @@ guideEl.addEventListener('change', (e) => {
     e.target.checked = false;
     return;
   }
+  document.body.classList.add('guide-on');
   chrome.storage.local.set({ guideOn: true });
 });
 
