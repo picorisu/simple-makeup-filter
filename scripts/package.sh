@@ -21,6 +21,28 @@ for f in _locales/ja/messages.json _locales/en/messages.json; do
   fi
 done
 
+# ガイド色の二重管理（override.js の GUIDE_COLORS / defaults.js の MBF_GUIDE_COLORS）が
+# 食い違うと popup の凡例が実際の線の色と合わなくなるため、提出前に一致を検証する
+python3 - <<'PY'
+import re, sys
+
+def colors(path, name):
+    src = open(path, encoding='utf-8').read()
+    m = re.search(name + r'\s*=\s*\{([^}]*)\}', src)
+    if not m:
+        print(f'ERROR: {path} に {name} が見つかりません', file=sys.stderr)
+        sys.exit(1)
+    return re.findall(r"(\w+):\s*'(#[0-9a-fA-F]{6})'", m.group(1))
+
+a = colors('override.js', 'GUIDE_COLORS')
+b = colors('defaults.js', 'MBF_GUIDE_COLORS')
+if a != b:
+    print('ERROR: ガイド色が override.js と defaults.js で一致しません（キー順含む）', file=sys.stderr)
+    print(f'  override.js : {a}', file=sys.stderr)
+    print(f'  defaults.js : {b}', file=sys.stderr)
+    sys.exit(1)
+PY
+
 VERSION=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
 OUT="dist/simple-makeup-filter-v${VERSION}.zip"
 mkdir -p dist
