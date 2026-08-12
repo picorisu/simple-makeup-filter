@@ -109,8 +109,9 @@
   .status.ok { color: #4caf7d; }
   .quick { display: flex; gap: 6px; margin-top: 10px; }
   .quick .btn { flex: 1; }
-  /* ガイド表示チェック。チェック時の塗り色はガイド線の色を JS が accent-color で当てる（凡例を兼ねる） */
-  .gt { margin: 0 5px 0 0; flex-shrink: 0; width: 12px; height: 12px; cursor: pointer; vertical-align: -2px; }
+  /* ガイド表示チェック。隣の線スウォッチ（.gl）がガイド線の色の凡例を兼ねる（色は JS が当てる） */
+  .gt { margin: 0 5px 0 0; flex-shrink: 0; width: 12px; height: 12px; cursor: pointer; vertical-align: -2px; accent-color: #d45f8a; }
+  .gl { display: inline-block; width: 18px; height: 3px; border-radius: 2px; margin-left: 6px; vertical-align: 2px; }
   .guide-row { border-bottom: 1px dashed #f3cdd9; padding-bottom: 8px; }
 </style>
 </head>

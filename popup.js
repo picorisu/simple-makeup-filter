@@ -83,14 +83,31 @@ function refreshUI(s) {
 
 // ---------- 位置ガイド ----------
 // パーツごとの表示チェック。調整するスライダーのそばに置き、
-// チェックの塗り色はガイド線の色と同じで凡例を兼ねる。
+// 隣の線スウォッチ（.gl）がガイド線の色の凡例を兼ねる。
 // 通話相手にも見えるため ON にするたびに承諾を取る
+const LIGHT_LUM = 0.85;
+
+function relLuminance(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const [r, g, b] = [16, 8, 0].map((s) => {
+    const v = ((n >> s) & 255) / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
 const guideToggles = {};
 for (const el of document.querySelectorAll('[data-guide]')) {
   const name = el.dataset.guide;
   const label = M(`guide_part_${name}`);
   el.title = label;
   el.setAttribute('aria-label', label);
+  const swatch = document.createElement('span');
+  swatch.className = 'gl';
+  swatch.style.background = MBF_GUIDE_COLORS[name];
+  // 明るい色は白背景に溶けるため輪郭を足す
+  if (relLuminance(MBF_GUIDE_COLORS[name]) >= LIGHT_LUM) swatch.style.outline = '1px solid #d9c3cc';
+  el.parentElement.appendChild(swatch);
   el.addEventListener('change', (e) => {
     if (e.target.checked && !confirm(M('confirm_guide'))) {
       e.target.checked = false;
@@ -106,24 +123,9 @@ for (const el of document.querySelectorAll('[data-guide]')) {
   guideToggles[name] = el;
 }
 
-const LIGHT_LUM = 0.85;
-
-function relLuminance(hex) {
-  const n = parseInt(hex.slice(1), 16);
-  const [r, g, b] = [16, 8, 0].map((s) => {
-    const v = ((n >> s) & 255) / 255;
-    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
-
 function showParts(parts) {
   for (const [name, el] of Object.entries(guideToggles)) {
-    const color = MBF_GUIDE_COLORS[name];
     el.checked = parts?.[name] === true;
-    el.style.accentColor = color;
-    // 明るい色のチェックは白背景に溶けるため輪郭を足す
-    el.style.outline = relLuminance(color) >= LIGHT_LUM ? '1px solid #d9c3cc' : '';
   }
 }
 
