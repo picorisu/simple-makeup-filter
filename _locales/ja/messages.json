@@ -118,7 +118,6 @@
   "guide_part_shadow": { "message": "アイシャドウのガイド線" },
   "guide_part_liner": { "message": "アイラインのガイド線" },
   "guide_part_nose": { "message": "ノーズシャドウのガイド線" },
-  "guide_part_jaw": { "message": "輪郭のガイド線" },
   "guide_part_hiNose": { "message": "鼻筋ハイライトのガイド線" },
   "guide_part_hiCheek": { "message": "頬骨ハイライトのガイド線" },
   "guide_part_hiChin": { "message": "顎先ハイライトのガイド線" },

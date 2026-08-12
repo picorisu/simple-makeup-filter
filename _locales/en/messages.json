@@ -118,7 +118,6 @@
   "guide_part_shadow": { "message": "Eyeshadow guide line" },
   "guide_part_liner": { "message": "Eyeliner guide line" },
   "guide_part_nose": { "message": "Nose shadow guide line" },
-  "guide_part_jaw": { "message": "Jawline guide line" },
   "guide_part_hiNose": { "message": "Nose bridge highlight guide line" },
   "guide_part_hiCheek": { "message": "Cheekbone highlight guide line" },
   "guide_part_hiChin": { "message": "Chin highlight guide line" },
