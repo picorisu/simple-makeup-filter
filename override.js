@@ -244,6 +244,8 @@ void main() {
   const NOSE_TIP = 1;
   const FACE_LEFT = 234;
   const FACE_RIGHT = 454;
+  // 目尻マスカラの長さ倍率（目尻側ほど長い）。全本同じ長さだと不自然になる
+  const LASH_SCALES = [0.6, 0.75, 0.9, 1.0];
 
   function tracePath(ctx, lm, indices, W, H) {
     ctx.moveTo(lm[indices[0]].x * W, lm[indices[0]].y * H);
@@ -565,6 +567,32 @@ void main() {
     ];
   }
 
+  // 目尻マスカラ1本分の始点・中点・終点。際の目尻側 1/4 の区間に等間隔で並べ、
+  // 際の接線を目尻方向へ rad だけ振った向きに伸ばす（n が大きいほど目尻寄り＝長い）
+  function lashStroke(eye, lm, W, H, upX, upY, rad, baseLen, n) {
+    // eye[0] が目尻、末尾が目頭。目尻側 1/4 に収まるよう区間を取る
+    const span = (eye.length - 1) / 4;
+    const t = span * (1 - n / LASH_SCALES.length);
+    const i0 = Math.min(eye.length - 2, Math.floor(t));
+    const f = t - i0;
+    const a = [lm[eye[i0]].x * W, lm[eye[i0]].y * H];
+    const b = [lm[eye[i0 + 1]].x * W, lm[eye[i0 + 1]].y * H];
+    const x0 = a[0] + (b[0] - a[0]) * f;
+    const y0 = a[1] + (b[1] - a[1]) * f;
+    // 接線は目頭→目尻の向き（外向き）に正規化する
+    let dx = a[0] - b[0], dy = a[1] - b[1];
+    const dl = Math.hypot(dx, dy) || 1;
+    dx /= dl; dy /= dl;
+    const wx = dx * Math.cos(rad) + upX * Math.sin(rad);
+    const wy = dy * Math.cos(rad) + upY * Math.sin(rad);
+    const len = baseLen * LASH_SCALES[n];
+    return {
+      x0, y0,
+      xm: x0 + wx * len * 0.5, ym: y0 + wy * len * 0.5,
+      x1: x0 + wx * len, y1: y0 + wy * len
+    };
+  }
+
   // アイラインの線幅。跳ね上げの根元幅にも使うため実描画とガイドで共有
   function linerWidth(faceW) {
     return Math.max(0.8, faceW * 0.008 * settings.linerW);
@@ -808,6 +836,33 @@ void main() {
           ctx.lineTo(wing[2][0], wing[2][1]);
           ctx.closePath();
           ctx.fill();
+        }
+      }
+    }
+
+    if (settings.lashA > 0) {
+      // 目尻マスカラ: 際の目尻側 1/4 から扇状に短いストロークを描く
+      ctx.filter = `blur(${Math.max(0.5, faceW * 0.002)}px)`;
+      ctx.strokeStyle = hexToRgba(settings.linerColor, settings.lashA * 0.85);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      const rad = (settings.lashUp * Math.PI) / 180;
+      const baseLen = faceW * 0.025 * settings.lashLen;
+      const rootW = linerWidth(faceW);
+      for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
+        for (let n = 0; n < LASH_SCALES.length; n++) {
+          const p = lashStroke(eye, lm, W, H, upX, upY, rad, baseLen, n);
+          // 根元を太く、先端へ向けて細くする（1本を2セグメントに割って幅を変える）
+          ctx.lineWidth = rootW * 0.9;
+          ctx.beginPath();
+          ctx.moveTo(p.x0, p.y0);
+          ctx.lineTo(p.xm, p.ym);
+          ctx.stroke();
+          ctx.lineWidth = Math.max(0.5, rootW * 0.45);
+          ctx.beginPath();
+          ctx.moveTo(p.xm, p.ym);
+          ctx.lineTo(p.x1, p.y1);
+          ctx.stroke();
         }
       }
     }
@@ -1278,7 +1333,7 @@ void main() {
         const makeupOn = on &&
           (settings.lipA > 0 || settings.lipGloss > 0 || settings.blushA > 0 || settings.browA > 0 ||
            settings.nasoA > 0 || settings.marioA > 0 || settings.eyebagLine > 0 || settings.eyebagBright > 0 ||
-           settings.shadowA > 0 || settings.linerA > 0 ||
+           settings.shadowA > 0 || settings.linerA > 0 || settings.lashA > 0 ||
            settings.tearA > 0 || settings.tearShadeA > 0 ||
            settings.noseA > 0 || settings.jawA > 0 ||
            settings.hiA > 0 || settings.hiCheekA > 0 || settings.hiChinA > 0 ||
