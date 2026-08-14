@@ -1,7 +1,7 @@
 const DEFAULTS = MBF_DEFAULTS; // 初期値は defaults.js が単一情報源
 
-const RANGES = ['smooth', 'bright', 'warmth', 'sat', 'lipThresh', 'skinRange', 'nasoA', 'marioA', 'eyebagLine', 'eyebagBright', 'eyebagW', 'eyebagH', 'eyebagX', 'eyebagY', 'lipA', 'lipGloss', 'lipW', 'blushA', 'blushShape', 'blushX', 'blushY', 'blushSoft', 'browA', 'browW', 'browTaper', 'browArch', 'browPeak', 'browTail', 'shadowA', 'shadowH', 'shadowW', 'shadowSoft', 'shadowBias', 'tearA', 'tearShadeA', 'tearH', 'tearW', 'tearSoft', 'linerA', 'linerW', 'linerY', 'linerWing', 'linerWingUp', 'linerWingW', 'noseA', 'noseW', 'noseIn', 'noseSoft', 'jawA', 'jawSoft', 'hiA', 'hiW', 'hiSoft', 'hiCheekA', 'hiCheekW', 'hiCheekX', 'hiCheekY', 'hiCheekSoft', 'hiChinA', 'hiChinW', 'hiChinY', 'hiChinSoft'];
-const COLORS = ['lipColor', 'blushColor', 'browColor', 'shadowColor', 'shadowColor2', 'shadowColor3', 'tearColor', 'tearShadeColor', 'linerColor', 'shadeColor', 'hiColor'];
+const RANGES = ['smooth', 'bright', 'warmth', 'sat', 'lipThresh', 'skinRange', 'nasoA', 'marioA', 'eyebagLine', 'eyebagBright', 'eyebagW', 'eyebagH', 'eyebagX', 'eyebagY', 'lipA', 'lipGloss', 'lipW', 'blushA', 'blushShape', 'blushX', 'blushY', 'blushSoft', 'browA', 'browW', 'browTaper', 'browArch', 'browPeak', 'browTail', 'shadowA', 'shadowH', 'shadowW', 'shadowSoft', 'shadowBias', 'tearA', 'tearShadeA', 'tearH', 'tearW', 'tearSoft', 'linerA', 'linerW', 'linerY', 'linerWing', 'linerWingUp', 'linerWingW', 'lashA', 'lashLen', 'lashUp', 'lashCurl', 'lashN', 'lashSpan', 'noseA', 'noseW', 'noseIn', 'noseSoft', 'jawA', 'jawSoft', 'hiA', 'hiW', 'hiSoft', 'hiCheekA', 'hiCheekW', 'hiCheekX', 'hiCheekY', 'hiCheekSoft', 'hiChinA', 'hiChinW', 'hiChinY', 'hiChinSoft'];
+const COLORS = ['lipColor', 'blushColor', 'browColor', 'shadowColor', 'shadowColor2', 'shadowColor3', 'tearColor', 'tearShadeColor', 'linerColor', 'lashColor', 'shadeColor', 'hiColor'];
 
 const CHECKS = ['enabled', 'shadowUse2', 'shadowUse3'];
 
@@ -42,7 +42,7 @@ const FX_KEYS = {
   brow: ['browA'],
   shadow: ['shadowA'],
   tear: ['tearA', 'tearShadeA'],
-  liner: ['linerA'],
+  liner: ['linerA', 'lashA'],
   shade: ['noseA', 'jawA'],
   hi: ['hiA', 'hiCheekA', 'hiChinA']
 };
