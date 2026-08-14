@@ -87,7 +87,7 @@
   "liner_wing": { "message": "目尻ハネの長さ（0でなし）" },
   "liner_wingUp": { "message": "ハネの角度（下向き ⇔ 上向き）" },
   "liner_wingW": { "message": "ハネの太さ（細 ⇔ 太）" },
-  "liner_lash_sub": { "message": "目尻マスカラ" },
+  "liner_lash_sub": { "message": "マスカラ" },
   "liner_lash_color_title": { "message": "マスカラ色" },
   "liner_lashA": { "message": "濃さ（0で無効）" },
   "liner_lashLen": { "message": "長さ（短 ⇔ 長）" },

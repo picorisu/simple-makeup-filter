@@ -255,6 +255,26 @@ void main() {
   const LASH_SAMPLES = 6;
   // 目頭側の内向きの倒れ（lashUp に対する比）
   const LASH_INNER_LEAN = 0.4;
+  // 本ごとのばらつきの振れ幅。実機で調整する
+  const LASH_VAR_WIDTH = 0.4;   // 太さの下振れ幅（1 - この値 〜 1 + 上振れ）
+  const LASH_VAR_WIDTH_UP = 0.15;
+  const LASH_VAR_LEN = 0.15;    // 長さ 1 - 0.15 〜 1 + 0.1
+  const LASH_VAR_LEN_UP = 0.1;
+  const LASH_VAR_LEAN = 4;      // 角度（度）±
+  const LASH_VAR_GAP = 0.2;     // 間隔（隣との間隔に対する比）±
+  // 左右の目でテーブルの参照位置をずらす量
+  const LASH_VAR_EYE_OFFSET = 5;
+  // ばらつきの元になる固定テーブル。要素数を互いに素にして周期が重ならないようにする。
+  // 毎フレーム同じ値でなければまつげがちらつくため乱数は使わない
+  const LASH_VAR_A = [0.62, 0.19, 0.94, 0.41, 0.77, 0.08, 0.55, 0.86, 0.31, 0.69, 0.13];
+  const LASH_VAR_B = [0.28, 0.83, 0.47, 0.71, 0.05, 0.92, 0.36, 0.58, 0.15, 0.79, 0.44, 0.66, 0.22];
+  const LASH_VAR_C = [0.73, 0.11, 0.52, 0.88, 0.26, 0.64, 0.39, 0.97, 0.18];
+  const LASH_VAR_D = [0.45, 0.81, 0.07, 0.59, 0.34, 0.91, 0.23];
+
+  // テーブルを本のインデックスで循環参照し、-1〜1 に写す（決定的）
+  function lashVar(table, i) {
+    return table[i % table.length] * 2 - 1;
+  }
 
   function tracePath(ctx, lm, indices, W, H) {
     ctx.moveTo(lm[indices[0]].x * W, lm[indices[0]].y * H);
@@ -576,13 +596,17 @@ void main() {
     ];
   }
 
-  // マスカラ1本分の2次ベジェ（始点・制御点・終点）。
-  // n は目尻側から数えた本数（0 が最も目尻寄り＝最長）
-  function lashStroke(eye, lm, W, H, upX, upY, lashUp, baseLen, n, count, spanRatio, curl) {
+  // マスカラ1本分の2次ベジェ（始点・制御点・終点）と根元幅の倍率。
+  // n は目尻側から数えた本数（0 が最も目尻寄り＝最長）。
+  // v は本ごとのばらつきの参照位置（左右の目でずらして同じ並びを避ける）
+  function lashStroke(eye, lm, W, H, upX, upY, lashUp, baseLen, n, count, spanRatio, curl, v) {
     // eye[0] が目尻、末尾が目頭。目尻側の spanRatio の区間に等間隔で並べる
     const total = eye.length - 1;
     const span = total * spanRatio;
-    const t = count > 1 ? span * (n / (count - 1)) : 0;
+    const gap = count > 1 ? span / (count - 1) : 0;
+    // 隣との間隔の一部だけずらす。半分を超えると隣と順序が入れ替わる
+    const jitter = gap * LASH_VAR_GAP * lashVar(LASH_VAR_D, v);
+    const t = Math.min(span, Math.max(0, (count > 1 ? span * (n / (count - 1)) : 0) + jitter));
     const i0 = Math.min(eye.length - 2, Math.floor(t));
     const f = t - i0;
     const a = [lm[eye[i0]].x * W, lm[eye[i0]].y * H];
@@ -600,18 +624,22 @@ void main() {
     // 際上の絶対位置 s（目頭 0 → 目尻 1）で倒れ方を変える。
     // 目尻は外向きに lashUp、目頭は内向きに lashUp * LASH_INNER_LEAN 倒す
     const s = 1 - t / total;
-    const lean = lashUp * (s * (1 + LASH_INNER_LEAN) - LASH_INNER_LEAN);
+    const lean = lashUp * (s * (1 + LASH_INNER_LEAN) - LASH_INNER_LEAN)
+      + LASH_VAR_LEAN * lashVar(LASH_VAR_C, v);
     const rad = (lean * Math.PI) / 180;
     const wx = nx * Math.cos(rad) + dx * Math.sin(rad);
     const wy = ny * Math.cos(rad) + dy * Math.sin(rad);
     const scale = count > 1 ? 1 - (1 - LASH_MIN_SCALE) * (n / (count - 1)) : 1;
-    const len = baseLen * scale;
+    const lenVar = lashVar(LASH_VAR_B, v);
+    const len = baseLen * scale * (1 + (lenVar < 0 ? LASH_VAR_LEN : LASH_VAR_LEN_UP) * lenVar);
     // カールは毛先だけを顔基準の上方向へ持ち上げる。制御点を進行方向上に置くことで
     // 根元の接線が元の向きのまま残る（両端固定で制御点を振ると毛先が垂れて見える）
     const off = len * curl * LASH_CURL_K;
     const x1 = x0 + wx * len + upX * off, y1 = y0 + wy * len + upY * off;
     const cx = x0 + wx * len * LASH_CURL_ANCHOR, cy = y0 + wy * len * LASH_CURL_ANCHOR;
-    return { x0, y0, cx, cy, x1, y1 };
+    const wVar = lashVar(LASH_VAR_A, v);
+    const widthMul = 1 + (wVar < 0 ? LASH_VAR_WIDTH : LASH_VAR_WIDTH_UP) * wVar;
+    return { x0, y0, cx, cy, x1, y1, widthMul };
   }
 
   // まつげ1本の輪郭: 曲線をサンプリングし、各点で進行方向に垂直な向きへ
@@ -894,11 +922,13 @@ void main() {
       const baseLen = faceW * 0.025 * settings.lashLen;
       const rootW = linerWidth(faceW) * 0.9;
       const count = Math.max(2, Math.round(settings.lashN));
-      for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
+      for (let e = 0; e < 2; e++) {
+        const eye = e === 0 ? EYE_TOP_L : EYE_TOP_R;
         for (let n = 0; n < count; n++) {
+          // 左右で参照位置をずらし、同じ並びのばらつきが両目に出ないようにする
           const c = lashStroke(eye, lm, W, H, upX, upY, settings.lashUp, baseLen, n,
-            count, settings.lashSpan, settings.lashCurl);
-          const pts = lashOutline(c, rootW);
+            count, settings.lashSpan, settings.lashCurl, n + e * LASH_VAR_EYE_OFFSET);
+          const pts = lashOutline(c, rootW * c.widthMul);
           ctx.beginPath();
           ctx.moveTo(pts[0][0], pts[0][1]);
           for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k][0], pts[k][1]);
