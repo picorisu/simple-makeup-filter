@@ -270,10 +270,24 @@ void main() {
   const LASH_VAR_B = [0.28, 0.83, 0.47, 0.71, 0.05, 0.92, 0.36, 0.58, 0.15, 0.79, 0.44, 0.66, 0.22];
   const LASH_VAR_C = [0.73, 0.11, 0.52, 0.88, 0.26, 0.64, 0.39, 0.97, 0.18];
   const LASH_VAR_D = [0.45, 0.81, 0.07, 0.59, 0.34, 0.91, 0.23];
+  // 帯状パーツ（アイシャドウ・涙袋等）の端点押し出しを狭める係数。紡錘形にするため
+  const BAND_EDGE_TAPER = 0.4;
 
   // テーブルを本のインデックスで循環参照し、-1〜1 に写す（決定的）
   function lashVar(table, i) {
     return table[i % table.length] * 2 - 1;
+  }
+
+  // 点列 pts を重心基準に、顔の横方向（dirX, dirY）にだけ伸縮する（高さは変えない）
+  function widenAlongFace(pts, dirX, dirY, widen) {
+    if (widen === 0) return pts;
+    let cx = 0, cy = 0;
+    for (const p of pts) { cx += p[0]; cy += p[1]; }
+    cx /= pts.length; cy /= pts.length;
+    return pts.map(([x, y]) => {
+      const d = (x - cx) * dirX + (y - cy) * dirY;
+      return [x + dirX * d * widen, y + dirY * d * widen];
+    });
   }
 
   function tracePath(ctx, lm, indices, W, H) {
@@ -556,20 +570,11 @@ void main() {
     const drop = faceW * 0.03 * settings.tearH;
     const dirX = Math.cos(roll), dirY = Math.sin(roll);
     const widen = settings.tearW - 1;
-    let lid = eye.map((i) => [lm[i].x * W, lm[i].y * H]);
     // 幅: 目の中心を基準に、顔の横方向にだけ伸縮（高さは変えない）
-    if (widen !== 0) {
-      let cx = 0, cy = 0;
-      for (const p of lid) { cx += p[0]; cy += p[1]; }
-      cx /= lid.length; cy /= lid.length;
-      lid = lid.map(([x, y]) => {
-        const d = (x - cx) * dirX + (y - cy) * dirY;
-        return [x + dirX * d * widen, y + dirY * d * widen];
-      });
-    }
+    const lid = widenAlongFace(eye.map((i) => [lm[i].x * W, lm[i].y * H]), dirX, dirY, widen);
     // 目尻・目頭側は押し出しを狭めて自然な紡錘形にする
     const lower = lid.map(([x, y], k) => {
-      const edge = k === 0 || k === lid.length - 1 ? 0.4 : 1;
+      const edge = k === 0 || k === lid.length - 1 ? BAND_EDGE_TAPER : 1;
       return [x - upX * drop * edge, y - upY * drop * edge];
     });
     return { lid, lower, drop };
@@ -784,17 +789,8 @@ void main() {
       const dirX = Math.cos(roll), dirY = Math.sin(roll); // 顔基準の「横」方向
       const widen = settings.shadowW - 1;
       for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
-        let lid = eye.map((i) => [lm[i].x * W, lm[i].y * H]);
         // 幅: 目の中心を基準に、顔の横方向にだけ伸縮（高さは変えない）
-        if (widen !== 0) {
-          let cx = 0, cy = 0;
-          for (const p of lid) { cx += p[0]; cy += p[1]; }
-          cx /= lid.length; cy /= lid.length;
-          lid = lid.map(([x, y]) => {
-            const d = (x - cx) * dirX + (y - cy) * dirY;
-            return [x + dirX * d * widen, y + dirY * d * widen];
-          });
-        }
+        const lid = widenAlongFace(eye.map((i) => [lm[i].x * W, lm[i].y * H]), dirX, dirY, widen);
         // グラデーション: 際 → (中間) → (上)。オフの色は飛ばして使う色だけ等間隔に並べる。
         // 1色のときは同じ色が上に向かって薄く抜ける
         let gx = 0, gy = 0;
@@ -824,7 +820,7 @@ void main() {
         for (let k = 1; k < lid.length; k++) ctx.lineTo(lid[k][0], lid[k][1]);
         // 上方向へ押し出した辺を逆順でたどって閉じる（目尻・目頭側は少し狭める）
         for (let k = lid.length - 1; k >= 0; k--) {
-          const edge = k === 0 || k === lid.length - 1 ? 0.4 : 1;
+          const edge = k === 0 || k === lid.length - 1 ? BAND_EDGE_TAPER : 1;
           ctx.lineTo(lid[k][0] + upX * lift * edge, lid[k][1] + upY * lift * edge);
         }
         ctx.closePath();
@@ -1178,19 +1174,10 @@ void main() {
       const dirX = Math.cos(roll), dirY = Math.sin(roll);
       const widen = settings.shadowW - 1;
       for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
-        let lid = eye.map((i) => [lm[i].x * W, lm[i].y * H]);
-        if (widen !== 0) {
-          let cx = 0, cy = 0;
-          for (const p of lid) { cx += p[0]; cy += p[1]; }
-          cx /= lid.length; cy /= lid.length;
-          lid = lid.map(([x, y]) => {
-            const d = (x - cx) * dirX + (y - cy) * dirY;
-            return [x + dirX * d * widen, y + dirY * d * widen];
-          });
-        }
+        const lid = widenAlongFace(eye.map((i) => [lm[i].x * W, lm[i].y * H]), dirX, dirY, widen);
         const band = lid.slice();
         for (let k = lid.length - 1; k >= 0; k--) {
-          const edge = k === 0 || k === lid.length - 1 ? 0.4 : 1;
+          const edge = k === 0 || k === lid.length - 1 ? BAND_EDGE_TAPER : 1;
           band.push([lid[k][0] + upX * lift * edge, lid[k][1] + upY * lift * edge]);
         }
         strokePoints(GUIDE_COLORS.shadow, band, true);
