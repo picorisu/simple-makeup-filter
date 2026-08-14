@@ -592,11 +592,10 @@ void main() {
     const scale = count > 1 ? 1 - (1 - LASH_MIN_SCALE) * (n / (count - 1)) : 1;
     const len = baseLen * scale;
     const x1 = x0 + wx * len, y1 = y0 + wy * len;
-    // 制御点は進行方向の法線のうち顔の上側へ振る（カールの向き）
-    let nx = -wy, ny = wx;
-    if (nx * upX + ny * upY < 0) { nx = -nx; ny = -ny; }
+    // 制御点は顔基準の上方向へ振る（カールの向き）。ストローク向きの法線から
+    // 求めると up と符号が食い違って下向きに曲がる
     const off = len * curl * LASH_CURL_K;
-    const cx = (x0 + x1) / 2 + nx * off, cy = (y0 + y1) / 2 + ny * off;
+    const cx = (x0 + x1) / 2 + upX * off, cy = (y0 + y1) / 2 + upY * off;
     // de Casteljau で t=0.5 分割
     const m0x = (x0 + cx) / 2, m0y = (y0 + cy) / 2;
     const m1x = (cx + x1) / 2, m1y = (cy + y1) / 2;
