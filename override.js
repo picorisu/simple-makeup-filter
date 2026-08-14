@@ -733,10 +733,12 @@ void main() {
       // 涙袋: 下まぶたの際から下へ広がる帯にハイライトを乗せ、その下端に影線を引く。
       // 明るい色だけでは立体感が出ないため、影線が「ぷっくり」の正体になる
       ctx.filter = `blur(${Math.max(2, faceW * 0.012 * settings.tearSoft)}px)`;
-      for (const eye of [EYE_BOT_L, EYE_BOT_R]) {
-        const { lid, lower, drop } = tearBandPoints(eye, lm, W, H, faceW, roll, upX, upY);
 
-        if (settings.tearA > 0) {
+      if (settings.tearA > 0) {
+        // ハイライトは screen 合成（multiply のままだとどんな肌色でも暗くなる）
+        ctx.globalCompositeOperation = 'screen';
+        for (const eye of [EYE_BOT_L, EYE_BOT_R]) {
+          const { lid, lower, drop } = tearBandPoints(eye, lm, W, H, faceW, roll, upX, upY);
           let gx = 0, gy = 0;
           for (const p of lid) { gx += p[0]; gy += p[1]; }
           gx /= lid.length; gy /= lid.length;
@@ -751,13 +753,17 @@ void main() {
           ctx.closePath();
           ctx.fill();
         }
+        ctx.globalCompositeOperation = 'multiply'; // 後続のメイク描画用に戻す
+      }
 
-        if (settings.tearShadeA > 0) {
-          // 影線は塗りでなく細い線（太いと不自然）
-          ctx.strokeStyle = hexToRgba(settings.tearShadeColor, settings.tearShadeA * 0.5);
-          ctx.lineWidth = Math.max(0.8, faceW * 0.008);
-          ctx.lineCap = 'round';
-          ctx.lineJoin = 'round';
+      if (settings.tearShadeA > 0) {
+        // 影線は暗い色を暗く乗せるので multiply のまま。塗りでなく細い線（太いと不自然）
+        ctx.strokeStyle = hexToRgba(settings.tearShadeColor, settings.tearShadeA * 0.5);
+        ctx.lineWidth = Math.max(0.8, faceW * 0.008);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        for (const eye of [EYE_BOT_L, EYE_BOT_R]) {
+          const { lower } = tearBandPoints(eye, lm, W, H, faceW, roll, upX, upY);
           ctx.beginPath();
           ctx.moveTo(lower[0][0], lower[0][1]);
           for (let k = 1; k < lower.length; k++) ctx.lineTo(lower[k][0], lower[k][1]);
