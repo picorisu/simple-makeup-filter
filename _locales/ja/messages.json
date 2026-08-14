@@ -70,6 +70,15 @@
   "shadow_soft": { "message": "ぼかし（くっきり ⇔ ふんわり）" },
   "shadow_bias": { "message": "際色の量（均等 ⇔ 際多め）" },
 
+  "tear_title": { "message": "💧 涙袋" },
+  "tear_color_title": { "message": "ハイライト色" },
+  "tear_shade_color_title": { "message": "影の色" },
+  "tear_a": { "message": "濃さ" },
+  "tear_shade_a": { "message": "影の濃さ" },
+  "tear_h": { "message": "高さ（狭 ⇔ 広）" },
+  "tear_w": { "message": "横幅（狭 ⇔ 広）" },
+  "tear_soft": { "message": "ぼかし（くっきり ⇔ ふんわり）" },
+
   "liner_title": { "message": "✒️ アイライン" },
   "liner_color_title": { "message": "アイライン色" },
   "liner_a": { "message": "濃さ" },
@@ -116,6 +125,7 @@
   "guide_part_blush": { "message": "チークのガイド線" },
   "guide_part_brow": { "message": "眉のガイド線" },
   "guide_part_shadow": { "message": "アイシャドウのガイド線" },
+  "guide_part_tear": { "message": "涙袋のガイド線" },
   "guide_part_liner": { "message": "アイラインのガイド線" },
   "guide_part_nose": { "message": "ノーズシャドウのガイド線" },
   "guide_part_jaw": { "message": "輪郭のガイド線" },

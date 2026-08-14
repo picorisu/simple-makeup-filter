@@ -14,6 +14,7 @@ globalThis.MBF_GUIDE_COLORS = {
   blush: '#ff7fbf',
   brow: '#8b5a2b',
   shadow: '#b14cff',
+  tear: '#ff2ed1',
   liner: '#2f6bff',
   nose: '#00c853',
   jaw: '#a8e000',
@@ -34,6 +35,7 @@ globalThis.MBF_DEFAULTS = {
     blush: false,
     brow: false,
     shadow: false,
+    tear: false,
     liner: false,
     nose: false,
     jaw: false,
@@ -94,6 +96,15 @@ globalThis.MBF_DEFAULTS = {
   shadowW: 1.0,    // 幅 0.8-1.4
   shadowSoft: 1.0, // ぼかし 0.5-3
   shadowBias: 1.0, // 際色の量 1-3
+
+  // --- 涙袋 ---
+  tearColor: '#f0d5cd',      // ハイライト色
+  tearShadeColor: '#c9a396', // シェイド色（影線）
+  tearA: 0,       // ハイライト濃さ 0-1
+  tearShadeA: 0,  // シェイド濃さ 0-1
+  tearH: 1.0,     // 高さ（帯の広さ） 0.5-2
+  tearW: 1.0,     // 横幅 0.8-1.4
+  tearSoft: 1.0,  // ぼかし 0.5-3
 
   // --- アイライン ---
   linerColor: '#2b1d1a',

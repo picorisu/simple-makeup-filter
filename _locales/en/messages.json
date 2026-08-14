@@ -70,6 +70,15 @@
   "shadow_soft": { "message": "Softness (sharp ⇔ diffused)" },
   "shadow_bias": { "message": "Crease ratio (even ⇔ crease-heavy)" },
 
+  "tear_title": { "message": "💧 Under-eye" },
+  "tear_color_title": { "message": "Highlight color" },
+  "tear_shade_color_title": { "message": "Shadow line color" },
+  "tear_a": { "message": "Opacity" },
+  "tear_shade_a": { "message": "Shadow opacity" },
+  "tear_h": { "message": "Height (narrow ⇔ wide)" },
+  "tear_w": { "message": "Width (narrow ⇔ wide)" },
+  "tear_soft": { "message": "Softness (sharp ⇔ diffused)" },
+
   "liner_title": { "message": "✒️ Eyeliner" },
   "liner_color_title": { "message": "Liner color" },
   "liner_a": { "message": "Opacity" },
@@ -116,6 +125,7 @@
   "guide_part_blush": { "message": "Blush guide line" },
   "guide_part_brow": { "message": "Brows guide line" },
   "guide_part_shadow": { "message": "Eyeshadow guide line" },
+  "guide_part_tear": { "message": "Under-eye highlight guide line" },
   "guide_part_liner": { "message": "Eyeliner guide line" },
   "guide_part_nose": { "message": "Nose shadow guide line" },
   "guide_part_jaw": { "message": "Jawline guide line" },

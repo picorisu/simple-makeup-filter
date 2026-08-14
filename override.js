@@ -263,6 +263,7 @@ void main() {
     blush: '#ff7fbf',
     brow: '#8b5a2b',
     shadow: '#b14cff',
+    tear: '#ff2ed1',
     liner: '#2f6bff',
     nose: '#00c853',
     jaw: '#a8e000',
@@ -517,6 +518,32 @@ void main() {
     return pts;
   }
 
+  // 涙袋の帯: 下まぶたの際ラインを顔基準の下方向へ押し出した閉領域。
+  // lid = 際側の点列、drop = 押し出した側の点列（シェイド線はこの辺に沿って引く）。
+  // 実描画と位置ガイドで同じ形を使う
+  function tearBandPoints(eye, lm, W, H, faceW, roll, upX, upY) {
+    const drop = faceW * 0.03 * settings.tearH;
+    const dirX = Math.cos(roll), dirY = Math.sin(roll);
+    const widen = settings.tearW - 1;
+    let lid = eye.map((i) => [lm[i].x * W, lm[i].y * H]);
+    // 幅: 目の中心を基準に、顔の横方向にだけ伸縮（高さは変えない）
+    if (widen !== 0) {
+      let cx = 0, cy = 0;
+      for (const p of lid) { cx += p[0]; cy += p[1]; }
+      cx /= lid.length; cy /= lid.length;
+      lid = lid.map(([x, y]) => {
+        const d = (x - cx) * dirX + (y - cy) * dirY;
+        return [x + dirX * d * widen, y + dirY * d * widen];
+      });
+    }
+    // 目尻・目頭側は押し出しを狭めて自然な紡錘形にする
+    const lower = lid.map(([x, y], k) => {
+      const edge = k === 0 || k === lid.length - 1 ? 0.4 : 1;
+      return [x - upX * drop * edge, y - upY * drop * edge];
+    });
+    return { lid, lower, drop };
+  }
+
   // アイラインの跳ね上げ三角形の3点（根元2点 + 先端）。実描画と位置ガイドで共有
   function linerWingPoints(eye, lm, W, H, faceW, upX, upY, lw) {
     const ox = lm[eye[0]].x * W, oy = lm[eye[0]].y * H;          // 目尻
@@ -699,6 +726,49 @@ void main() {
         }
         ctx.closePath();
         ctx.fill();
+      }
+    }
+
+    if (settings.tearA > 0 || settings.tearShadeA > 0) {
+      // 涙袋: 下まぶたの際から下へ広がる帯にハイライトを乗せ、その下端に影線を引く。
+      // 明るい色だけでは立体感が出ないため、影線が「ぷっくり」の正体になる
+      ctx.filter = `blur(${Math.max(2, faceW * 0.012 * settings.tearSoft)}px)`;
+
+      if (settings.tearA > 0) {
+        // ハイライトは screen 合成（multiply のままだとどんな肌色でも暗くなる）
+        ctx.globalCompositeOperation = 'screen';
+        for (const eye of [EYE_BOT_L, EYE_BOT_R]) {
+          const { lid, lower, drop } = tearBandPoints(eye, lm, W, H, faceW, roll, upX, upY);
+          let gx = 0, gy = 0;
+          for (const p of lid) { gx += p[0]; gy += p[1]; }
+          gx /= lid.length; gy /= lid.length;
+          const g = ctx.createLinearGradient(gx, gy, gx - upX * drop, gy - upY * drop);
+          g.addColorStop(0, hexToRgba(settings.tearColor, settings.tearA * 0.45));
+          g.addColorStop(1, hexToRgba(settings.tearColor, 0));
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.moveTo(lid[0][0], lid[0][1]);
+          for (let k = 1; k < lid.length; k++) ctx.lineTo(lid[k][0], lid[k][1]);
+          for (let k = lower.length - 1; k >= 0; k--) ctx.lineTo(lower[k][0], lower[k][1]);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.globalCompositeOperation = 'multiply'; // 後続のメイク描画用に戻す
+      }
+
+      if (settings.tearShadeA > 0) {
+        // 影線は暗い色を暗く乗せるので multiply のまま。塗りでなく細い線（太いと不自然）
+        ctx.strokeStyle = hexToRgba(settings.tearShadeColor, settings.tearShadeA * 0.5);
+        ctx.lineWidth = Math.max(0.8, faceW * 0.008);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        for (const eye of [EYE_BOT_L, EYE_BOT_R]) {
+          const { lower } = tearBandPoints(eye, lm, W, H, faceW, roll, upX, upY);
+          ctx.beginPath();
+          ctx.moveTo(lower[0][0], lower[0][1]);
+          for (let k = 1; k < lower.length; k++) ctx.lineTo(lower[k][0], lower[k][1]);
+          ctx.stroke();
+        }
       }
     }
 
@@ -1001,6 +1071,13 @@ void main() {
       }
     }
 
+    if ((settings.tearA > 0 || settings.tearShadeA > 0) && partOn('tear')) {
+      for (const eye of [EYE_BOT_L, EYE_BOT_R]) {
+        const { lid, lower } = tearBandPoints(eye, lm, W, H, faceW, roll, upX, upY);
+        strokePoints(GUIDE_COLORS.tear, lid.concat(lower.slice().reverse()), true);
+      }
+    }
+
     if (settings.linerA > 0 && partOn('liner')) {
       const off = faceW * (settings.linerY ?? 0.002);
       const lw = linerWidth(faceW);
@@ -1202,6 +1279,7 @@ void main() {
           (settings.lipA > 0 || settings.lipGloss > 0 || settings.blushA > 0 || settings.browA > 0 ||
            settings.nasoA > 0 || settings.marioA > 0 || settings.eyebagLine > 0 || settings.eyebagBright > 0 ||
            settings.shadowA > 0 || settings.linerA > 0 ||
+           settings.tearA > 0 || settings.tearShadeA > 0 ||
            settings.noseA > 0 || settings.jawA > 0 ||
            settings.hiA > 0 || settings.hiCheekA > 0 || settings.hiChinA > 0 ||
            anyGuideOn());
