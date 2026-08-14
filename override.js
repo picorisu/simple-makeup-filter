@@ -572,7 +572,7 @@ void main() {
     const widen = settings.shadowW - 1;
     // 幅: 目の中心を基準に、顔の横方向にだけ伸縮（高さは変えない）
     const lid = widenAlongFace(eye.map((i) => [lm[i].x * W, lm[i].y * H]), dirX, dirY, widen);
-    const band = lid.slice();
+    const band = lid.map(([x, y]) => [x, y]);
     // 上方向へ押し出した辺を逆順でたどって閉じる（目尻・目頭側は少し狭めて紡錘形にする）
     for (let k = lid.length - 1; k >= 0; k--) {
       const edge = k === 0 || k === lid.length - 1 ? BAND_EDGE_TAPER : 1;
