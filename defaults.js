@@ -121,8 +121,8 @@ globalThis.MBF_DEFAULTS = {
   lashLen: 1.0,   // 長さ 0.5-2
   lashUp: 40,     // 角度（度）0-70。上向きほど跳ね上がる
   lashCurl: 0.3,  // カール 0-1（0で直線）
-  lashN: 8,       // 本数 2-16
-  lashSpan: 0.25, // 適用幅（際に対する割合）0.15-0.6
+  lashN: 8,       // 本数 2-24
+  lashSpan: 0.25, // 適用幅（際に対する割合）0.15-1
 
   // --- シェーディング ---
   shadeColor: '#8a5a40',
