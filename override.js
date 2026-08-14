@@ -247,8 +247,10 @@ void main() {
   // 目尻マスカラの長さ倍率は内側 LASH_MIN_SCALE → 目尻側 1.0 の線形。
   // 全本を同じ長さにすると不自然になるため勾配は必ず保つ
   const LASH_MIN_SCALE = 0.6;
-  // カールの制御点を法線方向へ振る量（長さ比）
+  // カールで毛先を上方向へ持ち上げる量（長さ比）
   const LASH_CURL_K = 0.35;
+  // カールの制御点を進行方向のどこに置くか（長さ比）。大きいほど根元が直線的になる
+  const LASH_CURL_ANCHOR = 0.6;
 
   function tracePath(ctx, lm, indices, W, H) {
     ctx.moveTo(lm[indices[0]].x * W, lm[indices[0]].y * H);
@@ -591,11 +593,11 @@ void main() {
     const wy = dy * Math.cos(rad) + upY * Math.sin(rad);
     const scale = count > 1 ? 1 - (1 - LASH_MIN_SCALE) * (n / (count - 1)) : 1;
     const len = baseLen * scale;
-    const x1 = x0 + wx * len, y1 = y0 + wy * len;
-    // 制御点は顔基準の上方向へ振る（カールの向き）。ストローク向きの法線から
-    // 求めると up と符号が食い違って下向きに曲がる
+    // カールは毛先だけを顔基準の上方向へ持ち上げる。制御点を進行方向上に置くことで
+    // 根元の接線が元の向きのまま残る（両端固定で制御点を振ると毛先が垂れて見える）
     const off = len * curl * LASH_CURL_K;
-    const cx = (x0 + x1) / 2 + upX * off, cy = (y0 + y1) / 2 + upY * off;
+    const x1 = x0 + wx * len + upX * off, y1 = y0 + wy * len + upY * off;
+    const cx = x0 + wx * len * LASH_CURL_ANCHOR, cy = y0 + wy * len * LASH_CURL_ANCHOR;
     // de Casteljau で t=0.5 分割
     const m0x = (x0 + cx) / 2, m0y = (y0 + cy) / 2;
     const m1x = (cx + x1) / 2, m1y = (cy + y1) / 2;
