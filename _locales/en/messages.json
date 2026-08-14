@@ -92,6 +92,9 @@
   "liner_lashA": { "message": "Opacity (0 = off)" },
   "liner_lashLen": { "message": "Length (short ⇔ long)" },
   "liner_lashUp": { "message": "Angle (flat ⇔ lifted)" },
+  "liner_lashCurl": { "message": "Curl (straight ⇔ curled)" },
+  "liner_lashN": { "message": "Count" },
+  "liner_lashSpan": { "message": "Coverage (corner ⇔ wide)" },
 
   "shade_title": { "message": "🌘 Contour" },
   "shade_color_title": { "message": "Shadow color (nose & jaw)" },

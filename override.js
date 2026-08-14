@@ -244,8 +244,11 @@ void main() {
   const NOSE_TIP = 1;
   const FACE_LEFT = 234;
   const FACE_RIGHT = 454;
-  // 目尻マスカラの長さ倍率（目尻側ほど長い）。全本同じ長さだと不自然になる
-  const LASH_SCALES = [0.6, 0.75, 0.9, 1.0];
+  // 目尻マスカラの長さ倍率は内側 LASH_MIN_SCALE → 目尻側 1.0 の線形。
+  // 全本を同じ長さにすると不自然になるため勾配は必ず保つ
+  const LASH_MIN_SCALE = 0.6;
+  // カールの制御点を法線方向へ振る量（長さ比）
+  const LASH_CURL_K = 0.35;
 
   function tracePath(ctx, lm, indices, W, H) {
     ctx.moveTo(lm[indices[0]].x * W, lm[indices[0]].y * H);
@@ -567,12 +570,13 @@ void main() {
     ];
   }
 
-  // 目尻マスカラ1本分の始点・中点・終点。際の目尻側 1/4 の区間に等間隔で並べ、
-  // 際の接線を目尻方向へ rad だけ振った向きに伸ばす（n が大きいほど目尻寄り＝長い）
-  function lashStroke(eye, lm, W, H, upX, upY, rad, baseLen, n) {
-    // eye[0] が目尻、末尾が目頭。目尻側 1/4 に収まるよう区間を取る
-    const span = (eye.length - 1) / 4;
-    const t = span * (1 - n / LASH_SCALES.length);
+  // 目尻マスカラ1本分の2次ベジェを、根元側・先端側の2本に分割して返す
+  // （太さを変えて描くため。de Casteljau の分割なので元の曲線と完全に一致する）。
+  // n は目尻側から数えた本数（0 が最も目尻寄り＝最長）
+  function lashStroke(eye, lm, W, H, upX, upY, rad, baseLen, n, count, spanRatio, curl) {
+    // eye[0] が目尻、末尾が目頭。目尻側の spanRatio の区間に等間隔で並べる
+    const span = (eye.length - 1) * spanRatio;
+    const t = count > 1 ? span * (n / (count - 1)) : 0;
     const i0 = Math.min(eye.length - 2, Math.floor(t));
     const f = t - i0;
     const a = [lm[eye[i0]].x * W, lm[eye[i0]].y * H];
@@ -585,11 +589,21 @@ void main() {
     dx /= dl; dy /= dl;
     const wx = dx * Math.cos(rad) + upX * Math.sin(rad);
     const wy = dy * Math.cos(rad) + upY * Math.sin(rad);
-    const len = baseLen * LASH_SCALES[n];
+    const scale = count > 1 ? 1 - (1 - LASH_MIN_SCALE) * (n / (count - 1)) : 1;
+    const len = baseLen * scale;
+    const x1 = x0 + wx * len, y1 = y0 + wy * len;
+    // 制御点は進行方向の法線のうち顔の上側へ振る（カールの向き）
+    let nx = -wy, ny = wx;
+    if (nx * upX + ny * upY < 0) { nx = -nx; ny = -ny; }
+    const off = len * curl * LASH_CURL_K;
+    const cx = (x0 + x1) / 2 + nx * off, cy = (y0 + y1) / 2 + ny * off;
+    // de Casteljau で t=0.5 分割
+    const m0x = (x0 + cx) / 2, m0y = (y0 + cy) / 2;
+    const m1x = (cx + x1) / 2, m1y = (cy + y1) / 2;
+    const mx = (m0x + m1x) / 2, my = (m0y + m1y) / 2;
     return {
-      x0, y0,
-      xm: x0 + wx * len * 0.5, ym: y0 + wy * len * 0.5,
-      x1: x0 + wx * len, y1: y0 + wy * len
+      root: { x0, y0, cx: m0x, cy: m0y, x1: mx, y1: my },
+      tip: { x0: mx, y0: my, cx: m1x, cy: m1y, x1, y1 }
     };
   }
 
@@ -841,7 +855,7 @@ void main() {
     }
 
     if (settings.lashA > 0) {
-      // 目尻マスカラ: 際の目尻側 1/4 から扇状に短いストロークを描く
+      // 目尻マスカラ: 際の目尻側から扇状に短いストロークを描く
       ctx.filter = `blur(${Math.max(0.5, faceW * 0.002)}px)`;
       ctx.strokeStyle = hexToRgba(settings.lashColor, settings.lashA * 0.85);
       ctx.lineCap = 'round';
@@ -849,20 +863,21 @@ void main() {
       const rad = (settings.lashUp * Math.PI) / 180;
       const baseLen = faceW * 0.025 * settings.lashLen;
       const rootW = linerWidth(faceW);
+      const count = Math.max(2, Math.round(settings.lashN));
+      const curve = (c, w) => {
+        ctx.lineWidth = w;
+        ctx.beginPath();
+        ctx.moveTo(c.x0, c.y0);
+        ctx.quadraticCurveTo(c.cx, c.cy, c.x1, c.y1);
+        ctx.stroke();
+      };
       for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
-        for (let n = 0; n < LASH_SCALES.length; n++) {
-          const p = lashStroke(eye, lm, W, H, upX, upY, rad, baseLen, n);
-          // 根元を太く、先端へ向けて細くする（1本を2セグメントに割って幅を変える）
-          ctx.lineWidth = rootW * 0.9;
-          ctx.beginPath();
-          ctx.moveTo(p.x0, p.y0);
-          ctx.lineTo(p.xm, p.ym);
-          ctx.stroke();
-          ctx.lineWidth = Math.max(0.5, rootW * 0.45);
-          ctx.beginPath();
-          ctx.moveTo(p.xm, p.ym);
-          ctx.lineTo(p.x1, p.y1);
-          ctx.stroke();
+        for (let n = 0; n < count; n++) {
+          const p = lashStroke(eye, lm, W, H, upX, upY, rad, baseLen, n,
+            count, settings.lashSpan, settings.lashCurl);
+          // 根元を太く、先端へ向けて細くする
+          curve(p.root, rootW * 0.9);
+          curve(p.tip, Math.max(0.5, rootW * 0.45));
         }
       }
     }

@@ -92,6 +92,9 @@
   "liner_lashA": { "message": "濃さ（0で無効）" },
   "liner_lashLen": { "message": "長さ（短 ⇔ 長）" },
   "liner_lashUp": { "message": "角度（横向き ⇔ 上向き）" },
+  "liner_lashCurl": { "message": "カール（直線 ⇔ カール）" },
+  "liner_lashN": { "message": "本数" },
+  "liner_lashSpan": { "message": "適用幅（目尻のみ ⇔ 広く）" },
 
   "shade_title": { "message": "🌘 シェーディング" },
   "shade_color_title": { "message": "影色（ノーズ・輪郭共通）" },
