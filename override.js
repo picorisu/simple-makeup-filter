@@ -843,7 +843,7 @@ void main() {
     if (settings.lashA > 0) {
       // 目尻マスカラ: 際の目尻側 1/4 から扇状に短いストロークを描く
       ctx.filter = `blur(${Math.max(0.5, faceW * 0.002)}px)`;
-      ctx.strokeStyle = hexToRgba(settings.linerColor, settings.lashA * 0.85);
+      ctx.strokeStyle = hexToRgba(settings.lashColor, settings.lashA * 0.85);
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       const rad = (settings.lashUp * Math.PI) / 180;

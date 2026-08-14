@@ -88,6 +88,7 @@
   "liner_wingUp": { "message": "Wing angle (down ⇔ up)" },
   "liner_wingW": { "message": "Wing thickness (thin ⇔ thick)" },
   "liner_lash_sub": { "message": "Outer-corner lashes" },
+  "liner_lash_color_title": { "message": "Lash color" },
   "liner_lashA": { "message": "Opacity (0 = off)" },
   "liner_lashLen": { "message": "Length (short ⇔ long)" },
   "liner_lashUp": { "message": "Angle (flat ⇔ lifted)" },

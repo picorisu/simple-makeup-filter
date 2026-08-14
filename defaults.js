@@ -116,6 +116,7 @@ globalThis.MBF_DEFAULTS = {
   linerWingW: 1.5, // ハネの太さ 0.5-3
 
   // --- 目尻マスカラ（アイラインセクション内） ---
+  lashColor: '#2b1d1a',
   lashA: 0,      // 濃さ 0-1（0で無効）
   lashLen: 1.0,  // 長さ 0.5-2
   lashUp: 40,    // 角度（度）0-70。上向きほど跳ね上がる
