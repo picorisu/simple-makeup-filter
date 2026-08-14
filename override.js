@@ -253,6 +253,8 @@ void main() {
   const LASH_CURL_ANCHOR = 0.6;
   // 楔形リボンの輪郭サンプル数（片側）
   const LASH_SAMPLES = 6;
+  // 目頭側の内向きの倒れ（lashUp に対する比）
+  const LASH_INNER_LEAN = 0.4;
 
   function tracePath(ctx, lm, indices, W, H) {
     ctx.moveTo(lm[indices[0]].x * W, lm[indices[0]].y * H);
@@ -574,11 +576,12 @@ void main() {
     ];
   }
 
-  // 目尻マスカラ1本分の2次ベジェ（始点・制御点・終点）。
+  // マスカラ1本分の2次ベジェ（始点・制御点・終点）。
   // n は目尻側から数えた本数（0 が最も目尻寄り＝最長）
-  function lashStroke(eye, lm, W, H, upX, upY, rad, baseLen, n, count, spanRatio, curl) {
+  function lashStroke(eye, lm, W, H, upX, upY, lashUp, baseLen, n, count, spanRatio, curl) {
     // eye[0] が目尻、末尾が目頭。目尻側の spanRatio の区間に等間隔で並べる
-    const span = (eye.length - 1) * spanRatio;
+    const total = eye.length - 1;
+    const span = total * spanRatio;
     const t = count > 1 ? span * (n / (count - 1)) : 0;
     const i0 = Math.min(eye.length - 2, Math.floor(t));
     const f = t - i0;
@@ -590,8 +593,17 @@ void main() {
     let dx = a[0] - b[0], dy = a[1] - b[1];
     const dl = Math.hypot(dx, dy) || 1;
     dx /= dl; dy /= dl;
-    const wx = dx * Math.cos(rad) + upX * Math.sin(rad);
-    const wy = dy * Math.cos(rad) + upY * Math.sin(rad);
+    // まぶたの法線（際から顔の上側へ離れる向き）。接線とはほぼ直交しない関係のため
+    // up との内積による符号選択が安定する
+    let nx = -dy, ny = dx;
+    if (nx * upX + ny * upY < 0) { nx = -nx; ny = -ny; }
+    // 際上の絶対位置 s（目頭 0 → 目尻 1）で倒れ方を変える。
+    // 目尻は外向きに lashUp、目頭は内向きに lashUp * LASH_INNER_LEAN 倒す
+    const s = 1 - t / total;
+    const lean = lashUp * (s * (1 + LASH_INNER_LEAN) - LASH_INNER_LEAN);
+    const rad = (lean * Math.PI) / 180;
+    const wx = nx * Math.cos(rad) + dx * Math.sin(rad);
+    const wy = ny * Math.cos(rad) + dy * Math.sin(rad);
     const scale = count > 1 ? 1 - (1 - LASH_MIN_SCALE) * (n / (count - 1)) : 1;
     const len = baseLen * scale;
     // カールは毛先だけを顔基準の上方向へ持ち上げる。制御点を進行方向上に置くことで
@@ -876,16 +888,15 @@ void main() {
     }
 
     if (settings.lashA > 0) {
-      // 目尻マスカラ: 際の目尻側から扇状に短い楔形を塗る
+      // マスカラ: 際の目尻側から扇状に短い楔形を塗る
       ctx.filter = `blur(${Math.max(0.5, faceW * 0.002)}px)`;
       ctx.fillStyle = hexToRgba(settings.lashColor, settings.lashA * 0.85);
-      const rad = (settings.lashUp * Math.PI) / 180;
       const baseLen = faceW * 0.025 * settings.lashLen;
       const rootW = linerWidth(faceW) * 0.9;
       const count = Math.max(2, Math.round(settings.lashN));
       for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
         for (let n = 0; n < count; n++) {
-          const c = lashStroke(eye, lm, W, H, upX, upY, rad, baseLen, n,
+          const c = lashStroke(eye, lm, W, H, upX, upY, settings.lashUp, baseLen, n,
             count, settings.lashSpan, settings.lashCurl);
           const pts = lashOutline(c, rootW);
           ctx.beginPath();
