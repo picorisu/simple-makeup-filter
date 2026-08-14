@@ -563,6 +563,24 @@ void main() {
     return pts;
   }
 
+  // アイシャドウの帯: 上まぶたの際ラインを顔基準の上方向へ押し出した閉領域。
+  // lid = 際側の点列、band = lid + 押し出し辺を逆順にたどった閉領域の全点列。
+  // 実描画と位置ガイドで同じ形を使う
+  function shadowBandPoints(eye, lm, W, H, faceW, roll, upX, upY) {
+    const lift = faceW * 0.055 * settings.shadowH;
+    const dirX = Math.cos(roll), dirY = Math.sin(roll);
+    const widen = settings.shadowW - 1;
+    // 幅: 目の中心を基準に、顔の横方向にだけ伸縮（高さは変えない）
+    const lid = widenAlongFace(eye.map((i) => [lm[i].x * W, lm[i].y * H]), dirX, dirY, widen);
+    const band = lid.slice();
+    // 上方向へ押し出した辺を逆順でたどって閉じる（目尻・目頭側は少し狭めて紡錘形にする）
+    for (let k = lid.length - 1; k >= 0; k--) {
+      const edge = k === 0 || k === lid.length - 1 ? BAND_EDGE_TAPER : 1;
+      band.push([lid[k][0] + upX * lift * edge, lid[k][1] + upY * lift * edge]);
+    }
+    return { lid, band, lift };
+  }
+
   // 涙袋の帯: 下まぶたの際ラインを顔基準の下方向へ押し出した閉領域。
   // lid = 際側の点列、drop = 押し出した側の点列（シェイド線はこの辺に沿って引く）。
   // 実描画と位置ガイドで同じ形を使う
@@ -785,12 +803,8 @@ void main() {
       // アイシャドウ: 上まぶたの際ラインを顔基準の上方向へ押し出した帯を塗る。
       // 際側が濃く上端へ向かって薄くなるよう、ぼかし + multiply で馴染ませる
       ctx.filter = `blur(${Math.max(2, faceW * 0.015 * settings.shadowSoft)}px)`;
-      const lift = faceW * 0.055 * settings.shadowH;
-      const dirX = Math.cos(roll), dirY = Math.sin(roll); // 顔基準の「横」方向
-      const widen = settings.shadowW - 1;
       for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
-        // 幅: 目の中心を基準に、顔の横方向にだけ伸縮（高さは変えない）
-        const lid = widenAlongFace(eye.map((i) => [lm[i].x * W, lm[i].y * H]), dirX, dirY, widen);
+        const { lid, band, lift } = shadowBandPoints(eye, lm, W, H, faceW, roll, upX, upY);
         // グラデーション: 際 → (中間) → (上)。オフの色は飛ばして使う色だけ等間隔に並べる。
         // 1色のときは同じ色が上に向かって薄く抜ける
         let gx = 0, gy = 0;
@@ -816,13 +830,8 @@ void main() {
         }
         ctx.fillStyle = g;
         ctx.beginPath();
-        ctx.moveTo(lid[0][0], lid[0][1]);
-        for (let k = 1; k < lid.length; k++) ctx.lineTo(lid[k][0], lid[k][1]);
-        // 上方向へ押し出した辺を逆順でたどって閉じる（目尻・目頭側は少し狭める）
-        for (let k = lid.length - 1; k >= 0; k--) {
-          const edge = k === 0 || k === lid.length - 1 ? BAND_EDGE_TAPER : 1;
-          ctx.lineTo(lid[k][0] + upX * lift * edge, lid[k][1] + upY * lift * edge);
-        }
+        ctx.moveTo(band[0][0], band[0][1]);
+        for (let k = 1; k < band.length; k++) ctx.lineTo(band[k][0], band[k][1]);
         ctx.closePath();
         ctx.fill();
       }
@@ -1170,16 +1179,8 @@ void main() {
     }
 
     if (settings.shadowA > 0 && partOn('shadow')) {
-      const lift = faceW * 0.055 * settings.shadowH;
-      const dirX = Math.cos(roll), dirY = Math.sin(roll);
-      const widen = settings.shadowW - 1;
       for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
-        const lid = widenAlongFace(eye.map((i) => [lm[i].x * W, lm[i].y * H]), dirX, dirY, widen);
-        const band = lid.slice();
-        for (let k = lid.length - 1; k >= 0; k--) {
-          const edge = k === 0 || k === lid.length - 1 ? BAND_EDGE_TAPER : 1;
-          band.push([lid[k][0] + upX * lift * edge, lid[k][1] + upY * lift * edge]);
-        }
+        const { band } = shadowBandPoints(eye, lm, W, H, faceW, roll, upX, upY);
         strokePoints(GUIDE_COLORS.shadow, band, true);
       }
     }
