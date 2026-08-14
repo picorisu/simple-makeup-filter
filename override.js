@@ -251,6 +251,8 @@ void main() {
   const LASH_CURL_K = 0.35;
   // カールの制御点を進行方向のどこに置くか（長さ比）。大きいほど根元が直線的になる
   const LASH_CURL_ANCHOR = 0.6;
+  // 楔形リボンの輪郭サンプル数（片側）
+  const LASH_SAMPLES = 6;
 
   function tracePath(ctx, lm, indices, W, H) {
     ctx.moveTo(lm[indices[0]].x * W, lm[indices[0]].y * H);
@@ -572,8 +574,7 @@ void main() {
     ];
   }
 
-  // 目尻マスカラ1本分の2次ベジェを、根元側・先端側の2本に分割して返す
-  // （太さを変えて描くため。de Casteljau の分割なので元の曲線と完全に一致する）。
+  // 目尻マスカラ1本分の2次ベジェ（始点・制御点・終点）。
   // n は目尻側から数えた本数（0 が最も目尻寄り＝最長）
   function lashStroke(eye, lm, W, H, upX, upY, rad, baseLen, n, count, spanRatio, curl) {
     // eye[0] が目尻、末尾が目頭。目尻側の spanRatio の区間に等間隔で並べる
@@ -598,14 +599,33 @@ void main() {
     const off = len * curl * LASH_CURL_K;
     const x1 = x0 + wx * len + upX * off, y1 = y0 + wy * len + upY * off;
     const cx = x0 + wx * len * LASH_CURL_ANCHOR, cy = y0 + wy * len * LASH_CURL_ANCHOR;
-    // de Casteljau で t=0.5 分割
-    const m0x = (x0 + cx) / 2, m0y = (y0 + cy) / 2;
-    const m1x = (cx + x1) / 2, m1y = (cy + y1) / 2;
-    const mx = (m0x + m1x) / 2, my = (m0y + m1y) / 2;
-    return {
-      root: { x0, y0, cx: m0x, cy: m0y, x1: mx, y1: my },
-      tip: { x0: mx, y0: my, cx: m1x, cy: m1y, x1, y1 }
+    return { x0, y0, cx, cy, x1, y1 };
+  }
+
+  // まつげ1本の輪郭: 曲線をサンプリングし、各点で進行方向に垂直な向きへ
+  // 幅(t) = rootW * (1 - t) の半分ずつ両側へ広げた先細りリボンを返す（毛先は幅0で尖る）
+  function lashOutline(c, rootW) {
+    const at = (t) => [
+      (1 - t) * (1 - t) * c.x0 + 2 * (1 - t) * t * c.cx + t * t * c.x1,
+      (1 - t) * (1 - t) * c.y0 + 2 * (1 - t) * t * c.cy + t * t * c.y1
+    ];
+    // 接線は2次ベジェの微分
+    const tangent = (t) => {
+      const gx = 2 * (1 - t) * (c.cx - c.x0) + 2 * t * (c.x1 - c.cx);
+      const gy = 2 * (1 - t) * (c.cy - c.y0) + 2 * t * (c.y1 - c.cy);
+      const gl = Math.hypot(gx, gy) || 1;
+      return [gx / gl, gy / gl];
     };
+    const left = [], right = [];
+    for (let i = 0; i < LASH_SAMPLES; i++) {
+      const t = i / (LASH_SAMPLES - 1);
+      const [px, py] = at(t);
+      const [tx, ty] = tangent(t);
+      const half = (rootW * (1 - t)) / 2;
+      left.push([px - ty * half, py + tx * half]);
+      right.push([px + ty * half, py - tx * half]);
+    }
+    return left.concat(right.reverse());
   }
 
   // アイラインの線幅。跳ね上げの根元幅にも使うため実描画とガイドで共有
@@ -856,29 +876,23 @@ void main() {
     }
 
     if (settings.lashA > 0) {
-      // 目尻マスカラ: 際の目尻側から扇状に短いストロークを描く
+      // 目尻マスカラ: 際の目尻側から扇状に短い楔形を塗る
       ctx.filter = `blur(${Math.max(0.5, faceW * 0.002)}px)`;
-      ctx.strokeStyle = hexToRgba(settings.lashColor, settings.lashA * 0.85);
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+      ctx.fillStyle = hexToRgba(settings.lashColor, settings.lashA * 0.85);
       const rad = (settings.lashUp * Math.PI) / 180;
       const baseLen = faceW * 0.025 * settings.lashLen;
-      const rootW = linerWidth(faceW);
+      const rootW = linerWidth(faceW) * 0.9;
       const count = Math.max(2, Math.round(settings.lashN));
-      const curve = (c, w) => {
-        ctx.lineWidth = w;
-        ctx.beginPath();
-        ctx.moveTo(c.x0, c.y0);
-        ctx.quadraticCurveTo(c.cx, c.cy, c.x1, c.y1);
-        ctx.stroke();
-      };
       for (const eye of [EYE_TOP_L, EYE_TOP_R]) {
         for (let n = 0; n < count; n++) {
-          const p = lashStroke(eye, lm, W, H, upX, upY, rad, baseLen, n,
+          const c = lashStroke(eye, lm, W, H, upX, upY, rad, baseLen, n,
             count, settings.lashSpan, settings.lashCurl);
-          // 根元を太く、先端へ向けて細くする
-          curve(p.root, rootW * 0.9);
-          curve(p.tip, Math.max(0.5, rootW * 0.45));
+          const pts = lashOutline(c, rootW);
+          ctx.beginPath();
+          ctx.moveTo(pts[0][0], pts[0][1]);
+          for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k][0], pts[k][1]);
+          ctx.closePath();
+          ctx.fill();
         }
       }
     }
