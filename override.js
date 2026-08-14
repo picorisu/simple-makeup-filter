@@ -280,7 +280,7 @@ void main() {
 
   // 点列 pts を重心基準に、顔の横方向（dirX, dirY）にだけ伸縮する（高さは変えない）
   function widenAlongFace(pts, dirX, dirY, widen) {
-    if (widen === 0) return pts;
+    if (widen === 0) return pts.map(([x, y]) => [x, y]);
     let cx = 0, cy = 0;
     for (const p of pts) { cx += p[0]; cy += p[1]; }
     cx /= pts.length; cy /= pts.length;
