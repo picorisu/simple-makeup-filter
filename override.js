@@ -276,6 +276,8 @@ void main() {
   const LASH_VAR_D = [0.45, 0.81, 0.07, 0.59, 0.34, 0.91, 0.23];
   // 帯状パーツ（アイシャドウ・涙袋等）の端点押し出しを狭める係数。紡錘形にするため
   const BAND_EDGE_TAPER = 0.4;
+  // 輪郭シェーディングの帯幅（faceW 比）。実描画は帯全幅、ガイドは半幅（両縁を描くため）
+  const JAW_BAND_WIDTH = 0.05;
 
   // テーブルを本のインデックスで循環参照し、-1〜1 に写す（決定的）
   function lashVar(table, i) {
@@ -491,6 +493,38 @@ void main() {
       rx: faceW * 0.05 * settings.hiChinW, ry: faceW * 0.035 * settings.hiChinW,
       angle: roll
     };
+  }
+
+  function blushEllipse(idx, lm, W, H, faceW, roll) {
+    const r = faceW * 0.13;
+    const aspect = Math.max(1, settings.blushShape); // 横:縦 の比率
+    const soft = Math.min(2.2, Math.max(1, settings.blushSoft));
+    const rEff = r * soft;
+    const noseX = lm[NOSE_TIP].x * W, noseY = lm[NOSE_TIP].y * H;
+    const rightX = Math.cos(roll), rightY = Math.sin(roll);
+    const x = lm[idx].x * W, y = lm[idx].y * H;
+    // 横位置: 左右対称（プラスで両頬とも外側へ）。どちら側の頬かは鼻先基準で判定
+    const side = Math.sign((x - noseX) * rightX + (y - noseY) * rightY) || 1;
+    const ox = side * (settings.blushX ?? 0) * faceW;
+    const oy = -settings.blushY * faceW;
+    return {
+      cx: x + rightX * ox - rightY * oy, cy: y + rightY * ox + rightX * oy,
+      rx: rEff * aspect, ry: rEff,
+      angle: roll, aspect, soft
+    };
+  }
+
+  function jawInsetPoints(jaw, lm, W, H, faceW) {
+    const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
+    return jaw.map((i) => {
+      let x = lm[i].x * W, y = lm[i].y * H;
+      // 鼻先方向（顔の内側）へ少し寄せる＝帯が背景にはみ出さない
+      const dx = nx - x, dy = ny - y;
+      const dl = Math.hypot(dx, dy) || 1;
+      x += (dx / dl) * faceW * 0.03;
+      y += (dy / dl) * faceW * 0.03;
+      return [x, y];
+    });
   }
 
   // クマ・目の下の線消し: 下まぶたの少し下の楕円領域に、ぼかし + 明るさを少し
@@ -802,34 +836,23 @@ void main() {
 
     if (settings.blushA > 0) {
       ctx.filter = 'none';
-      const r = faceW * 0.13;
-      const aspect = Math.max(1, settings.blushShape); // 横:縦 の比率
-      const noseX5 = lm[NOSE_TIP].x * W, noseY5 = lm[NOSE_TIP].y * H;
-      const rX5 = Math.cos(roll), rY5 = Math.sin(roll);
       for (const idx of [CHEEK_L, CHEEK_R]) {
-        const x = lm[idx].x * W;
-        const y = lm[idx].y * H;
-        // 横位置: 左右対称（プラスで両頬とも外側へ）。どちら側の頬かは鼻先基準で判定
-        const side = Math.sign((x - noseX5) * rX5 + (y - noseY5) * rY5) || 1;
+        const e = blushEllipse(idx, lm, W, H, faceW, roll);
+        const a = (settings.blushA * 0.45) / e.soft;
         ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(roll);
-        // 顔の傾きに沿った横・上下オフセット
-        ctx.translate(side * (settings.blushX ?? 0) * faceW, -settings.blushY * faceW);
-        ctx.scale(aspect, 1); // 横方向に引き伸ばして楕円化
+        ctx.translate(e.cx, e.cy);
+        ctx.rotate(e.angle);
         // ぼかし: soft を上げるほど広い半径に薄く伸ばす（総量はほぼ一定に保つ）。
         // 中間ストップで指数減衰っぽく落として、自然な「霞み」にする
-        const soft = Math.min(2.2, Math.max(1, settings.blushSoft));
-        const rEff = r * soft;
-        const a = (settings.blushA * 0.45) / soft;
-        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rEff);
+        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, e.ry);
         g.addColorStop(0, hexToRgba(settings.blushColor, a));
         g.addColorStop(0.45, hexToRgba(settings.blushColor, a * 0.55));
         g.addColorStop(0.75, hexToRgba(settings.blushColor, a * 0.2));
         g.addColorStop(1, hexToRgba(settings.blushColor, 0));
         ctx.fillStyle = g;
+        ctx.scale(e.aspect, 1); // 横方向に引き伸ばして楕円化
         ctx.beginPath();
-        ctx.arc(0, 0, rEff, 0, Math.PI * 2);
+        ctx.arc(0, 0, e.ry, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       }
@@ -1007,17 +1030,11 @@ void main() {
       ctx.strokeStyle = hexToRgba(settings.shadeColor, settings.jawA * 0.3);
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.lineWidth = faceW * 0.05;
-      const nx2 = lm[NOSE_TIP].x * W, ny2 = lm[NOSE_TIP].y * H;
+      ctx.lineWidth = faceW * JAW_BAND_WIDTH;
       for (const jaw of [JAW_L, JAW_R]) {
+        const pts = jawInsetPoints(jaw, lm, W, H, faceW);
         ctx.beginPath();
-        jaw.forEach((i, k) => {
-          // 鼻先方向（顔の内側）へ少し寄せる＝帯が背景にはみ出さない
-          let x = lm[i].x * W, y = lm[i].y * H;
-          const dx2 = nx2 - x, dy2 = ny2 - y;
-          const dl2 = Math.hypot(dx2, dy2) || 1;
-          x += (dx2 / dl2) * faceW * 0.03;
-          y += (dy2 / dl2) * faceW * 0.03;
+        pts.forEach(([x, y], k) => {
           if (k === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         });
         ctx.stroke();
@@ -1158,22 +1175,9 @@ void main() {
     }
 
     if (settings.blushA > 0 && partOn('blush')) {
-      const r = faceW * 0.13;
-      const aspect = Math.max(1, settings.blushShape);
-      const soft = Math.min(2.2, Math.max(1, settings.blushSoft));
-      const rEff = r * soft;
-      const noseX = lm[NOSE_TIP].x * W, noseY = lm[NOSE_TIP].y * H;
-      const rX = Math.cos(roll), rY = Math.sin(roll);
       for (const idx of [CHEEK_L, CHEEK_R]) {
-        const x = lm[idx].x * W, y = lm[idx].y * H;
-        const side = Math.sign((x - noseX) * rX + (y - noseY) * rY) || 1;
-        const ox = side * (settings.blushX ?? 0) * faceW;
-        const oy = -settings.blushY * faceW;
-        strokeEllipse(
-          GUIDE_COLORS.blush,
-          x + rX * ox - rY * oy, y + rY * ox + rX * oy,
-          rEff * aspect, rEff, roll
-        );
+        const e = blushEllipse(idx, lm, W, H, faceW, roll);
+        strokeEllipse(GUIDE_COLORS.blush, e.cx, e.cy, e.rx, e.ry, e.angle);
       }
     }
 
@@ -1234,18 +1238,10 @@ void main() {
     }
 
     if (settings.jawA > 0 && partOn('jaw')) {
-      // 実描画は太い帯（lineWidth = faceW * 0.05）なので、中心線ではなく帯の両縁を描く
-      const half = faceW * 0.025;
-      const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
+      // 実描画は太い帯（lineWidth = faceW * JAW_BAND_WIDTH）なので、中心線ではなく帯の両縁を描く
+      const half = faceW * JAW_BAND_WIDTH / 2;
       for (const jaw of [JAW_L, JAW_R]) {
-        const pts = jaw.map((i) => {
-          let x = lm[i].x * W, y = lm[i].y * H;
-          const dx = nx - x, dy = ny - y;
-          const dl = Math.hypot(dx, dy) || 1;
-          x += (dx / dl) * faceW * 0.03;
-          y += (dy / dl) * faceW * 0.03;
-          return [x, y];
-        });
+        const pts = jawInsetPoints(jaw, lm, W, H, faceW);
         for (const sign of [1, -1]) {
           strokePoints(GUIDE_COLORS.jaw, offsetPolyline(pts, half * sign), false);
         }
