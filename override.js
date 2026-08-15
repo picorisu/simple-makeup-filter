@@ -231,6 +231,8 @@ void main() {
   const EYE_BOT_R = [263, 249, 390, 373, 374, 380, 381, 382, 362];
   const CHEEK_L = 205;
   const CHEEK_R = 425;
+  const HI_CHEEK_L = 117; // 左頬骨ハイライトの基準点
+  const HI_CHEEK_R = 346; // 右頬骨ハイライトの基準点
   // 鼻筋の付け根（眉頭の下あたり）
   const NOSE_TOP_L = 193;
   const NOSE_TOP_R = 417;
@@ -446,6 +448,63 @@ void main() {
 
     const ry = faceW * 0.035 * boost * settings.eyebagH;
     return { cx, cy, ry, scale: (eyeW * 0.65 * settings.eyebagW) / ry };
+  }
+
+  // ノーズシャドウの楕円パラメータ。実描画とガイドで同じ位置・サイズを使う
+  function noseShadeEllipse(lm, W, H, faceW, topI, alaI, inn) {
+    const bx = lm[168].x * W, by = lm[168].y * H; // 眉間（鼻筋の上端中心）
+    const tipX = lm[NOSE_TIP].x * W, tipY = lm[NOSE_TIP].y * H;
+    // 内側寄せ: 上端は鼻筋の付け根（眉間側）、下端は鼻先へ向けて寄せる
+    const tx = lm[topI].x * W + (bx - lm[topI].x * W) * inn;
+    const ty = lm[topI].y * H + (by - lm[topI].y * H) * inn;
+    const ax = lm[alaI].x * W + (tipX - lm[alaI].x * W) * inn;
+    const ay = lm[alaI].y * H + (tipY - lm[alaI].y * H) * inn;
+    const len = Math.hypot(ax - tx, ay - ty);
+    const ry = faceW * 0.018 * settings.noseW;
+    return {
+      cx: (tx + ax) / 2, cy: (ty + ay) / 2,
+      rx: len * 0.55, ry,
+      angle: Math.atan2(ay - ty, ax - tx)
+    };
+  }
+
+  // 鼻筋ハイライトの楕円パラメータ。実描画とガイドで同じ位置・サイズを使う
+  function hiNoseEllipse(lm, W, H, faceW) {
+    const tx = lm[168].x * W, ty = lm[168].y * H;
+    const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
+    const len = Math.hypot(nx - tx, ny - ty);
+    return {
+      cx: (tx + nx) / 2, cy: (ty + ny) / 2,
+      rx: len * 0.55, ry: faceW * 0.012 * settings.hiW,
+      angle: Math.atan2(ny - ty, nx - tx)
+    };
+  }
+
+  // 頬骨ハイライトの楕円パラメータ。実描画とガイドで同じ位置・サイズを使う
+  function hiCheekEllipse(idx, lm, W, H, faceW, roll, upX, upY) {
+    const rightX = Math.cos(roll), rightY = Math.sin(roll);
+    const noseX = lm[NOSE_TIP].x * W, noseY = lm[NOSE_TIP].y * H;
+    let x = lm[idx].x * W, y = lm[idx].y * H;
+    // 外向きの符号: 鼻先から見てこの頬がどちら側かで決める
+    const side = Math.sign((x - noseX) * rightX + (y - noseY) * rightY) || 1;
+    x += (rightX * side * settings.hiCheekX + upX * settings.hiCheekY) * faceW;
+    y += (rightY * side * settings.hiCheekX + upY * settings.hiCheekY) * faceW;
+    return {
+      cx: x, cy: y,
+      rx: faceW * 0.09 * settings.hiCheekW, ry: faceW * 0.035 * settings.hiCheekW,
+      angle: roll
+    };
+  }
+
+  // 顎先ハイライトの楕円パラメータ。実描画とガイドで同じ位置・サイズを使う
+  function hiChinEllipse(lm, W, H, faceW, roll, upX, upY) {
+    const chinX = lm[152].x * W + upX * faceW * (0.035 + settings.hiChinY);
+    const chinY = lm[152].y * H + upY * faceW * (0.035 + settings.hiChinY);
+    return {
+      cx: chinX, cy: chinY,
+      rx: faceW * 0.05 * settings.hiChinW, ry: faceW * 0.035 * settings.hiChinW,
+      angle: roll
+    };
   }
 
   // クマ・目の下の線消し: 下まぶたの少し下の楕円領域に、ぼかし + 明るさを少し
@@ -949,23 +1008,13 @@ void main() {
     if (settings.noseA > 0) {
       // ノーズシャドウ: 鼻筋の付け根→小鼻のラインに沿った細長い影を左右に落とす
       ctx.filter = `blur(${Math.max(1, faceW * 0.012 * settings.noseSoft)}px)`;
-      // 内側寄せ: 上端は鼻筋の付け根（眉間側）、下端は鼻先へ向けて寄せる
-      const bx = lm[168].x * W, by = lm[168].y * H; // 眉間（鼻筋の上端中心）
-      const tipX = lm[NOSE_TIP].x * W, tipY = lm[NOSE_TIP].y * H;
       const inn = settings.noseIn;
       for (const [topI, alaI] of [[NOSE_TOP_L, ALA_L], [NOSE_TOP_R, ALA_R]]) {
-        const tx2 = lm[topI].x * W + (bx - lm[topI].x * W) * inn;
-        const ty2 = lm[topI].y * H + (by - lm[topI].y * H) * inn;
-        const ax = lm[alaI].x * W + (tipX - lm[alaI].x * W) * inn;
-        const ay = lm[alaI].y * H + (tipY - lm[alaI].y * H) * inn;
-        const len = Math.hypot(ax - tx2, ay - ty2);
-        const angle = Math.atan2(ay - ty2, ax - tx2);
-        const cx2 = (tx2 + ax) / 2, cy2 = (ty2 + ay) / 2;
-        const ry = faceW * 0.018 * settings.noseW;
+        const { cx, cy, rx, ry, angle } = noseShadeEllipse(lm, W, H, faceW, topI, alaI, inn);
         ctx.save();
-        ctx.translate(cx2, cy2);
+        ctx.translate(cx, cy);
         ctx.rotate(angle);
-        ctx.scale((len * 0.55) / ry, 1);
+        ctx.scale(rx / ry, 1);
         const g = ctx.createRadialGradient(0, 0, 0, 0, 0, ry);
         g.addColorStop(0, hexToRgba(settings.shadeColor, settings.noseA * 0.3));
         g.addColorStop(1, hexToRgba(settings.shadeColor, 0));
@@ -1025,44 +1074,23 @@ void main() {
 
       if (settings.hiA > 0) {
         // 鼻筋: 眉間→鼻先の中心線
-        const tx3 = lm[168].x * W, ty3 = lm[168].y * H;
-        const nx3 = lm[NOSE_TIP].x * W, ny3 = lm[NOSE_TIP].y * H;
-        const len = Math.hypot(nx3 - tx3, ny3 - ty3);
-        glow(
-          (tx3 + nx3) / 2, (ty3 + ny3) / 2,
-          Math.atan2(ny3 - ty3, nx3 - tx3),
-          len * 0.55, faceW * 0.012 * settings.hiW,
-          settings.hiA * 0.4, settings.hiSoft
-        );
+        const e = hiNoseEllipse(lm, W, H, faceW);
+        glow(e.cx, e.cy, e.angle, e.rx, e.ry, settings.hiA * 0.4, settings.hiSoft);
       }
 
       if (settings.hiCheekA > 0) {
         // 頬骨の上（Cゾーン）: 目尻の下の高い位置に、頬骨に沿った楕円。
         // 横位置は左右対称（プラスで両方とも外側へ）、縦位置は顔の傾きに追従
-        const rightX = Math.cos(roll), rightY = Math.sin(roll);
-        const noseX2 = lm[NOSE_TIP].x * W, noseY2 = lm[NOSE_TIP].y * H;
-        for (const idx of [117, 346]) {
-          let x = lm[idx].x * W, y = lm[idx].y * H;
-          // 外向きの符号: 鼻先から見てこの頬がどちら側かで決める
-          const side = Math.sign((x - noseX2) * rightX + (y - noseY2) * rightY) || 1;
-          x += (rightX * side * settings.hiCheekX + upX * settings.hiCheekY) * faceW;
-          y += (rightY * side * settings.hiCheekX + upY * settings.hiCheekY) * faceW;
-          glow(
-            x, y,
-            roll,
-            faceW * 0.09 * settings.hiCheekW, faceW * 0.035 * settings.hiCheekW,
-            settings.hiCheekA * 0.35, settings.hiCheekSoft
-          );
+        for (const idx of [HI_CHEEK_L, HI_CHEEK_R]) {
+          const e = hiCheekEllipse(idx, lm, W, H, faceW, roll, upX, upY);
+          glow(e.cx, e.cy, e.angle, e.rx, e.ry, settings.hiCheekA * 0.35, settings.hiCheekSoft);
         }
       }
 
       if (settings.hiChinA > 0) {
         // 顎先: 顎の先端から少し上に丸く
-        const chinX = lm[152].x * W + upX * faceW * (0.035 + settings.hiChinY);
-        const chinY = lm[152].y * H + upY * faceW * (0.035 + settings.hiChinY);
-        glow(chinX, chinY, roll,
-          faceW * 0.05 * settings.hiChinW, faceW * 0.035 * settings.hiChinW,
-          settings.hiChinA * 0.35, settings.hiChinSoft);
+        const e = hiChinEllipse(lm, W, H, faceW, roll, upX, upY);
+        glow(e.cx, e.cy, e.angle, e.rx, e.ry, settings.hiChinA * 0.35, settings.hiChinSoft);
       }
 
       ctx.globalCompositeOperation = 'multiply'; // 後続のメイク描画用に戻す
@@ -1224,20 +1252,10 @@ void main() {
     }
 
     if (settings.noseA > 0 && partOn('nose')) {
-      const bx = lm[168].x * W, by = lm[168].y * H;
-      const tipX = lm[NOSE_TIP].x * W, tipY = lm[NOSE_TIP].y * H;
       const inn = settings.noseIn;
       for (const [topI, alaI] of [[NOSE_TOP_L, ALA_L], [NOSE_TOP_R, ALA_R]]) {
-        const tx = lm[topI].x * W + (bx - lm[topI].x * W) * inn;
-        const ty = lm[topI].y * H + (by - lm[topI].y * H) * inn;
-        const ax = lm[alaI].x * W + (tipX - lm[alaI].x * W) * inn;
-        const ay = lm[alaI].y * H + (tipY - lm[alaI].y * H) * inn;
-        const len = Math.hypot(ax - tx, ay - ty);
-        const ry = faceW * 0.018 * settings.noseW;
-        strokeEllipse(
-          GUIDE_COLORS.nose, (tx + ax) / 2, (ty + ay) / 2,
-          len * 0.55, ry, Math.atan2(ay - ty, ax - tx)
-        );
+        const e = noseShadeEllipse(lm, W, H, faceW, topI, alaI, inn);
+        strokeEllipse(GUIDE_COLORS.nose, e.cx, e.cy, e.rx, e.ry, e.angle);
       }
     }
 
@@ -1261,37 +1279,20 @@ void main() {
     }
 
     if (settings.hiA > 0 && partOn('hiNose')) {
-      const tx = lm[168].x * W, ty = lm[168].y * H;
-      const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
-      const len = Math.hypot(nx - tx, ny - ty);
-      strokeEllipse(
-        GUIDE_COLORS.hiNose, (tx + nx) / 2, (ty + ny) / 2,
-        len * 0.55, faceW * 0.012 * settings.hiW, Math.atan2(ny - ty, nx - tx)
-      );
+      const e = hiNoseEllipse(lm, W, H, faceW);
+      strokeEllipse(GUIDE_COLORS.hiNose, e.cx, e.cy, e.rx, e.ry, e.angle);
     }
 
     if (settings.hiCheekA > 0 && partOn('hiCheek')) {
-      const rightX = Math.cos(roll), rightY = Math.sin(roll);
-      const noseX = lm[NOSE_TIP].x * W, noseY = lm[NOSE_TIP].y * H;
-      for (const idx of [117, 346]) {
-        let x = lm[idx].x * W, y = lm[idx].y * H;
-        const side = Math.sign((x - noseX) * rightX + (y - noseY) * rightY) || 1;
-        x += (rightX * side * settings.hiCheekX + upX * settings.hiCheekY) * faceW;
-        y += (rightY * side * settings.hiCheekX + upY * settings.hiCheekY) * faceW;
-        strokeEllipse(
-          GUIDE_COLORS.hiCheek, x, y,
-          faceW * 0.09 * settings.hiCheekW, faceW * 0.035 * settings.hiCheekW, roll
-        );
+      for (const idx of [HI_CHEEK_L, HI_CHEEK_R]) {
+        const e = hiCheekEllipse(idx, lm, W, H, faceW, roll, upX, upY);
+        strokeEllipse(GUIDE_COLORS.hiCheek, e.cx, e.cy, e.rx, e.ry, e.angle);
       }
     }
 
     if (settings.hiChinA > 0 && partOn('hiChin')) {
-      const chinX = lm[152].x * W + upX * faceW * (0.035 + settings.hiChinY);
-      const chinY = lm[152].y * H + upY * faceW * (0.035 + settings.hiChinY);
-      strokeEllipse(
-        GUIDE_COLORS.hiChin, chinX, chinY,
-        faceW * 0.05 * settings.hiChinW, faceW * 0.035 * settings.hiChinW, roll
-      );
+      const e = hiChinEllipse(lm, W, H, faceW, roll, upX, upY);
+      strokeEllipse(GUIDE_COLORS.hiChin, e.cx, e.cy, e.rx, e.ry, e.angle);
     }
 
     ctx.restore();
