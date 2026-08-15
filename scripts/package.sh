@@ -50,18 +50,18 @@ python3 - <<'PY'
 import re, sys
 
 html = open('popup.html', encoding='utf-8').read()
-m = re.search(r'id="blushSoft"[^>]*\bmin="([^"]+)"[^>]*\bmax="([^"]+)"', html)
-if not m:
-    print('ERROR: popup.html に id="blushSoft" の min/max 属性が見つかりません', file=sys.stderr)
+html_hits = re.findall(r'id="blushSoft"[^>]*\bmin="([^"]+)"[^>]*\bmax="([^"]+)"', html)
+if len(html_hits) != 1:
+    print(f'ERROR: popup.html の id="blushSoft" min/max 属性が {len(html_hits)} 件ヒットしました（1件のはず）', file=sys.stderr)
     sys.exit(1)
-html_min, html_max = m.group(1), m.group(2)
+html_min, html_max = html_hits[0]
 
 js = open('override.js', encoding='utf-8').read()
-m2 = re.search(r'Math\.min\(([\d.]+),\s*Math\.max\(([\d.]+),\s*settings\.blushSoft\)\)', js)
-if not m2:
-    print('ERROR: override.js に blushSoft のクランプ式が見つかりません', file=sys.stderr)
+js_hits = re.findall(r'Math\.min\(([\d.]+),\s*Math\.max\(([\d.]+),\s*settings\.blushSoft\)\)', js)
+if len(js_hits) != 1:
+    print(f'ERROR: override.js の blushSoft クランプ式が {len(js_hits)} 件ヒットしました（1件のはず）', file=sys.stderr)
     sys.exit(1)
-js_max, js_min = m2.group(1), m2.group(2)
+js_max, js_min = js_hits[0]
 
 if (html_min, html_max) != (js_min, js_max):
     print('ERROR: blushSoft の値域が popup.html と override.js で一致しません', file=sys.stderr)
