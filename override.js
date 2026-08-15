@@ -243,6 +243,8 @@ void main() {
   const ALA_R = 279;   // 右小鼻の外側
   const MOUTH_L = 61;  // 左口角
   const MOUTH_R = 291; // 右口角
+  const MARIO_JAW_L = 149; // マリオネットライン終点（左顎）
+  const MARIO_JAW_R = 378; // マリオネットライン終点（右顎）
   const NOSE_TIP = 1;
   const FACE_LEFT = 234;
   const FACE_RIGHT = 454;
@@ -349,6 +351,53 @@ void main() {
     return { cx, cy, rx: len * 0.7, ry: faceW * 0.05 * boost, angle };
   }
 
+  // マスクに回転楕円のラジアルグラデーションを1つ塗る（中心が不透明度 alpha、
+  // 0.7 地点で alpha*0.6、外周で透明になる3ストップ）。scaleX は縦方向(ry)に対する
+  // 横方向の拡大率（溝に沿った細長い楕円なら rx/ry、eyebag のような真円ベースなら scale）
+  function fillMaskEllipse(mctx, { cx, cy, ry, angle, scaleX }, alpha) {
+    mctx.save();
+    mctx.translate(cx, cy);
+    mctx.rotate(angle);
+    mctx.scale(scaleX, 1);
+    const g = mctx.createRadialGradient(0, 0, 0, 0, 0, ry);
+    g.addColorStop(0, `rgba(0,0,0,${alpha})`);
+    g.addColorStop(0.7, `rgba(0,0,0,${alpha * 0.6})`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    mctx.fillStyle = g;
+    mctx.beginPath();
+    mctx.arc(0, 0, ry, 0, Math.PI * 2);
+    mctx.fill();
+    mctx.restore();
+  }
+
+  // 溝消しパッチの共通処理: ランドマークのペア配列ごとにマスクへ楕円グラデーションを描き、
+  // 強くぼかした画像をソフトマスク付きで上書きする。領域外は一切触らないので全体のシャープさは保たれる
+  function applyGroovePatch(ctx, srcCanvas, patch, mask, lm, W, H, faceW, pairs, raw) {
+    if (raw <= 0) return;
+    // 1.0 までは不透明度、それ以上はぼかしの強さとパッチの太さを増やして消す力を上げる
+    const a = Math.min(1, raw);
+    const boost = Math.max(1, raw);
+
+    const mctx = mask.getContext('2d');
+    const pctx = patch.getContext('2d');
+
+    mctx.clearRect(0, 0, W, H);
+    for (const [fromI, toI] of pairs) {
+      const { cx, cy, rx, ry, angle } = grooveEllipse(lm, W, H, faceW, fromI, toI, boost);
+      fillMaskEllipse(mctx, { cx, cy, ry, angle, scaleX: rx / ry }, a);
+    }
+
+    pctx.clearRect(0, 0, W, H);
+    pctx.filter = `blur(${Math.max(2, faceW * 0.02 * boost)}px)`;
+    pctx.drawImage(srcCanvas, 0, 0);
+    pctx.filter = 'none';
+    pctx.globalCompositeOperation = 'destination-in';
+    pctx.drawImage(mask, 0, 0);
+    pctx.globalCompositeOperation = 'source-over';
+
+    ctx.drawImage(patch, 0, 0);
+  }
+
   // ほうれい線消し: 小鼻→口角のラインに沿った楕円領域だけ、強くぼかした画像を
   // ソフトマスク付きで上書きする。領域外は一切触らないので全体のシャープさは保たれる
   function drawNasoFix(ctx, srcCanvas, patch, mask, lm, W, H) {
@@ -360,75 +409,12 @@ void main() {
       (lm[FACE_RIGHT].x - lm[FACE_LEFT].x) * W,
       (lm[FACE_RIGHT].y - lm[FACE_LEFT].y) * H
     );
-    const mctx = mask.getContext('2d');
-    const pctx = patch.getContext('2d');
 
-    if (raw > 0) {
-      // 1.0 までは不透明度、それ以上はぼかしの強さとパッチの太さを増やして消す力を上げる
-      const a = Math.min(1, raw);
-      const boost = Math.max(1, raw);
+    applyGroovePatch(ctx, srcCanvas, patch, mask, lm, W, H, faceW,
+      [[ALA_L, MOUTH_L], [ALA_R, MOUTH_R]], raw);
 
-      mctx.clearRect(0, 0, W, H);
-      for (const [alaI, mouthI] of [[ALA_L, MOUTH_L], [ALA_R, MOUTH_R]]) {
-        const { cx, cy, rx, ry, angle } = grooveEllipse(lm, W, H, faceW, alaI, mouthI, boost);
-        mctx.save();
-        mctx.translate(cx, cy);
-        mctx.rotate(angle);
-        mctx.scale(rx / ry, 1); // 溝に沿った細長い楕円
-        const g = mctx.createRadialGradient(0, 0, 0, 0, 0, ry);
-        g.addColorStop(0, `rgba(0,0,0,${a})`);
-        g.addColorStop(0.7, `rgba(0,0,0,${a * 0.6})`);
-        g.addColorStop(1, 'rgba(0,0,0,0)');
-        mctx.fillStyle = g;
-        mctx.beginPath();
-        mctx.arc(0, 0, ry, 0, Math.PI * 2);
-        mctx.fill();
-        mctx.restore();
-      }
-
-      pctx.clearRect(0, 0, W, H);
-      pctx.filter = `blur(${Math.max(2, faceW * 0.02 * boost)}px)`;
-      pctx.drawImage(srcCanvas, 0, 0);
-      pctx.filter = 'none';
-      pctx.globalCompositeOperation = 'destination-in';
-      pctx.drawImage(mask, 0, 0);
-      pctx.globalCompositeOperation = 'source-over';
-
-      ctx.drawImage(patch, 0, 0);
-    }
-
-    if (rawM > 0) {
-      const aM = Math.min(1, rawM);
-      const boostM = Math.max(1, rawM);
-
-      mctx.clearRect(0, 0, W, H);
-      for (const [mouthI, jawI] of [[MOUTH_L, 149], [MOUTH_R, 378]]) {
-        const { cx, cy, rx, ry, angle } = grooveEllipse(lm, W, H, faceW, mouthI, jawI, boostM);
-        mctx.save();
-        mctx.translate(cx, cy);
-        mctx.rotate(angle);
-        mctx.scale(rx / ry, 1);
-        const g = mctx.createRadialGradient(0, 0, 0, 0, 0, ry);
-        g.addColorStop(0, `rgba(0,0,0,${aM})`);
-        g.addColorStop(0.7, `rgba(0,0,0,${aM * 0.6})`);
-        g.addColorStop(1, 'rgba(0,0,0,0)');
-        mctx.fillStyle = g;
-        mctx.beginPath();
-        mctx.arc(0, 0, ry, 0, Math.PI * 2);
-        mctx.fill();
-        mctx.restore();
-      }
-
-      pctx.clearRect(0, 0, W, H);
-      pctx.filter = `blur(${Math.max(2, faceW * 0.02 * boostM)}px)`;
-      pctx.drawImage(srcCanvas, 0, 0);
-      pctx.filter = 'none';
-      pctx.globalCompositeOperation = 'destination-in';
-      pctx.drawImage(mask, 0, 0);
-      pctx.globalCompositeOperation = 'source-over';
-
-      ctx.drawImage(patch, 0, 0);
-    }
+    applyGroovePatch(ctx, srcCanvas, patch, mask, lm, W, H, faceW,
+      [[MOUTH_L, MARIO_JAW_L], [MOUTH_R, MARIO_JAW_R]], rawM);
   }
 
   // クマ消しパッチの楕円パラメータ。drawEyebagFix の描画とガイド線で同じ位置・サイズを使う
@@ -531,19 +517,7 @@ void main() {
 
     for (const eye of [EYE_BOT_L, EYE_BOT_R]) {
       const { cx, cy, ry, scale } = eyebagEllipse(eye, lm, W, H, faceW, roll, boost);
-      mctx.save();
-      mctx.translate(cx, cy);
-      mctx.rotate(roll);
-      mctx.scale(scale, 1);
-      const g = mctx.createRadialGradient(0, 0, 0, 0, 0, ry);
-      g.addColorStop(0, `rgba(0,0,0,${a})`);
-      g.addColorStop(0.7, `rgba(0,0,0,${a * 0.6})`);
-      g.addColorStop(1, 'rgba(0,0,0,0)');
-      mctx.fillStyle = g;
-      mctx.beginPath();
-      mctx.arc(0, 0, ry, 0, Math.PI * 2);
-      mctx.fill();
-      mctx.restore();
+      fillMaskEllipse(mctx, { cx, cy, ry, angle: roll, scaleX: scale }, a);
     }
 
     const pctx = patch.getContext('2d');
@@ -1245,7 +1219,7 @@ void main() {
 
     if (settings.marioA > 0 && partOn('mario')) {
       const boostM = Math.max(1, settings.marioA);
-      for (const [mouthI, jawI] of [[MOUTH_L, 149], [MOUTH_R, 378]]) {
+      for (const [mouthI, jawI] of [[MOUTH_L, MARIO_JAW_L], [MOUTH_R, MARIO_JAW_R]]) {
         const e = grooveEllipse(lm, W, H, faceW, mouthI, jawI, boostM);
         strokeEllipse(GUIDE_COLORS.mario, e.cx, e.cy, e.rx, e.ry, e.angle);
       }
