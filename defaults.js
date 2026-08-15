@@ -45,18 +45,18 @@ globalThis.MBF_DEFAULTS = {
   },
 
   // --- 肌 ---
-  smooth: 0,       // 美肌の強さ 0-1
-  bright: 0,       // 明るさ 0-0.3
-  warmth: 0,       // 血色（暖色寄せ） 0-0.2
-  sat: 1.0,        // 鮮やかさ 0.5-1.5
-  nasoA: 0,        // ほうれい線うすめ 0-2（0で無効。1超でぼかし・範囲も強化）
-  marioA: 0,       // マリオネットライン（口角下のしわ）うすめ 0-2
-  eyebagLine: 0,   // 目の下の線うすめ 0-2
-  eyebagBright: 0, // クマを明るく 0-1
-  eyebagW: 1.0,    // パッチの横幅倍率 0.5-2
-  eyebagH: 1.0,    // パッチの縦幅倍率 0.5-2
-  eyebagX: 0,      // クマ横位置オフセット -1〜1（マイナス=内側、プラス=外側）
-  eyebagY: 0,      // クマ縦位置オフセット -1〜1（マイナス=上、プラス=下）
+  smooth: 0,       // 美肌の強さ
+  bright: 0,       // 明るさ
+  warmth: 0,       // 血色（暖色寄せ）
+  sat: 1.0,        // 鮮やかさ
+  nasoA: 0,        // ほうれい線うすめ（0で無効。1超でぼかし・範囲も強化）
+  marioA: 0,       // マリオネットライン（口角下のしわ）うすめ
+  eyebagLine: 0,   // 目の下の線うすめ
+  eyebagBright: 0, // クマを明るく
+  eyebagW: 1.0,    // パッチの横幅倍率
+  eyebagH: 1.0,    // パッチの縦幅倍率
+  eyebagX: 0,      // クマ横位置オフセット（マイナス=内側、プラス=外側）
+  eyebagY: 0,      // クマ縦位置オフセット（マイナス=上、プラス=下）
 
   // --- キャリブレーション（人・環境への校正） ---
   lipThresh: 0.575, // 唇除外のしきい値（Cr）。下げるほど赤みの弱い唇も除外
@@ -64,13 +64,13 @@ globalThis.MBF_DEFAULTS = {
 
   // --- リップ ---
   lipColor: '#c2476e',
-  lipA: 0,       // 濃さ 0-1
-  lipGloss: 0,   // ツヤ 0-1
+  lipA: 0,       // 濃さ
+  lipGloss: 0,   // ツヤ
   lipW: 1.0,     // 太さ 0.8（細め）-1.3（オーバーリップ）
 
   // --- チーク ---
   blushColor: '#e8889a',
-  blushA: 0,       // 濃さ 0-1
+  blushA: 0,       // 濃さ
   blushShape: 1.6, // 形状 1=丸 - 2.5=横長
   blushX: 0,       // 横位置（顔幅比）。プラスで外側、マイナスで内側
   blushY: 0.06,    // 縦位置（顔幅比）
@@ -78,12 +78,12 @@ globalThis.MBF_DEFAULTS = {
 
   // --- 眉 ---
   browColor: '#5a3d2b',
-  browA: 0,      // 濃さ 0-1
-  browW: 1.0,    // 太さ 0.25-1.05
-  browTaper: 0,  // 眉尻の細さ 0-1
-  browArch: 0,   // アーチの高さ -1〜1
-  browPeak: 0.6, // アーチの位置 0.2-0.9
-  browTail: 0,   // 眉尻の高さ -1.5〜1
+  browA: 0,      // 濃さ
+  browW: 1.0,    // 太さ
+  browTaper: 0,  // 眉尻の細さ
+  browArch: 0,   // アーチの高さ
+  browPeak: 0.6, // アーチの位置
+  browTail: 0,   // 眉尻の高さ
 
   // --- アイシャドウ ---
   shadowColor: '#9e5a73',  // 際
@@ -91,60 +91,60 @@ globalThis.MBF_DEFAULTS = {
   shadowColor3: '#e8c9c4', // 上
   shadowUse2: true,
   shadowUse3: true,
-  shadowA: 0,      // 濃さ 0-1
-  shadowH: 1.0,    // 高さ 0.5-2
-  shadowW: 1.0,    // 幅 0.8-1.4
+  shadowA: 0,      // 濃さ
+  shadowH: 1.0,    // 高さ
+  shadowW: 1.0,    // 幅
   shadowSoft: 1.0, // ぼかし
-  shadowBias: 1.0, // 際色の量 1-3
+  shadowBias: 1.0, // 際色の量
 
   // --- 涙袋 ---
   tearColor: '#f0d5cd',      // ハイライト色
   tearShadeColor: '#c9a396', // シェイド色（影線）
-  tearA: 0,       // ハイライト濃さ 0-1
-  tearShadeA: 0,  // シェイド濃さ 0-1
-  tearH: 1.0,     // 高さ（帯の広さ） 0.5-2
-  tearW: 1.0,     // 横幅 0.8-1.4
+  tearA: 0,       // ハイライト濃さ
+  tearShadeA: 0,  // シェイド濃さ
+  tearH: 1.0,     // 高さ（帯の広さ）
+  tearW: 1.0,     // 横幅
   tearSoft: 1.0,  // ぼかし
 
   // --- アイライン ---
   linerColor: '#2b1d1a',
-  linerA: 0,       // 濃さ 0-1
-  linerW: 1.0,     // 太さ 0.4-2
-  linerY: 0.002,   // 上下位置（顔幅比）-0.006〜0.01。0=際ぴったり
-  linerWing: 0,    // 目尻ハネの長さ 0-1
-  linerWingUp: 25, // ハネ角度（度）-60〜60
-  linerWingW: 1.5, // ハネの太さ 0.5-3
+  linerA: 0,       // 濃さ
+  linerW: 1.0,     // 太さ
+  linerY: 0.002,   // 上下位置（顔幅比）。0=際ぴったり
+  linerWing: 0,    // 目尻ハネの長さ
+  linerWingUp: 25, // ハネ角度（度）
+  linerWingW: 1.5, // ハネの太さ
 
   // --- 目尻マスカラ（アイラインセクション内） ---
   lashColor: '#2b1d1a',
-  lashA: 0,       // 濃さ 0-1（0で無効）
-  lashLen: 1.0,   // 長さ 0.5-2
-  lashUp: 40,     // 角度（度）0-70。上向きほど跳ね上がる
-  lashCurl: 0.3,  // カール 0-1（0で直線）
-  lashN: 8,       // 本数 2-24
-  lashSpan: 0.25, // 適用幅（際に対する割合）0.15-1
+  lashA: 0,       // 濃さ（0で無効）
+  lashLen: 1.0,   // 長さ
+  lashUp: 40,     // 角度（度）。上向きほど跳ね上がる
+  lashCurl: 0.3,  // カール（0で直線）
+  lashN: 8,       // 本数
+  lashSpan: 0.25, // 適用幅（際に対する割合）
 
   // --- シェーディング ---
   shadeColor: '#8a5a40',
-  noseA: 0,      // ノーズ濃さ 0-1
-  noseW: 1.0,    // ノーズ幅 0.5-2
-  noseIn: 0.25,  // ノーズ位置（内側寄せ） 0-0.6
-  noseSoft: 1.0, // ノーズぼかし 0.5-3
-  jawA: 0,       // 輪郭濃さ 0-1
-  jawSoft: 1.0,  // 輪郭ぼかし 0.5-3
+  noseA: 0,      // ノーズ濃さ
+  noseW: 1.0,    // ノーズ幅
+  noseIn: 0.25,  // ノーズ位置（内側寄せ）
+  noseSoft: 1.0, // ノーズぼかし
+  jawA: 0,       // 輪郭濃さ
+  jawSoft: 1.0,  // 輪郭ぼかし
 
   // --- ハイライト ---
   hiColor: '#fff2e2',
-  hiA: 0,           // 鼻筋濃さ 0-1
-  hiW: 1.0,         // 鼻筋幅 0.5-2
-  hiSoft: 1.0,      // 鼻筋ぼかし 0.5-3
-  hiCheekA: 0,      // 頬骨濃さ 0-1
-  hiCheekW: 1.0,    // 頬骨の大きさ 0.5-2
-  hiCheekX: 0,      // 頬骨横位置 -0.08〜0.08
-  hiCheekY: 0,      // 頬骨縦位置 -0.08〜0.08
-  hiCheekSoft: 1.0, // 頬骨ぼかし 0.5-3
-  hiChinA: 0,       // 顎先濃さ 0-1
-  hiChinW: 1.0,     // 顎先の大きさ 0.5-2
-  hiChinY: 0,       // 顎先縦位置 -0.06〜0.06
-  hiChinSoft: 1.0   // 顎先ぼかし 0.5-3
+  hiA: 0,           // 鼻筋濃さ
+  hiW: 1.0,         // 鼻筋幅
+  hiSoft: 1.0,      // 鼻筋ぼかし
+  hiCheekA: 0,      // 頬骨濃さ
+  hiCheekW: 1.0,    // 頬骨の大きさ
+  hiCheekX: 0,      // 頬骨横位置
+  hiCheekY: 0,      // 頬骨縦位置
+  hiCheekSoft: 1.0, // 頬骨ぼかし
+  hiChinA: 0,       // 顎先濃さ
+  hiChinW: 1.0,     // 顎先の大きさ
+  hiChinY: 0,       // 顎先縦位置
+  hiChinSoft: 1.0   // 顎先ぼかし
 };
