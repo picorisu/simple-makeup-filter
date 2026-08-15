@@ -74,7 +74,7 @@ globalThis.MBF_DEFAULTS = {
   blushShape: 1.6, // 形状 1=丸 - 2.5=横長
   blushX: 0,       // 横位置（顔幅比）。プラスで外側、マイナスで内側
   blushY: 0.06,    // 縦位置（顔幅比）
-  blushSoft: 1.3,  // ぼかし 1-2.2
+  blushSoft: 1.3,  // ぼかし
 
   // --- 眉 ---
   browColor: '#5a3d2b',
@@ -94,7 +94,7 @@ globalThis.MBF_DEFAULTS = {
   shadowA: 0,      // 濃さ 0-1
   shadowH: 1.0,    // 高さ 0.5-2
   shadowW: 1.0,    // 幅 0.8-1.4
-  shadowSoft: 1.0, // ぼかし 0.5-3
+  shadowSoft: 1.0, // ぼかし
   shadowBias: 1.0, // 際色の量 1-3
 
   // --- 涙袋 ---
@@ -104,7 +104,7 @@ globalThis.MBF_DEFAULTS = {
   tearShadeA: 0,  // シェイド濃さ 0-1
   tearH: 1.0,     // 高さ（帯の広さ） 0.5-2
   tearW: 1.0,     // 横幅 0.8-1.4
-  tearSoft: 1.0,  // ぼかし 0.5-3
+  tearSoft: 1.0,  // ぼかし
 
   // --- アイライン ---
   linerColor: '#2b1d1a',
