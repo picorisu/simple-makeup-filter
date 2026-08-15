@@ -43,6 +43,33 @@ if a != b:
     sys.exit(1)
 PY
 
+# blushSoft の値域（popup.html のスライダー属性と override.js のクランプ式）が
+# 食い違うと、スライダーで選べる値をクランプが黙って潰す（または範囲外の値が素通りする）ため、
+# 提出前に一致を検証する
+python3 - <<'PY'
+import re, sys
+
+html = open('popup.html', encoding='utf-8').read()
+m = re.search(r'id="blushSoft"[^>]*\bmin="([^"]+)"[^>]*\bmax="([^"]+)"', html)
+if not m:
+    print('ERROR: popup.html に id="blushSoft" の min/max 属性が見つかりません', file=sys.stderr)
+    sys.exit(1)
+html_min, html_max = m.group(1), m.group(2)
+
+js = open('override.js', encoding='utf-8').read()
+m2 = re.search(r'Math\.min\(([\d.]+),\s*Math\.max\(([\d.]+),\s*settings\.blushSoft\)\)', js)
+if not m2:
+    print('ERROR: override.js に blushSoft のクランプ式が見つかりません', file=sys.stderr)
+    sys.exit(1)
+js_max, js_min = m2.group(1), m2.group(2)
+
+if (html_min, html_max) != (js_min, js_max):
+    print('ERROR: blushSoft の値域が popup.html と override.js で一致しません', file=sys.stderr)
+    print(f'  popup.html  : min={html_min} max={html_max}', file=sys.stderr)
+    print(f'  override.js : min={js_min} max={js_max}', file=sys.stderr)
+    sys.exit(1)
+PY
+
 VERSION=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
 OUT="dist/simple-makeup-filter-v${VERSION}.zip"
 mkdir -p dist
