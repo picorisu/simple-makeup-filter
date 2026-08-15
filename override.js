@@ -353,44 +353,47 @@ void main() {
     const raw = settings.nasoA;
     const rawM = settings.marioA;
     if (raw <= 0 && rawM <= 0) return;
-    // 1.0 までは不透明度、それ以上はぼかしの強さとパッチの太さを増やして消す力を上げる
-    const a = Math.min(1, raw);
-    const boost = Math.max(1, raw);
 
     const faceW = Math.hypot(
       (lm[FACE_RIGHT].x - lm[FACE_LEFT].x) * W,
       (lm[FACE_RIGHT].y - lm[FACE_LEFT].y) * H
     );
     const mctx = mask.getContext('2d');
-    mctx.clearRect(0, 0, W, H);
-
-    for (const [alaI, mouthI] of [[ALA_L, MOUTH_L], [ALA_R, MOUTH_R]]) {
-      const { cx, cy, rx, ry, angle } = grooveEllipse(lm, W, H, faceW, alaI, mouthI, boost);
-      mctx.save();
-      mctx.translate(cx, cy);
-      mctx.rotate(angle);
-      mctx.scale(rx / ry, 1); // 溝に沿った細長い楕円
-      const g = mctx.createRadialGradient(0, 0, 0, 0, 0, ry);
-      g.addColorStop(0, `rgba(0,0,0,${a})`);
-      g.addColorStop(0.7, `rgba(0,0,0,${a * 0.6})`);
-      g.addColorStop(1, 'rgba(0,0,0,0)');
-      mctx.fillStyle = g;
-      mctx.beginPath();
-      mctx.arc(0, 0, ry, 0, Math.PI * 2);
-      mctx.fill();
-      mctx.restore();
-    }
-
     const pctx = patch.getContext('2d');
-    pctx.clearRect(0, 0, W, H);
-    pctx.filter = `blur(${Math.max(2, faceW * 0.02 * boost)}px)`;
-    pctx.drawImage(srcCanvas, 0, 0);
-    pctx.filter = 'none';
-    pctx.globalCompositeOperation = 'destination-in';
-    pctx.drawImage(mask, 0, 0);
-    pctx.globalCompositeOperation = 'source-over';
 
-    ctx.drawImage(patch, 0, 0);
+    if (raw > 0) {
+      // 1.0 までは不透明度、それ以上はぼかしの強さとパッチの太さを増やして消す力を上げる
+      const a = Math.min(1, raw);
+      const boost = Math.max(1, raw);
+
+      mctx.clearRect(0, 0, W, H);
+      for (const [alaI, mouthI] of [[ALA_L, MOUTH_L], [ALA_R, MOUTH_R]]) {
+        const { cx, cy, rx, ry, angle } = grooveEllipse(lm, W, H, faceW, alaI, mouthI, boost);
+        mctx.save();
+        mctx.translate(cx, cy);
+        mctx.rotate(angle);
+        mctx.scale(rx / ry, 1); // 溝に沿った細長い楕円
+        const g = mctx.createRadialGradient(0, 0, 0, 0, 0, ry);
+        g.addColorStop(0, `rgba(0,0,0,${a})`);
+        g.addColorStop(0.7, `rgba(0,0,0,${a * 0.6})`);
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        mctx.fillStyle = g;
+        mctx.beginPath();
+        mctx.arc(0, 0, ry, 0, Math.PI * 2);
+        mctx.fill();
+        mctx.restore();
+      }
+
+      pctx.clearRect(0, 0, W, H);
+      pctx.filter = `blur(${Math.max(2, faceW * 0.02 * boost)}px)`;
+      pctx.drawImage(srcCanvas, 0, 0);
+      pctx.filter = 'none';
+      pctx.globalCompositeOperation = 'destination-in';
+      pctx.drawImage(mask, 0, 0);
+      pctx.globalCompositeOperation = 'source-over';
+
+      ctx.drawImage(patch, 0, 0);
+    }
 
     if (rawM > 0) {
       const aM = Math.min(1, rawM);
