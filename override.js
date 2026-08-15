@@ -495,8 +495,6 @@ void main() {
     };
   }
 
-  // チークの楕円パラメータ。実描画とガイドで同じ中心・半径・角度・回転を使う
-  // （実描画は translate+rotate、ガイドは回転行列で消費するが、共有するのは値のみ）
   function blushEllipse(idx, lm, W, H, faceW, roll) {
     const r = faceW * 0.13;
     const aspect = Math.max(1, settings.blushShape); // 横:縦 の比率
@@ -512,11 +510,10 @@ void main() {
     return {
       cx: x + rightX * ox - rightY * oy, cy: y + rightY * ox + rightX * oy,
       rx: rEff * aspect, ry: rEff,
-      angle: roll
+      angle: roll, aspect, soft
     };
   }
 
-  // 輪郭シェーディングの内側寄せ済み点列。実描画とガイドで同じ点列を使う
   function jawInsetPoints(jaw, lm, W, H, faceW) {
     const nx = lm[NOSE_TIP].x * W, ny = lm[NOSE_TIP].y * H;
     return jaw.map((i) => {
@@ -839,10 +836,9 @@ void main() {
 
     if (settings.blushA > 0) {
       ctx.filter = 'none';
-      const soft = Math.min(2.2, Math.max(1, settings.blushSoft));
-      const a = (settings.blushA * 0.45) / soft;
       for (const idx of [CHEEK_L, CHEEK_R]) {
         const e = blushEllipse(idx, lm, W, H, faceW, roll);
+        const a = (settings.blushA * 0.45) / e.soft;
         ctx.save();
         ctx.translate(e.cx, e.cy);
         ctx.rotate(e.angle);
@@ -854,7 +850,7 @@ void main() {
         g.addColorStop(0.75, hexToRgba(settings.blushColor, a * 0.2));
         g.addColorStop(1, hexToRgba(settings.blushColor, 0));
         ctx.fillStyle = g;
-        ctx.scale(e.rx / e.ry, 1); // 横方向に引き伸ばして楕円化
+        ctx.scale(e.aspect, 1); // 横方向に引き伸ばして楕円化
         ctx.beginPath();
         ctx.arc(0, 0, e.ry, 0, Math.PI * 2);
         ctx.fill();
