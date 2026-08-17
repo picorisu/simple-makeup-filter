@@ -18,7 +18,10 @@ Google Meet の自分の映像に、自然な美肌補正とメイクのフィ�
 • ほうれい線・目の下の線・クマの軽減。
 • リップ（色・ツヤ・太さ）/ チーク（形・位置・ぼかし）/ 眉（太さ・アーチ・眉尻）。
 • アイシャドウ（最大3色グラデーション）/ アイライン（猫目〜垂れ目の目尻ハネ）。
+• 涙袋（ハイライトとシェードの2層で自然な立体感）。
+• マスカラ（長さ・カール・本数・角度を調整可能）。
 • シェーディング（ノーズ・輪郭）/ ハイライト（鼻筋・頬骨・顎先）。
+• 位置ガイド線: 各パーツの位置を線で表示して、重なりやすい部分の調整をサポート。
 • 顔の468点をリアルタイム追跡。動いても、まばたきしても、首をかしげても追従します。
 • 設定したメイクをプリセット保存。書き出し・読み込みで友達との共有もできます。
 
@@ -78,7 +81,10 @@ Fine-tune every detail with sliders and create your perfect look.
 • Reduces nasolabial lines, under-eye lines, and dark circles.
 • Lip (color, gloss, fullness) / Blush (shape, position, softness) / Brow (thickness, arch, tail).
 • Eyeshadow (up to 3-color gradient) / Eyeliner (adjustable wing angle).
+• Aegyo-sal / under-eye highlight (two layers of highlight and shade for natural dimension).
+• Mascara (adjustable length, curl, count, and angle).
 • Contouring (nose, jawline) / Highlight (nose bridge, cheekbone, chin).
+• Position guides: outlines each part on screen to help align overlapping areas.
 • Real-time 468-point face tracking — follows your every move, blink, and head tilt.
 • Save presets. Export & import to share with friends.
 
