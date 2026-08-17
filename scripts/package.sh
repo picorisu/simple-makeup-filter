@@ -79,14 +79,14 @@ import json, re, sys
 manifest_version = json.load(open('manifest.json'))['version']
 
 listing = open('docs/store-listing.md', encoding='utf-8').read()
-listing_hits = re.findall(r'## 対象バージョン[ \t]*\n(\S+)', listing)
+listing_hits = re.findall(r'## 対象バージョン[ \t\r　]*\n(\S+)', listing)
 if len(listing_hits) != 1:
     print(f'ERROR: docs/store-listing.md の「## 対象バージョン」が {len(listing_hits)} 件ヒットしました（1件のはず）', file=sys.stderr)
     sys.exit(1)
 listing_version = listing_hits[0]
 
-if not re.match(r'^\d+\.\d+\.\d+$', listing_version):
-    print(f'ERROR: docs/store-listing.md の「## 対象バージョン」の値 ({listing_version}) がバージョン形式（例: 1.2.3）ではありません', file=sys.stderr)
+if not re.match(r'^\d+(\.\d+){0,3}$', listing_version):
+    print(f'ERROR: docs/store-listing.md の「## 対象バージョン」の値 ({listing_version}) がバージョン形式（数字をドットで区切った形式）ではありません', file=sys.stderr)
     sys.exit(1)
 
 if listing_version != manifest_version:
