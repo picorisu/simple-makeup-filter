@@ -29,7 +29,7 @@ Features are intentionally limited to what looks natural in a professional setti
   - マスカラ / Mascara（濃さ・色・長さ・角度・カール・本数・適用幅）
   - シェーディング / Contouring：ノーズ（濃さ・幅・位置・ぼかし）・輪郭（濃さ・ぼかし）
   - ハイライト / Highlight：鼻筋（濃さ・幅・ぼかし）・頬骨（濃さ・大きさ・横位置・縦位置・ぼかし）・顎先（濃さ・大きさ・縦位置・ぼかし）
-- **プリセット / Presets**: 設定した内容に名前を付けて保存・呼び出し。JSON で書き出し / 読み込みも可能（位置ガイドの ON/OFF は含まない）
+- **プリセット / Presets**: ナチュラル / しっかり / 血色感 のワンタップ初期プリセットを用意。設定した内容に名前を付けて保存・呼び出しも可能で、JSON で書き出し / 読み込みもできる（位置ガイドの ON/OFF は含まない）
 - **位置ガイド線 / Position guides**: 各パーツの描画位置を線で表示して、重なりやすい部分（クマ消しと涙袋など）の調整を補助する。パーツごとに色分け。通話相手にも見えるため既定は全 OFF で、ON にする際は確認ダイアログを出す。Meet の再読み込みで自動的に OFF に戻る
 - **キャリブレーション / Calibration**: 唇除外しきい値・肌色判定の広さを人・環境に合わせて調整可能
 - 全パラメータはツールバーのポップアップから会議中でも即時反映 / All parameters adjustable in real time from the toolbar popup
