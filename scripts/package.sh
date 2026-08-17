@@ -79,14 +79,18 @@ import json, re, sys
 manifest_version = json.load(open('manifest.json'))['version']
 
 listing = open('docs/store-listing.md', encoding='utf-8').read()
-m = re.search(r'## 対象バージョン\s*\n(\S+)', listing)
-if not m:
-    print('ERROR: docs/store-listing.md に「## 対象バージョン」が見つかりません', file=sys.stderr)
+listing_hits = re.findall(r'## 対象バージョン[ \t]*\n(\S+)', listing)
+if len(listing_hits) != 1:
+    print(f'ERROR: docs/store-listing.md の「## 対象バージョン」が {len(listing_hits)} 件ヒットしました（1件のはず）', file=sys.stderr)
     sys.exit(1)
-listing_version = m.group(1)
+listing_version = listing_hits[0]
+
+if not re.match(r'^\d+\.\d+\.\d+$', listing_version):
+    print(f'ERROR: docs/store-listing.md の「## 対象バージョン」の値 ({listing_version}) がバージョン形式（例: 1.2.3）ではありません', file=sys.stderr)
+    sys.exit(1)
 
 if listing_version != manifest_version:
-    print(f'掲載文の対象バージョン ({listing_version}) が manifest.json ({manifest_version}) と一致しません。', file=sys.stderr)
+    print(f'ERROR: 掲載文の対象バージョン ({listing_version}) が manifest.json ({manifest_version}) と一致しません', file=sys.stderr)
     print('docs/store-listing.md の機能一覧を確認し、「## 対象バージョン」を更新してください。', file=sys.stderr)
     print('（README.md の機能一覧もあわせて確認）', file=sys.stderr)
     sys.exit(1)
