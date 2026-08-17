@@ -105,11 +105,3 @@ Fine-tune every detail with sliders and create your perfect look.
 • This extension is unofficial. Google Meet is a trademark of Google LLC.
 • Face-tracking features (makeup, etc.) may vary in performance depending on your PC.
 
----
-
-## スクリーンショット（1280x800、最低1枚・推奨5枚）※要準備
-1. ポップアップ UI 全体（アコーディオンを開いた状態）
-2. 美肌 before/after の比較
-3. メイク適用例（リップ・チーク・アイシャドウ）
-4. プリセット機能
-5. プライバシー説明の図（映像がPCから出ないことの図解）
