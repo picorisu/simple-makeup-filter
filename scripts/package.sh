@@ -70,6 +70,32 @@ if (html_min, html_max) != (js_min, js_max):
     sys.exit(1)
 PY
 
+# 掲載文（docs/store-listing.md）の対象バージョンが manifest.json と食い違うと、
+# 機能を追加してもストア掲載文が更新されないまま提出される事故につながるため、
+# 提出前に一致を検証する
+python3 - <<'PY'
+import json, re, sys
+
+manifest_version = json.load(open('manifest.json'))['version']
+
+listing = open('docs/store-listing.md', encoding='utf-8').read()
+listing_hits = re.findall(r'## 対象バージョン[ \t\r　]*\n(\S+)', listing)
+if len(listing_hits) != 1:
+    print(f'ERROR: docs/store-listing.md の「## 対象バージョン」が {len(listing_hits)} 件ヒットしました（1件のはず）', file=sys.stderr)
+    sys.exit(1)
+listing_version = listing_hits[0]
+
+if not re.match(r'^\d+(\.\d+){0,3}$', listing_version):
+    print(f'ERROR: docs/store-listing.md の「## 対象バージョン」の値 ({listing_version}) がバージョン形式（数字をドットで区切った形式）ではありません', file=sys.stderr)
+    sys.exit(1)
+
+if listing_version != manifest_version:
+    print(f'ERROR: 掲載文の対象バージョン ({listing_version}) が manifest.json ({manifest_version}) と一致しません', file=sys.stderr)
+    print('docs/store-listing.md の機能一覧を確認し、「## 対象バージョン」を更新してください。', file=sys.stderr)
+    print('（README.md の機能一覧もあわせて確認）', file=sys.stderr)
+    sys.exit(1)
+PY
+
 VERSION=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
 OUT="dist/simple-makeup-filter-v${VERSION}.zip"
 mkdir -p dist
