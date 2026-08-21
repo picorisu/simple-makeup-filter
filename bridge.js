@@ -1,7 +1,7 @@
 // ISOLATED world。chrome.storage の設定を MAIN world (override.js) へ中継する
 // 初期値は defaults.js が単一情報源。
 // 万一 defaults.js が先に注入されていなくてもクラッシュさせない
-// （storage は popup 初回起動時に全キーが書き込まれるため、保存済みの値だけで動ける）
+// （sendCurrent は get(null) で storage を全量取得するため、DEFAULTS が空でも保存済みの値だけで動ける）
 const DEFAULTS = globalThis.MBF_DEFAULTS || {};
 
 function send(s) {
@@ -10,7 +10,13 @@ function send(s) {
 }
 
 function sendCurrent() {
-  chrome.storage.local.get(DEFAULTS, (s) => {
+  // get(null) で全量を取る: DEFAULTS が空（defaults.js 未注入）でも保存済み設定だけで動けるようにする。
+  // get(DEFAULTS) は DEFAULTS が {} のとき storage を一切読まない（空指定 = 空の結果が Chrome の仕様）
+  chrome.storage.local.get(null, (all) => {
+    const s = { ...DEFAULTS };
+    for (const k in all) {
+      if (!k.startsWith('__')) s[k] = all[k]; // __presets 等の UI 内部用キーは描画設定と無関係
+    }
     // MAIN world には chrome.runtime が無いので、vendor/ の URL をここから渡す
     s.__base = chrome.runtime.getURL('');
     s.guideParts = {};
