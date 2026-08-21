@@ -29,7 +29,7 @@
         if (!known || k in known) settings[k] = s[k];
       }
     } catch (err) {
-      console.warn('[Meet Beauty Filter] 設定の受信に失敗:', err);
+      console.warn('[Simple Makeup Filter] 設定の受信に失敗:', err);
     }
   });
   // bridge 側に「準備できた」と知らせて初期設定をもらう
@@ -171,12 +171,12 @@ void main() {
           trustedTypes.createPolicy('default', {
             createScriptURL: (url) => {
               if (url.startsWith(base)) return url;
-              throw new TypeError('blocked by Meet Beauty Filter default policy: ' + url);
+              throw new TypeError('blocked by Simple Makeup Filter default policy: ' + url);
             }
           });
         } catch (e) {
           // 既に default ポリシーが存在する／CSP がポリシー名を制限している場合
-          console.warn('[Meet Beauty Filter] Trusted Types ポリシー作成失敗:', e);
+          console.warn('[Simple Makeup Filter] Trusted Types ポリシー作成失敗:', e);
         }
       }
       // MediaPipe は内部ログ（W0612... / INFO: ... / xxx.cc:NN）を console.error/warn で
@@ -211,7 +211,7 @@ void main() {
           )
         )
         .catch((e) => {
-          console.warn('[Meet Beauty Filter] Face Mesh 初期化失敗（メイク無効、美肌は動作）:', e);
+          console.warn('[Simple Makeup Filter] Face Mesh 初期化失敗（メイク無効、美肌は動作）:', e);
           return null;
         });
     }
@@ -1300,7 +1300,7 @@ void main() {
         GLS = createGL(glCanvas);
         GLS.gl.viewport(0, 0, glCanvas.width || 1, glCanvas.height || 1);
       } catch (e) {
-        console.warn('[Meet Beauty Filter] WebGL 復元に失敗:', e);
+        console.warn('[Simple Makeup Filter] WebGL 復元に失敗:', e);
       }
     });
 
@@ -1324,7 +1324,7 @@ void main() {
         if (attempt < 3) {
           setTimeout(() => tryPlay(attempt + 1), 300);
         } else {
-          console.warn('[Meet Beauty Filter] video.play() に失敗。映像が表示されない場合はページを再読み込みしてください');
+          console.warn('[Simple Makeup Filter] video.play() に失敗。映像が表示されない場合はページを再読み込みしてください');
         }
       });
     };
@@ -1439,7 +1439,7 @@ void main() {
     try {
       return processStream(stream);
     } catch (e) {
-      console.warn('[Meet Beauty Filter] フィルター適用失敗、素の映像を使用:', e);
+      console.warn('[Simple Makeup Filter] フィルター適用失敗、素の映像を使用:', e);
       return stream;
     }
   };
