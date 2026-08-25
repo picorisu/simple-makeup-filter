@@ -6,6 +6,11 @@ A Chrome extension (MV3) that adds fully-local skin smoothing and makeup filters
 
 **[Chrome Web Store](https://chromewebstore.google.com/detail/jffebejmbaaolmjpokllkkhbepgohmnn)**
 
+> **配布について / Distribution**
+> 公式な配布元は上記の Chrome ウェブストアのみです。他サイトで配布・紹介されているものは当方の管理下になく、内容の正確性や安全性を保証できません。
+>
+> The Chrome Web Store link above is the only official distribution channel. Copies or listings on other sites are not maintained by us — we cannot vouch for their accuracy or safety.
+
 ## Concept / コンセプト
 
 この拡張はビジネスのビデオ通話（リモートワーク・オンライン会議・面接）向けに設計しています。目指すのは自然に身だしなみが整って見えること。カラコン・ヘアカラー・派手なエフェクト等は意図的にスコープ外としています。
