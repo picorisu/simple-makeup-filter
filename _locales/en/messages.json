@@ -3,14 +3,14 @@
   "extDescription": { "message": "Natural beauty, ON. Skin smoothing & makeup for your Google Meet camera. Nothing leaves your PC. Essential for remote meetings." },
 
   "enabled_title": { "message": "Enable / Disable filter" },
-  "status_checking": { "message": "○ Checking Meet tab…" },
+  "status_checking": { "message": "○ Checking for a supported tab…" },
   "status_off": { "message": "○ Filter is off (check the box at top-right to enable)" },
-  "status_no_tab": { "message": "○ No Meet tab found (open meet.google.com)" },
-  "status_active": { "message": "● Active on Meet" },
-  "status_reload": { "message": "○ Reload the Meet tab to activate" },
+  "status_no_tab": { "message": "○ No supported tab found (open Google Meet or Zoom)" },
+  "status_active": { "message": "● Active" },
+  "status_reload": { "message": "○ Reload the tab to activate" },
 
   "intro_title": { "message": "🌸 Getting Started" },
-  "intro_guide": { "message": "Open Google Meet with camera ON → move the sliders below to see changes instantly 💄 Try a quick preset to start:" },
+  "intro_guide": { "message": "Open Google Meet or Zoom with camera ON → move the sliders below to see changes instantly 💄 Try a quick preset to start:" },
   "quick_natural": { "message": "Natural" },
   "quick_full": { "message": "Full" },
   "quick_healthy": { "message": "Healthy Glow" },
@@ -153,7 +153,7 @@
 
   "confirm_quick": { "message": "Your current settings will be overwritten by this preset. Continue?\n(Save your settings as a preset first if you want to keep them)" },
   "confirm_reset": { "message": "Reset all settings to defaults? (Saved presets will be kept)" },
-  "confirm_guide": { "message": "Guide lines are also visible to the other participants.\nUncheck to turn them off anytime; even if you forget, reloading Meet turns them off automatically.\nTurn it on?" },
+  "confirm_guide": { "message": "Guide lines are also visible to the other participants.\nUncheck to turn them off anytime; even if you forget, reloading the page turns them off automatically.\nTurn it on?" },
   "confirm_overwrite": { "message": "\"$name$\" already exists. Overwrite?", "placeholders": { "name": { "content": "$1" } } },
   "confirm_export_dirty": { "message": "You have unsaved changes.\nThe export will contain the saved \"$name$\" preset, not your current screen settings.\nContinue? (Save first if you want to export current settings)", "placeholders": { "name": { "content": "$1" } } },
   "confirm_delete": { "message": "Delete \"$name$\"?", "placeholders": { "name": { "content": "$1" } } },

@@ -1,5 +1,8 @@
 const DEFAULTS = MBF_DEFAULTS; // 初期値は defaults.js が単一情報源
 
+// manifest.json の content_scripts.matches と一致させること（片方だけ直すと死活確認だけが無言で壊れる）
+const SUPPORTED_URL_PATTERNS = ['https://meet.google.com/*', 'https://app.zoom.us/*'];
+
 const RANGES = ['smooth', 'bright', 'warmth', 'sat', 'lipThresh', 'skinRange', 'nasoA', 'marioA', 'eyebagLine', 'eyebagBright', 'eyebagW', 'eyebagH', 'eyebagX', 'eyebagY', 'lipA', 'lipGloss', 'lipW', 'blushA', 'blushShape', 'blushX', 'blushY', 'blushSoft', 'browA', 'browW', 'browTaper', 'browArch', 'browPeak', 'browTail', 'shadowA', 'shadowH', 'shadowW', 'shadowSoft', 'shadowBias', 'tearA', 'tearShadeA', 'tearH', 'tearW', 'tearSoft', 'linerA', 'linerW', 'linerY', 'linerWing', 'linerWingUp', 'linerWingW', 'lashA', 'lashLen', 'lashUp', 'lashCurl', 'lashN', 'lashSpan', 'noseA', 'noseW', 'noseIn', 'noseSoft', 'jawA', 'jawSoft', 'hiA', 'hiW', 'hiSoft', 'hiCheekA', 'hiCheekW', 'hiCheekX', 'hiCheekY', 'hiCheekSoft', 'hiChinA', 'hiChinW', 'hiChinY', 'hiChinSoft'];
 const COLORS = ['lipColor', 'blushColor', 'browColor', 'shadowColor', 'shadowColor2', 'shadowColor3', 'tearColor', 'tearShadeColor', 'linerColor', 'lashColor', 'shadeColor', 'hiColor'];
 
@@ -161,7 +164,7 @@ function updateStatus() {
     statusEl.textContent = M('status_off');
     return;
   }
-  chrome.tabs.query({ url: 'https://meet.google.com/*' }, (tabs) => {
+  chrome.tabs.query({ url: SUPPORTED_URL_PATTERNS }, (tabs) => {
     if (!tabs || tabs.length === 0) {
       statusEl.textContent = M('status_no_tab');
       return;

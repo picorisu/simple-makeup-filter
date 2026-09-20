@@ -1,8 +1,8 @@
 # Simple Makeup Filter for Google Meet
 
-Google Meet のカメラ映像にローカル処理の美肌・メイクフィルターをかける Chrome 拡張（MV3）。映像・顔データは一切外部送信しない。
+Google Meet・Zoom（Web クライアント）のカメラ映像にローカル処理の美肌・メイクフィルターをかける Chrome 拡張（MV3）。映像・顔データは一切外部送信しない。
 
-A Chrome extension (MV3) that adds fully-local skin smoothing and makeup filters to Google Meet. Your face never leaves your computer — no video or face data is ever sent anywhere.
+A Chrome extension (MV3) that adds fully-local skin smoothing and makeup filters to Google Meet and Zoom (web client). Your face never leaves your computer — no video or face data is ever sent anywhere.
 
 **[Chrome Web Store](https://chromewebstore.google.com/detail/jffebejmbaaolmjpokllkkhbepgohmnn)**
 
@@ -35,7 +35,7 @@ Features are intentionally limited to what looks natural in a professional setti
   - シェーディング / Contouring：ノーズ（濃さ・幅・位置・ぼかし）・輪郭（濃さ・ぼかし）
   - ハイライト / Highlight：鼻筋（濃さ・幅・ぼかし）・頬骨（濃さ・大きさ・横位置・縦位置・ぼかし）・顎先（濃さ・大きさ・縦位置・ぼかし）
 - **プリセット / Presets**: ナチュラル / しっかり / 血色感 のワンタップ初期プリセットを用意。設定した内容に名前を付けて保存・呼び出しも可能で、JSON で書き出し / 読み込みもできる（位置ガイドの ON/OFF は含まない）
-- **位置ガイド線 / Position guides**: 各パーツの描画位置を線で表示して、重なりやすい部分（クマ消しと涙袋など）の調整を補助する。パーツごとに色分け。通話相手にも見えるため既定は全 OFF で、ON にする際は確認ダイアログを出す。Meet の再読み込みで自動的に OFF に戻る
+- **位置ガイド線 / Position guides**: 各パーツの描画位置を線で表示して、重なりやすい部分（クマ消しと涙袋など）の調整を補助する。パーツごとに色分け。通話相手にも見えるため既定は全 OFF で、ON にする際は確認ダイアログを出す。ページの再読み込みで自動的に OFF に戻る
 - **キャリブレーション / Calibration**: 唇除外しきい値・肌色判定の広さを人・環境に合わせて調整可能
 - 全パラメータはツールバーのポップアップから会議中でも即時反映 / All parameters adjustable in real time from the toolbar popup
 
@@ -65,7 +65,7 @@ f82a8e6c05e08a44cc9f9e7ec5f845935bcbb1b1500ebe8c2f4812fb4e2917dc  vendor/wasm/vi
 
 1. `chrome://extensions` → Developer mode ON / デベロッパーモード ON
 2. "Load unpacked" → select this folder / 「パッケージ化されていない拡張機能を読み込む」→ このフォルダを選択
-3. Open Meet (reload if already open), adjust from the toolbar icon / Meet を開き（開いていたらリロード）、ツールバーの拡張アイコンから調整
+3. Open Meet or Zoom (reload if already open), adjust from the toolbar icon / Meet か Zoom を開き（開いていたらリロード）、ツールバーの拡張アイコンから調整
 
 ## Architecture / アーキテクチャ
 
