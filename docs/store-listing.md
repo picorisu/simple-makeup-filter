@@ -115,6 +115,6 @@ Fine-tune every detail with sliders and create your perfect look.
 • Desktop Chrome only (not available on mobile).
 • Demo screenshots use AI-generated faces.
 • This extension is unofficial. Google Meet is a trademark of Google LLC.
-• This extension is unofficial and not affiliated with Zoom. Zoom is a trademark of Zoom Communications, Inc.
+• This extension is unofficial. Zoom is a trademark of Zoom Communications, Inc.
 • Face-tracking features (makeup, etc.) may vary in performance depending on your PC.
 
