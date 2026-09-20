@@ -11,12 +11,14 @@
       "matches": ["https://meet.google.com/*", "https://app.zoom.us/*"],
       "js": ["override.js"],
       "run_at": "document_start",
-      "world": "MAIN"
+      "world": "MAIN",
+      "all_frames": true
     },
     {
       "matches": ["https://meet.google.com/*", "https://app.zoom.us/*"],
       "js": ["defaults.js", "bridge.js"],
-      "run_at": "document_start"
+      "run_at": "document_start",
+      "all_frames": true
     }
   ],
   "web_accessible_resources": [
