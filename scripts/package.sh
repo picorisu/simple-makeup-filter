@@ -96,6 +96,22 @@ if listing_version != manifest_version:
     sys.exit(1)
 PY
 
+# 掲載文（docs/store-listing.md）に未記入のプレースホルダ（TODO/FIXME）が残っていると、
+# 未完成のまま提出できてしまうため、提出前に検証する
+python3 - <<'PY'
+import re, sys
+
+listing_path = 'docs/store-listing.md'
+lines = open(listing_path, encoding='utf-8').readlines()
+hits = [(i, line.rstrip('\n')) for i, line in enumerate(lines, start=1) if re.search(r'TODO|FIXME', line)]
+
+if hits:
+    print(f'ERROR: {listing_path} に未記入の箇所が残っています。提出前に埋めてください。', file=sys.stderr)
+    for lineno, content in hits:
+        print(f'  {lineno}: {content}', file=sys.stderr)
+    sys.exit(1)
+PY
+
 VERSION=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
 OUT="dist/simple-makeup-filter-v${VERSION}.zip"
 mkdir -p dist
