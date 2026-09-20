@@ -34,7 +34,8 @@ Google Meet の自分の映像に、自然な美肌補正とメイクのフィ�
 • 要求する権限は「フィルター設定の保存」と「meet.google.com / app.zoom.us でのみ動作」の2つだけです。
 
 💬 このツールについて
-• TODO: ここに公開理由を1〜2文で入れる（未確定）
+• 自分が毎日使うために作ったものです。
+• 同じように困っている方がいるならどうぞ、という気持ちで無料で公開しています。
 
 💡 使い方
 1. インストール後、Google Meet または Zoom（Web クライアント）を開く（開いていたらリロード）。
@@ -101,7 +102,8 @@ Fine-tune every detail with sliders and create your perfect look.
 • Only two permissions: "save filter settings" and "run on meet.google.com / app.zoom.us."
 
 💬 About this extension
-• TODO: one or two sentences on why this is free (pending)
+• I built this for my own daily calls.
+• It's free because I figured others might have the same problem.
 
 💡 How to Use
 1. Install, then open Google Meet or Zoom web client — reload if already open.
