@@ -3,14 +3,14 @@
   "extDescription": { "message": "ナチュラルな綺麗を ON。Google Meet のカメラ映像に美肌とメイクのフィルターを。全てあなたのPC内で完結。リモートワークやオンライン会議の必須アイテム。" },
 
   "enabled_title": { "message": "フィルターの有効/無効" },
-  "status_checking": { "message": "○ Meet のタブを確認中…" },
+  "status_checking": { "message": "○ 対応ページのタブを確認中…" },
   "status_off": { "message": "○ フィルターはオフです（右上のチェックで ON）" },
-  "status_no_tab": { "message": "○ Meet のタブが見つかりません（meet.google.com を開いてね）" },
-  "status_active": { "message": "● Meet で動作中" },
-  "status_reload": { "message": "○ Meet のタブを再読み込みすると有効になります" },
+  "status_no_tab": { "message": "○ 対応ページのタブが見つかりません（Google Meet か Zoom を開いてね）" },
+  "status_active": { "message": "● 動作中" },
+  "status_reload": { "message": "○ タブを再読み込みすると有効になります" },
 
   "intro_title": { "message": "🌸 はじめに（使い方）" },
-  "intro_guide": { "message": "Google Meet を開いてカメラON → 下の項目のスライダーを動かすと、すぐ映像に反映されます💄 まずはボタンでベースを選ぶのがおすすめ：" },
+  "intro_guide": { "message": "Google Meet か Zoom を開いてカメラON → 下の項目のスライダーを動かすと、すぐ映像に反映されます💄 まずはボタンでベースを選ぶのがおすすめ：" },
   "quick_natural": { "message": "ナチュラル" },
   "quick_full": { "message": "しっかり" },
   "quick_healthy": { "message": "血色感" },
@@ -153,7 +153,7 @@
 
   "confirm_quick": { "message": "今の設定はこのプリセットで上書きされます。続けますか？\n（大事な設定は先に「プリセット」で保存してください）" },
   "confirm_reset": { "message": "すべての設定を初期値に戻しますか？（保存済みプリセットは残ります）" },
-  "confirm_guide": { "message": "ガイド線は通話相手にも表示されます。\nチェックを外せばオフにできます。消し忘れても Meet の再読み込みで自動的にオフに戻ります。\nオンにしますか？" },
+  "confirm_guide": { "message": "ガイド線は通話相手にも表示されます。\nチェックを外せばオフにできます。消し忘れてもページの再読み込みで自動的にオフに戻ります。\nオンにしますか？" },
   "confirm_overwrite": { "message": "「$name$」は既にあります。上書きしますか？", "placeholders": { "name": { "content": "$1" } } },
   "confirm_export_dirty": { "message": "未保存の変更があります。\n書き出されるのは保存済みの「$name$」の内容で、今の画面の状態は含まれません。\n続けますか？（今の状態を出したい場合は先に保存してください）", "placeholders": { "name": { "content": "$1" } } },
   "confirm_delete": { "message": "「$name$」を削除しますか？", "placeholders": { "name": { "content": "$1" } } },

@@ -5,16 +5,16 @@
   "default_locale": "ja",
   "description": "__MSG_extDescription__",
   "permissions": ["storage"],
-  "host_permissions": ["https://meet.google.com/*"],
+  "host_permissions": ["https://meet.google.com/*", "https://app.zoom.us/*"],
   "content_scripts": [
     {
-      "matches": ["https://meet.google.com/*"],
+      "matches": ["https://meet.google.com/*", "https://app.zoom.us/*"],
       "js": ["override.js"],
       "run_at": "document_start",
       "world": "MAIN"
     },
     {
-      "matches": ["https://meet.google.com/*"],
+      "matches": ["https://meet.google.com/*", "https://app.zoom.us/*"],
       "js": ["defaults.js", "bridge.js"],
       "run_at": "document_start"
     }
@@ -22,7 +22,7 @@
   "web_accessible_resources": [
     {
       "resources": ["vendor/*", "vendor/wasm/*"],
-      "matches": ["https://meet.google.com/*"]
+      "matches": ["https://meet.google.com/*", "https://app.zoom.us/*"]
     }
   ],
   "icons": {

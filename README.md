@@ -1,8 +1,8 @@
 # Simple Makeup Filter for Google Meet
 
-Google Meet のカメラ映像にローカル処理の美肌・メイクフィルターをかける Chrome 拡張（MV3）。映像・顔データは一切外部送信しない。
+Google Meet・Zoom（Web クライアント）のカメラ映像にローカル処理の美肌・メイクフィルターをかける Chrome 拡張（MV3）。映像・顔データは一切外部送信しない。
 
-A Chrome extension (MV3) that adds fully-local skin smoothing and makeup filters to Google Meet. Your face never leaves your computer — no video or face data is ever sent anywhere.
+A Chrome extension (MV3) that adds fully-local skin smoothing and makeup filters to Google Meet and Zoom (web client). Your face never leaves your computer — no video or face data is ever sent anywhere.
 
 **[Chrome Web Store](https://chromewebstore.google.com/detail/jffebejmbaaolmjpokllkkhbepgohmnn)**
 
@@ -65,7 +65,7 @@ f82a8e6c05e08a44cc9f9e7ec5f845935bcbb1b1500ebe8c2f4812fb4e2917dc  vendor/wasm/vi
 
 1. `chrome://extensions` → Developer mode ON / デベロッパーモード ON
 2. "Load unpacked" → select this folder / 「パッケージ化されていない拡張機能を読み込む」→ このフォルダを選択
-3. Open Meet (reload if already open), adjust from the toolbar icon / Meet を開き（開いていたらリロード）、ツールバーの拡張アイコンから調整
+3. Open Meet or Zoom (reload if already open), adjust from the toolbar icon / Meet か Zoom を開き（開いていたらリロード）、ツールバーの拡張アイコンから調整
 
 ## Architecture / アーキテクチャ
 
