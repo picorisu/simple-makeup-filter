@@ -31,10 +31,14 @@ Google Meet の自分の映像に、自然な美肌補正とメイクのフィ�
 🔒 プライバシー最優先
 • 映像・顔データは一切外部に送信されません。全ての処理がブラウザ内で完結します。
 • 顔検出（Google MediaPipe）のモデルも拡張機能に同梱。通信する権限自体を持っていません。
-• 要求する権限は「フィルター設定の保存」と「meet.google.com でのみ動作」の2つだけです。
+• 要求する権限は「フィルター設定の保存」と「meet.google.com / app.zoom.us でのみ動作」の2つだけです。
+
+💬 このツールについて
+• 自分が毎日使うために作ったものです。
+• 同じように困っている方がいるならどうぞ、という気持ちで無料で公開しています。
 
 💡 使い方
-1. インストール後、Google Meet を開く（開いていたらリロード）。
+1. インストール後、Google Meet または Zoom（Web クライアント）を開く（開いていたらリロード）。
 2. ツールバーのハートのアイコンをクリック。
 3. 「肌」から美肌を調整 → メイクはお好みで各スライダーを上げてください。
 4. 気に入った設定は「プリセット」で保存できます。
@@ -43,6 +47,7 @@ Google Meet の自分の映像に、自然な美肌補正とメイクのフィ�
 • パソコン版 Chrome 専用です（スマートフォン・タブレットでは動作しません）。
 • スクリーンショットの人物は AI 生成によるデモ画像です。
 • 本拡張機能は Google 非公式です。Google Meet は Google LLC の商標です。
+• 本拡張機能は Zoom 非公式です。Zoom は Zoom Communications, Inc. の商標です。
 • 顔検出を使う機能（メイク等）は、ご利用の PC の性能により負荷が変わります。
 
 ## カテゴリ
@@ -61,9 +66,9 @@ https://picorisu.github.io/simple-makeup-filter/privacy.html
 - ユーザーデータを収集しない（全項目「収集しない」で申告）
 - 権限の正当化:
   - `storage`: フィルター設定（スライダー値・色・プリセット）をローカル保存するため
-  - ホスト権限 (meet.google.com): Google Meet のページでカメラ映像にフィルターを適用するため。
-    コンテンツスクリプトが getUserMedia をラップし、ローカルの WebGL/Canvas 処理で加工した
-    ストリームを返します。外部送信はありません
+  - ホスト権限 (meet.google.com, app.zoom.us): Google Meet・Zoom（Web クライアント）のページで
+    カメラ映像にフィルターを適用するため。コンテンツスクリプトが getUserMedia をラップし、
+    ローカルの WebGL/Canvas 処理で加工したストリームを返します。外部送信はありません
 - リモートコード: 使用しない（MediaPipe は拡張パッケージに同梱）
 
 ---
@@ -94,10 +99,14 @@ Fine-tune every detail with sliders and create your perfect look.
 🔒 Privacy First
 • No video or face data is ever sent externally. All processing stays in your browser.
 • Face detection model (Google MediaPipe) is bundled — the extension has no network permissions.
-• Only two permissions: "save filter settings" and "run on meet.google.com."
+• Only two permissions: "save filter settings" and "run on meet.google.com / app.zoom.us."
+
+💬 About this extension
+• I built this for my own daily calls.
+• It's free because I figured others might have the same problem.
 
 💡 How to Use
-1. Install, then open Google Meet (reload if already open).
+1. Install, then open Google Meet or Zoom web client — reload if already open.
 2. Click the heart icon in the toolbar.
 3. Adjust skin smoothing under "Skin," then explore makeup sliders.
 4. Save your favorite look as a preset.
@@ -106,5 +115,6 @@ Fine-tune every detail with sliders and create your perfect look.
 • Desktop Chrome only (not available on mobile).
 • Demo screenshots use AI-generated faces.
 • This extension is unofficial. Google Meet is a trademark of Google LLC.
+• This extension is unofficial. Zoom is a trademark of Zoom Communications, Inc.
 • Face-tracking features (makeup, etc.) may vary in performance depending on your PC.
 
