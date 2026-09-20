@@ -12,9 +12,9 @@ A Chrome extension (MV3) that adds fully-local skin smoothing and makeup filters
 > The Chrome Web Store link above is the only official distribution channel. Copies or listings on other sites are not maintained by us — we cannot vouch for their accuracy or safety.
 
 > **非公式・商標について / Unofficial & Trademarks**
-> 本拡張機能は Google 非公式です。Google Meet は Google LLC の商標です。本拡張機能は Zoom 非公式です。Zoom は Zoom Communications, Inc. の商標です。
+> 本拡張機能は Google および Zoom の非公式ツールです。Google Meet は Google LLC、Zoom は Zoom Communications, Inc. の商標です。
 >
-> This extension is unofficial. Google Meet is a trademark of Google LLC. This extension is unofficial. Zoom is a trademark of Zoom Communications, Inc.
+> This extension is unofficial and not affiliated with Google or Zoom. Google Meet is a trademark of Google LLC, and Zoom is a trademark of Zoom Communications, Inc.
 
 ## Concept / コンセプト
 
