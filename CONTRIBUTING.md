@@ -18,7 +18,7 @@ This extension is designed for **natural-looking adjustments in business video c
 - Colored contacts / decorative lenses
 - Hair color changes
 - Dramatic or playful filters (animal ears, backgrounds, etc.)
-- Non-Meet platforms
+- Support for platforms other than Google Meet and Zoom (web client)
 
 This isn't a judgment on the idea — it's just not what this tool is for.
 
@@ -52,7 +52,7 @@ I'm a solo developer in Japan. I read everything, but responses may be slow. Tha
 - カラコン・装飾レンズ
 - ヘアカラー変更
 - 派手・遊び系のフィルター（動物の耳、背景変更など）
-- Meet 以外のプラットフォーム対応
+- Google Meet・Zoom（Web クライアント）以外のプラットフォーム対応
 
 アイデア自体を否定しているわけではなく、このツールの目的と異なるためです。
 
