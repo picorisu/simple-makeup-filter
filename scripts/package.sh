@@ -103,7 +103,7 @@ import re, sys
 
 listing_path = 'docs/store-listing.md'
 lines = open(listing_path, encoding='utf-8').readlines()
-hits = [(i, line.rstrip('\n')) for i, line in enumerate(lines, start=1) if re.search(r'TODO|FIXME', line)]
+hits = [(i, line.rstrip('\n')) for i, line in enumerate(lines, start=1) if re.search(r'TODO|FIXME', line, re.IGNORECASE)]
 
 if hits:
     print(f'ERROR: {listing_path} に未記入の箇所が残っています。提出前に埋めてください。', file=sys.stderr)
