@@ -31,10 +31,13 @@ Google Meet の自分の映像に、自然な美肌補正とメイクのフィ�
 🔒 プライバシー最優先
 • 映像・顔データは一切外部に送信されません。全ての処理がブラウザ内で完結します。
 • 顔検出（Google MediaPipe）のモデルも拡張機能に同梱。通信する権限自体を持っていません。
-• 要求する権限は「フィルター設定の保存」と「meet.google.com でのみ動作」の2つだけです。
+• 要求する権限は「フィルター設定の保存」と「meet.google.com / app.zoom.us でのみ動作」の2つだけです。
+
+💬 このツールについて
+• TODO: ここに公開理由を1〜2文で入れる（未確定）
 
 💡 使い方
-1. インストール後、Google Meet を開く（開いていたらリロード）。
+1. インストール後、Google Meet または Zoom（Web クライアント）を開く（開いていたらリロード）。
 2. ツールバーのハートのアイコンをクリック。
 3. 「肌」から美肌を調整 → メイクはお好みで各スライダーを上げてください。
 4. 気に入った設定は「プリセット」で保存できます。
@@ -61,9 +64,9 @@ https://picorisu.github.io/simple-makeup-filter/privacy.html
 - ユーザーデータを収集しない（全項目「収集しない」で申告）
 - 権限の正当化:
   - `storage`: フィルター設定（スライダー値・色・プリセット）をローカル保存するため
-  - ホスト権限 (meet.google.com): Google Meet のページでカメラ映像にフィルターを適用するため。
-    コンテンツスクリプトが getUserMedia をラップし、ローカルの WebGL/Canvas 処理で加工した
-    ストリームを返します。外部送信はありません
+  - ホスト権限 (meet.google.com, app.zoom.us): Google Meet・Zoom（Web クライアント）のページで
+    カメラ映像にフィルターを適用するため。コンテンツスクリプトが getUserMedia をラップし、
+    ローカルの WebGL/Canvas 処理で加工したストリームを返します。外部送信はありません
 - リモートコード: 使用しない（MediaPipe は拡張パッケージに同梱）
 
 ---
@@ -94,10 +97,13 @@ Fine-tune every detail with sliders and create your perfect look.
 🔒 Privacy First
 • No video or face data is ever sent externally. All processing stays in your browser.
 • Face detection model (Google MediaPipe) is bundled — the extension has no network permissions.
-• Only two permissions: "save filter settings" and "run on meet.google.com."
+• Only two permissions: "save filter settings" and "run on meet.google.com / app.zoom.us."
+
+💬 About this extension
+• TODO: one or two sentences on why this is free (pending)
 
 💡 How to Use
-1. Install, then open Google Meet (reload if already open).
+1. Install, then open Google Meet or Zoom (web client) (reload if already open).
 2. Click the heart icon in the toolbar.
 3. Adjust skin smoothing under "Skin," then explore makeup sliders.
 4. Save your favorite look as a preset.
