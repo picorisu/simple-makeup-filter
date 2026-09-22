@@ -76,7 +76,7 @@ https://picorisu.github.io/simple-makeup-filter/privacy.html
 ## English
 
 ### Summary (132 chars max)
-Natural beauty, ON. Skin smoothing & makeup for your Google Meet camera. Nothing leaves your PC. Essential for remote meetings.
+Natural beauty, ON. Skin smoothing & makeup for Google Meet and Zoom. Nothing leaves your PC. Essential for remote meetings.
 
 ### Detailed Description
 
