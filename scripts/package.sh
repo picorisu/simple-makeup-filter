@@ -96,6 +96,51 @@ if listing_version != manifest_version:
     sys.exit(1)
 PY
 
+# 掲載文（docs/store-listing.md）の概要文が _locales の extDescription と食い違うと、
+# 配信される説明文とストアに表示される説明文が一致しなくなるため、提出前に検証する。
+# 掲載文の構造（セクションの並び・重複の有無）に依存させず、「extDescription がそのまま
+# 掲載文のどこかに含まれているか」「似ているが一致しない旧文が残っていないか」だけを見る。
+python3 - <<'PY'
+import json, sys
+
+listing_path = 'docs/store-listing.md'
+listing_lines = open(listing_path, encoding='utf-8').readlines()
+listing_text = ''.join(listing_lines)
+
+failed = False
+for locale in ('ja', 'en'):
+    messages = json.load(open(f'_locales/{locale}/messages.json', encoding='utf-8'))
+    desc = messages['extDescription']['message']
+
+    if desc not in listing_text:
+        print(f'ERROR: {listing_path} に _locales/{locale}/messages.json の extDescription がそのまま含まれていません', file=sys.stderr)
+        print(f'  _locales 側の値: {desc}', file=sys.stderr)
+        print(f'{listing_path} の概要文を _locales/{locale}/messages.json の extDescription に合わせて修正してください。', file=sys.stderr)
+        failed = True
+        continue
+
+    # 似ているが一致しない旧文の残存を検出する。desc の接頭辞（絶対長10文字以上・
+    # 全体の15%以上。ja/en で1文字あたりの情報量が違うため割合で動的に求める）が
+    # 部分文字列として出現する行のうち、「desc が行の末尾までそのまま続く行」（正しい行。
+    # 前置きの `- ja: ` 等は許容し、desc の後ろに余分な文字が続く破損は正しい行として
+    # 扱わない）以外を旧文とみなす。
+    prefix_len = int(max(10, len(desc) * 0.15))
+    prefix = desc[:prefix_len]
+    for lineno, line in enumerate(listing_lines, start=1):
+        stripped = line.rstrip('\n')
+        if stripped.endswith(desc):
+            continue
+        if prefix in stripped:
+            print(f'ERROR: {listing_path} に _locales/{locale}/messages.json の extDescription と似ているが一致しない行が残っています', file=sys.stderr)
+            print(f'  _locales 側の値: {desc}', file=sys.stderr)
+            print(f'  掲載文側の不一致行 ({lineno}行目): {stripped}', file=sys.stderr)
+            print(f'{listing_path} の概要文を _locales/{locale}/messages.json の extDescription に合わせて修正してください。', file=sys.stderr)
+            failed = True
+
+if failed:
+    sys.exit(1)
+PY
+
 # 掲載文（docs/store-listing.md）に未記入のプレースホルダ（TODO/FIXME）が残っていると、
 # 未完成のまま提出できてしまうため、提出前に検証する
 python3 - <<'PY'
