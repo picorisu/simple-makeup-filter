@@ -12,7 +12,7 @@ Simple Makeup Filter for Google Meet
 
 ## 詳細説明
 
-Google Meet の自分の映像に、自然な美肌補正とメイクのフィルターをかける拡張機能です。
+Google Meet・Zoom の自分の映像に、自然な美肌補正とメイクのフィルターをかける拡張機能です。
 リモートワーク・オンライン会議・Web面接などに最適。
 スライダーで細かく調整して、あなただけのお気に入りのメイクフィルターをつくれます。
 
@@ -80,7 +80,7 @@ Natural beauty, ON. Skin smoothing & makeup for Google Meet and Zoom. Nothing le
 
 ### Detailed Description
 
-A Chrome extension that applies natural skin smoothing and makeup filters to your Google Meet video.
+A Chrome extension that applies natural skin smoothing and makeup filters to your Google Meet and Zoom video.
 Perfect for remote work, online meetings, and video interviews.
 Fine-tune every detail with sliders and create your perfect look.
 
