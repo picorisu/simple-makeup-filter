@@ -6,11 +6,35 @@
 ## 名前（ja/en共通）
 Simple Makeup Filter for Google Meet
 
-## 概要（132文字以内・_locales で出し分け）
-- ja: ナチュラルな綺麗を ON。Google Meet・Zoom のカメラ映像に美肌とメイクのフィルターを。全てあなたのPC内で完結。リモートワークやオンライン会議の必須アイテム。
-- en: Natural beauty, ON. Skin smoothing & makeup for Google Meet and Zoom. Nothing leaves your PC. Essential for remote meetings.
+## カテゴリ
+コミュニケーション
 
-## 詳細説明
+## 言語
+日本語
+
+## サポート URL（サポートタブ / ウェブサイト欄）
+https://forms.gle/PLrEpVQxsKttEWri6
+
+## プライバシーポリシー URL
+https://picorisu.github.io/simple-makeup-filter/privacy.html
+
+## データ利用の申告（Privacy practices タブ）
+- ユーザーデータを収集しない（全項目「収集しない」で申告）
+- 権限の正当化:
+  - `storage`: フィルター設定（スライダー値・色・プリセット）をローカル保存するため
+  - ホスト権限 (meet.google.com, app.zoom.us): Google Meet・Zoom（Web クライアント）のページで
+    カメラ映像にフィルターを適用するため。コンテンツスクリプトが getUserMedia をラップし、
+    ローカルの WebGL/Canvas 処理で加工したストリームを返します。外部送信はありません
+- リモートコード: 使用しない（MediaPipe は拡張パッケージに同梱）
+
+---
+
+## 日本語
+
+### 概要（132文字以内）
+ナチュラルな綺麗を ON。Google Meet・Zoom のカメラ映像に美肌とメイクのフィルターを。全てあなたのPC内で完結。リモートワークやオンライン会議の必須アイテム。
+
+### 詳細説明
 
 Google Meet・Zoom の自分の映像に、自然な美肌補正とメイクのフィルターをかける拡張機能です。
 リモートワーク・オンライン会議・Web面接などに最適。
@@ -49,27 +73,6 @@ Google Meet・Zoom の自分の映像に、自然な美肌補正とメイクの�
 • 本拡張機能は Google 非公式です。Google Meet は Google LLC の商標です。
 • 本拡張機能は Zoom 非公式です。Zoom は Zoom Communications, Inc. の商標です。
 • 顔検出を使う機能（メイク等）は、ご利用の PC の性能により負荷が変わります。
-
-## カテゴリ
-コミュニケーション
-
-## 言語
-日本語
-
-## サポート URL（サポートタブ / ウェブサイト欄）
-https://forms.gle/PLrEpVQxsKttEWri6
-
-## プライバシーポリシー URL
-https://picorisu.github.io/simple-makeup-filter/privacy.html
-
-## データ利用の申告（Privacy practices タブ）
-- ユーザーデータを収集しない（全項目「収集しない」で申告）
-- 権限の正当化:
-  - `storage`: フィルター設定（スライダー値・色・プリセット）をローカル保存するため
-  - ホスト権限 (meet.google.com, app.zoom.us): Google Meet・Zoom（Web クライアント）のページで
-    カメラ映像にフィルターを適用するため。コンテンツスクリプトが getUserMedia をラップし、
-    ローカルの WebGL/Canvas 処理で加工したストリームを返します。外部送信はありません
-- リモートコード: 使用しない（MediaPipe は拡張パッケージに同梱）
 
 ---
 
@@ -117,4 +120,3 @@ Fine-tune every detail with sliders and create your perfect look.
 • This extension is unofficial. Google Meet is a trademark of Google LLC.
 • This extension is unofficial. Zoom is a trademark of Zoom Communications, Inc.
 • Face-tracking features (makeup, etc.) may vary in performance depending on your PC.
-
