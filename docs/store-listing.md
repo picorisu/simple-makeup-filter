@@ -4,7 +4,7 @@
 1.3.0
 
 ## 名前（ja/en共通）
-Simple Makeup Filter for Google Meet
+Simple Makeup Filter for Google Meet™
 
 ## カテゴリ
 コミュニケーション
