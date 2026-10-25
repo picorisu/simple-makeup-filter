@@ -1,4 +1,4 @@
-# Simple Makeup Filter for Google Meet
+# Simple Makeup Filter for Google Meet™
 
 Google Meet・Zoom（Web クライアント）のカメラ映像にローカル処理の美肌・メイクフィルターをかける Chrome 拡張（MV3）。映像・顔データは一切外部送信しない。
 
