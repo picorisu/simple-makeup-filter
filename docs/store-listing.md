@@ -70,7 +70,7 @@ Google Meet・Zoom の自分の映像に、自然な美肌補正とメイクの�
 ⚠️ ご注意
 • パソコン版 Chrome 専用です（スマートフォン・タブレットでは動作しません）。
 • スクリーンショットの人物は AI 生成によるデモ画像です。
-• 本拡張機能は Google 非公式です。Google Meet は Google LLC の商標です。
+• 本拡張機能は Google 非公式です。Google Meet は Google LLC の商標です。Use of this trademark is subject to Google Permissions.
 • 本拡張機能は Zoom 非公式です。Zoom は Zoom Communications, Inc. の商標です。
 • 顔検出を使う機能（メイク等）は、ご利用の PC の性能により負荷が変わります。
 
@@ -117,6 +117,6 @@ Fine-tune every detail with sliders and create your perfect look.
 ⚠️ Notes
 • Desktop Chrome only (not available on mobile).
 • Demo screenshots use AI-generated faces.
-• This extension is unofficial. Google Meet is a trademark of Google LLC.
+• This extension is unofficial. Google Meet is a trademark of Google LLC. Use of this trademark is subject to Google Permissions.
 • This extension is unofficial. Zoom is a trademark of Zoom Communications, Inc.
 • Face-tracking features (makeup, etc.) may vary in performance depending on your PC.
