@@ -1,7 +1,7 @@
 # Chrome ウェブストア掲載情報（下書き）
 
 ## 対象バージョン
-1.3.0
+1.3.1
 
 ## 名前（ja/en共通）
 Simple Makeup Filter for Google Meet™
