@@ -65,7 +65,10 @@ Google Meet・Zoom の自分の映像に、自然な美肌補正とメイクの�
 1. インストール後、Google Meet または Zoom（Web クライアント）を開く（開いていたらリロード）。
 2. ツールバーのハートのアイコンをクリック。
 3. 「肌」から美肌を調整 → メイクはお好みで各スライダーを上げてください。
-4. 気に入った設定は「プリセット」で保存できます。
+4. 気に入った設定は「プリセット」に名前を付けて保存でき、あとで切り替えられます。
+• 会議の前に試すなら、ひとりで会議を始めてカメラを ON にしてください。自分の映像を見ながら調整できます。
+• フィルターの設定は自動で保存され、次の会議でもそのまま使えます。
+• ただし、ブラウザ側の事情などで消えることもあります。大事な設定は、プリセットに保存して「書き出し（DL）」しておいてください。
 
 ⚠️ ご注意
 • パソコン版 Chrome 専用です（スマートフォン・タブレットでは動作しません）。
@@ -112,7 +115,10 @@ Fine-tune every detail with sliders and create your perfect look.
 1. Install, then open Google Meet or Zoom web client — reload if already open.
 2. Click the heart icon in the toolbar.
 3. Adjust skin smoothing under "Skin," then explore makeup sliders.
-4. Save your favorite look as a preset.
+4. Save your favorite looks as named presets and switch between them anytime.
+• Want to try it first? Start a meeting by yourself with your camera on. You can adjust while watching your own video.
+• Your filter settings are saved automatically and carry over to future meetings.
+• However, they may be lost for browser-related or other reasons. Save important looks as presets and export them.
 
 ⚠️ Notes
 • Desktop Chrome only (not available on mobile).
