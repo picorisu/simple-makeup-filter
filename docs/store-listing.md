@@ -68,7 +68,7 @@ Google Meet・Zoom の自分の映像に、自然な美肌補正とメイクの�
 4. 気に入った設定は「プリセット」に名前を付けて保存でき、あとで切り替えられます。
 • 会議の前に試すなら、ひとりで会議を始めてカメラを ON にしてください。自分の映像を見ながら調整できます。
 • フィルターの設定は自動で保存され、次の会議でもそのまま使えます。
-• ただし、Chrome 側の事情で消えることもあります。大事な設定は、プリセットに保存して「書き出し（DL）」しておいてください。
+• ただし、ブラウザ側の事情などで消えることもあります。大事な設定は、プリセットに保存して「書き出し（DL）」しておいてください。
 
 ⚠️ ご注意
 • パソコン版 Chrome 専用です（スマートフォン・タブレットでは動作しません）。
@@ -118,7 +118,7 @@ Fine-tune every detail with sliders and create your perfect look.
 4. Save your favorite looks as named presets and switch between them anytime.
 • Want to try it first? Start a meeting by yourself with your camera on. You can adjust while watching your own video.
 • Your filter settings are saved automatically and carry over to future meetings.
-• However, they can be lost due to Chrome-side issues. Save important looks as presets and export them.
+• However, they may be lost for browser-related or other reasons. Save important looks as presets and export them.
 
 ⚠️ Notes
 • Desktop Chrome only (not available on mobile).
