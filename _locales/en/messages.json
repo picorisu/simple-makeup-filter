@@ -1,6 +1,7 @@
 {
   "extName": { "message": "Simple Makeup Filter for Google Meet™" },
-  "extDescription": { "message": "Natural beauty, ON. Skin smoothing & makeup for Google Meet and Zoom. Nothing leaves your PC. Essential for remote meetings." },
+  "extDescription": { "message": "Natural beauty, ON. Skin smoothing & makeup for Google Meet™ and Zoom. Nothing leaves your PC. Essential for remote meetings." },
+  "html_lang": { "message": "en", "description": "popup の html の lang に入れる値。画面には出ない。ハイフン区切りの形（例: pt-BR）" },
 
   "enabled_title": { "message": "Enable / Disable filter" },
   "status_checking": { "message": "○ Checking for a supported tab…" },
