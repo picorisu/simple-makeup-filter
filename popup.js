@@ -12,6 +12,13 @@ function M(key, subs) {
   return chrome.i18n.getMessage(key, subs != null ? [].concat(subs) : undefined);
 }
 
+// i18n: 実際に表示に使われた言語（_locales のどれか）を html の lang に入れる。
+// chrome.i18n.getUILanguage() はブラウザの UI の言語を返すため、_locales に無い言語の時に
+// 表示している文字の言語（既定の en）と食い違う。messages.json に持たせた値を使う
+// （値は html の lang の形にする。例: pt-BR。_locales のフォルダ名の pt_BR ではない）
+const htmlLang = M('html_lang');
+if (htmlLang) document.documentElement.lang = htmlLang;
+
 // i18n: data-i18n 属性を持つ要素のテキストを差し替える
 document.querySelectorAll('[data-i18n]').forEach(el => {
   const msg = M(el.dataset.i18n);
