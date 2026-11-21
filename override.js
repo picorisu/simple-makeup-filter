@@ -1330,8 +1330,58 @@ void main() {
     };
     tryPlay();
 
+    // 次の render の待ち方。表のタブでは requestVideoFrameCallback（無ければ rAF）で映像のフレームに合わせて呼ぶ。
+    // 裏のタブ（document.hidden）ではどちらも呼ばれず、相手に送る outCanvas が描き変わらないため、相手の映像が止まる。
+    // そのため裏の間は、カメラのトラックの複製に届くフレームを合図に render を呼ぶ（frameReader。processStream の最後、outTrack.stop の上書きと ended の登録の後で準備する）。
+    // 予約（rvfcHandle / rafHandle）と waitFrame は、いつもどちらか一方だけにする（両方から呼ぶと1フレームに2回描く）
+    let rvfcHandle = null;
+    let rafHandle = null;
+    let waitFrame = false;
+    let frameTrack = null;
+    let frameReader = null;
+
+    const cancelScheduled = () => {
+      if (rvfcHandle !== null) {
+        video.cancelVideoFrameCallback(rvfcHandle);
+        rvfcHandle = null;
+      }
+      if (rafHandle !== null) {
+        cancelAnimationFrame(rafHandle);
+        rafHandle = null;
+      }
+    };
+
+    const scheduleNext = () => {
+      if (!running) return;
+      if (document.hidden && frameReader) {
+        waitFrame = true;
+      } else if (video.requestVideoFrameCallback) {
+        rvfcHandle = video.requestVideoFrameCallback(render);
+      } else {
+        rafHandle = requestAnimationFrame(render);
+      }
+    };
+
+    // 裏に回ったら予約を取り消してカメラのフレーム待ちに、表に戻ったら予約に戻す
+    const onVisibility = () => {
+      if (!running || !frameReader) return;
+      if (document.hidden) {
+        if (!waitFrame) {
+          cancelScheduled();
+          waitFrame = true;
+        }
+      } else if (waitFrame) {
+        waitFrame = false;
+        scheduleNext();
+      }
+    };
+
     const render = () => {
       if (!running) return;
+      // 呼ばれた時点で、前の予約と待ちは使い終わっている
+      rvfcHandle = null;
+      rafHandle = null;
+      waitFrame = false;
       const { gl, uniforms } = GLS;
       if (video.readyState >= 2 && video.videoWidth > 0) {
         const W = video.videoWidth;
@@ -1393,11 +1443,7 @@ void main() {
           }
         }
       }
-      if (video.requestVideoFrameCallback) {
-        video.requestVideoFrameCallback(render);
-      } else {
-        requestAnimationFrame(render);
-      }
+      scheduleNext();
     };
     render();
 
@@ -1409,6 +1455,11 @@ void main() {
     const dispose = () => {
       if (!running) return;
       running = false;
+      // 裏のタブの間の合図を止める。複製も同じカメラを使うので、止めないとカメラのランプが消えない
+      document.removeEventListener('visibilitychange', onVisibility);
+      cancelScheduled();
+      if (frameReader) frameReader.cancel().catch(() => {});
+      if (frameTrack) frameTrack.stop();
       video.srcObject = null;
       const lose = GLS.gl.getExtension('WEBGL_lose_context');
       if (lose) lose.loseContext();
@@ -1428,6 +1479,62 @@ void main() {
       dispose();
       outTrack.stop();
     });
+
+    // 裏のタブの間の合図: カメラのトラックの複製を読み、フレームが届くたびに render を呼ぶ。
+    // 映像は video 要素から描くので、フレームは合図にだけ使い、表・裏に関わらず届くたびにすぐ閉じる。
+    // outTrack.stop の上書きと ended の登録の後で準備する（前で準備すると、その間で例外が出た時に複製を止める者がいない）
+    if (typeof MediaStreamTrackProcessor === 'function') {
+      try {
+        frameTrack = videoTrack.clone();
+        frameReader = new MediaStreamTrackProcessor({ track: frameTrack }).readable.getReader();
+      } catch (e) {
+        console.warn('[Simple Makeup Filter] 裏のタブで映像を送り続ける仕組みを使えない:', e);
+        if (frameTrack) frameTrack.stop();
+        frameTrack = null;
+        frameReader = null;
+      }
+    }
+    if (frameReader) {
+      const reader = frameReader;
+      let renderWarned = false;
+      const pump = async () => {
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) return;
+          value.close();
+          if (running && waitFrame && document.hidden) {
+            try {
+              render();
+            } catch (e) {
+              // render は頭で waitFrame を消すので、投げると次の待ちが立たないまま止まる。
+              // 次の待ち（裏なら次のカメラのフレーム、表なら予約）を立て直す。警告は1回だけ出す
+              scheduleNext();
+              if (!renderWarned) {
+                renderWarned = true;
+                console.warn('[Simple Makeup Filter] 裏のタブでの描画に失敗:', e);
+              }
+            }
+          }
+        }
+      };
+      // 複製の読みが終わった時（read() の失敗・複製の終了）は、合図の仕組みを外して、
+      // MediaStreamTrackProcessor が無い時と同じ動き（予約だけ）に戻す
+      const stopSignal = () => {
+        if (!running) return;
+        document.removeEventListener('visibilitychange', onVisibility);
+        if (frameTrack) frameTrack.stop();
+        frameTrack = null;
+        frameReader = null;
+        if (waitFrame) {
+          waitFrame = false;
+          scheduleNext();
+        }
+      };
+      pump().then(stopSignal, stopSignal);
+      document.addEventListener('visibilitychange', onVisibility);
+      // 始めから裏だった時に、予約からカメラのフレーム待ちに切り替える
+      onVisibility();
+    }
 
     return outStream;
   }
