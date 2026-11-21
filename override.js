@@ -1467,9 +1467,22 @@ void main() {
     };
     disposeActive = dispose;
 
+    // Meet 側が出力トラックを stop したら元カメラも止める（カメラランプ消灯のため）
+    const outTrack = outStream.getVideoTracks()[0];
+    const origStop = outTrack.stop.bind(outTrack);
+    outTrack.stop = () => {
+      dispose();
+      videoTrack.stop();
+      origStop();
+    };
+    videoTrack.addEventListener('ended', () => {
+      dispose();
+      outTrack.stop();
+    });
+
     // 裏のタブの間の合図: カメラのトラックの複製を読み、フレームが届くたびに render を呼ぶ。
     // 映像は video 要素から描くので、フレームは合図にだけ使い、表・裏に関わらず届くたびにすぐ閉じる。
-    // disposeActive を決めた後で準備する（前で準備すると、この後で例外が出た時に複製を止める者がいない）
+    // outTrack.stop の上書きと ended の登録の後で準備する（前で準備すると、その間で例外が出た時に複製を止める者がいない）
     if (typeof MediaStreamTrackProcessor === 'function') {
       try {
         frameTrack = videoTrack.clone();
@@ -1483,40 +1496,45 @@ void main() {
     }
     if (frameReader) {
       const reader = frameReader;
+      let renderWarned = false;
       const pump = async () => {
         for (;;) {
           const { value, done } = await reader.read();
           if (done) return;
           value.close();
           if (running && waitFrame && document.hidden) {
-            // 例外で読みを止めると、複製が読まれないまま残るので、ここで受け止めて読み続ける
             try {
               render();
             } catch (e) {
-              console.warn('[Simple Makeup Filter] 裏のタブでの描画に失敗:', e);
+              // render は頭で waitFrame を消すので、投げると次の待ちが立たないまま止まる。
+              // 次の待ち（裏なら次のカメラのフレーム、表なら予約）を立て直す。警告は1回だけ出す
+              scheduleNext();
+              if (!renderWarned) {
+                renderWarned = true;
+                console.warn('[Simple Makeup Filter] 裏のタブでの描画に失敗:', e);
+              }
             }
           }
         }
       };
-      // read() の失敗（複製が終わった時など）は黙って読みを終える（裏では止まる、今までどおりの動きになる）
-      pump().catch(() => {});
+      // 複製の読みが終わった時（read() の失敗・複製の終了）は、合図の仕組みを外して、
+      // MediaStreamTrackProcessor が無い時と同じ動き（予約だけ）に戻す
+      const stopSignal = () => {
+        if (!running) return;
+        document.removeEventListener('visibilitychange', onVisibility);
+        if (frameTrack) frameTrack.stop();
+        frameTrack = null;
+        frameReader = null;
+        if (waitFrame) {
+          waitFrame = false;
+          scheduleNext();
+        }
+      };
+      pump().then(stopSignal, stopSignal);
       document.addEventListener('visibilitychange', onVisibility);
       // 始めから裏だった時に、予約からカメラのフレーム待ちに切り替える
       onVisibility();
     }
-
-    // Meet 側が出力トラックを stop したら元カメラも止める（カメラランプ消灯のため）
-    const outTrack = outStream.getVideoTracks()[0];
-    const origStop = outTrack.stop.bind(outTrack);
-    outTrack.stop = () => {
-      dispose();
-      videoTrack.stop();
-      origStop();
-    };
-    videoTrack.addEventListener('ended', () => {
-      dispose();
-      outTrack.stop();
-    });
 
     return outStream;
   }
