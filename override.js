@@ -1332,7 +1332,7 @@ void main() {
 
     // 次の render の待ち方。表のタブでは requestVideoFrameCallback（無ければ rAF）で映像のフレームに合わせて呼ぶ。
     // 裏のタブ（document.hidden）ではどちらも呼ばれず、相手に送る outCanvas が描き変わらないため、相手の映像が止まる。
-    // そのため裏の間は、カメラのトラックの複製に届くフレームを合図に render を呼ぶ（frameReader。dispose の後で準備する）。
+    // そのため裏の間は、カメラのトラックの複製に届くフレームを合図に render を呼ぶ（frameReader。processStream の最後、outTrack.stop の上書きと ended の登録の後で準備する）。
     // 予約（rvfcHandle / rafHandle）と waitFrame は、いつもどちらか一方だけにする（両方から呼ぶと1フレームに2回描く）
     let rvfcHandle = null;
     let rafHandle = null;
