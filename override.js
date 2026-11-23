@@ -1445,11 +1445,6 @@ void main() {
       }
       scheduleNext();
     };
-    render();
-
-    const fps = videoTrack.getSettings().frameRate || 30;
-    const outStream = outCanvas.captureStream(fps);
-    srcStream.getAudioTracks().forEach((t) => outStream.addTrack(t));
 
     // パイプライン一式の破棄: 描画ループ停止・video解放・WebGLコンテキスト返却
     const dispose = () => {
@@ -1467,76 +1462,88 @@ void main() {
     };
     disposeActive = dispose;
 
-    // Meet 側が出力トラックを stop したら元カメラも止める（カメラランプ消灯のため）
-    const outTrack = outStream.getVideoTracks()[0];
-    const origStop = outTrack.stop.bind(outTrack);
-    outTrack.stop = () => {
-      dispose();
-      videoTrack.stop();
-      origStop();
-    };
-    videoTrack.addEventListener('ended', () => {
-      dispose();
-      outTrack.stop();
-    });
+    // ここから先で例外が出たら、このパイプラインを止めてから投げ直す
+    // （投げ直した例外は getUserMedia の包みが受け止め、素の映像を返す）
+    try {
+      render();
 
-    // 裏のタブの間の合図: カメラのトラックの複製を読み、フレームが届くたびに render を呼ぶ。
-    // 映像は video 要素から描くので、フレームは合図にだけ使い、表・裏に関わらず届くたびにすぐ閉じる。
-    // outTrack.stop の上書きと ended の登録の後で準備する（前で準備すると、その間で例外が出た時に複製を止める者がいない）
-    if (typeof MediaStreamTrackProcessor === 'function') {
-      try {
-        frameTrack = videoTrack.clone();
-        frameReader = new MediaStreamTrackProcessor({ track: frameTrack }).readable.getReader();
-      } catch (e) {
-        console.warn('[Simple Makeup Filter] 裏のタブで映像を送り続ける仕組みを使えない:', e);
-        if (frameTrack) frameTrack.stop();
-        frameTrack = null;
-        frameReader = null;
+      const fps = videoTrack.getSettings().frameRate || 30;
+      const outStream = outCanvas.captureStream(fps);
+      srcStream.getAudioTracks().forEach((t) => outStream.addTrack(t));
+
+      // Meet 側が出力トラックを stop したら元カメラも止める（カメラランプ消灯のため）
+      const outTrack = outStream.getVideoTracks()[0];
+      const origStop = outTrack.stop.bind(outTrack);
+      outTrack.stop = () => {
+        dispose();
+        videoTrack.stop();
+        origStop();
+      };
+      videoTrack.addEventListener('ended', () => {
+        dispose();
+        outTrack.stop();
+      });
+
+      // 裏のタブの間の合図: カメラのトラックの複製を読み、フレームが届くたびに render を呼ぶ。
+      // 映像は video 要素から描くので、フレームは合図にだけ使い、表・裏に関わらず届くたびにすぐ閉じる。
+      if (typeof MediaStreamTrackProcessor === 'function') {
+        try {
+          frameTrack = videoTrack.clone();
+          frameReader = new MediaStreamTrackProcessor({ track: frameTrack }).readable.getReader();
+        } catch (e) {
+          console.warn('[Simple Makeup Filter] 裏のタブで映像を送り続ける仕組みを使えない:', e);
+          if (frameTrack) frameTrack.stop();
+          frameTrack = null;
+          frameReader = null;
+        }
       }
-    }
-    if (frameReader) {
-      const reader = frameReader;
-      let renderWarned = false;
-      const pump = async () => {
-        for (;;) {
-          const { value, done } = await reader.read();
-          if (done) return;
-          value.close();
-          if (running && waitFrame && document.hidden) {
-            try {
-              render();
-            } catch (e) {
-              // render は頭で waitFrame を消すので、投げると次の待ちが立たないまま止まる。
-              // 次の待ち（裏なら次のカメラのフレーム、表なら予約）を立て直す。警告は1回だけ出す
-              scheduleNext();
-              if (!renderWarned) {
-                renderWarned = true;
-                console.warn('[Simple Makeup Filter] 裏のタブでの描画に失敗:', e);
+      if (frameReader) {
+        const reader = frameReader;
+        let renderWarned = false;
+        const pump = async () => {
+          for (;;) {
+            const { value, done } = await reader.read();
+            if (done) return;
+            value.close();
+            if (running && waitFrame && document.hidden) {
+              try {
+                render();
+              } catch (e) {
+                // render は頭で waitFrame を消すので、投げると次の待ちが立たないまま止まる。
+                // 次の待ち（裏なら次のカメラのフレーム、表なら予約）を立て直す。警告は1回だけ出す
+                scheduleNext();
+                if (!renderWarned) {
+                  renderWarned = true;
+                  console.warn('[Simple Makeup Filter] 裏のタブでの描画に失敗:', e);
+                }
               }
             }
           }
-        }
-      };
-      // 複製の読みが終わった時（read() の失敗・複製の終了）は、合図の仕組みを外して、
-      // MediaStreamTrackProcessor が無い時と同じ動き（予約だけ）に戻す
-      const stopSignal = () => {
-        if (!running) return;
-        document.removeEventListener('visibilitychange', onVisibility);
-        if (frameTrack) frameTrack.stop();
-        frameTrack = null;
-        frameReader = null;
-        if (waitFrame) {
-          waitFrame = false;
-          scheduleNext();
-        }
-      };
-      pump().then(stopSignal, stopSignal);
-      document.addEventListener('visibilitychange', onVisibility);
-      // 始めから裏だった時に、予約からカメラのフレーム待ちに切り替える
-      onVisibility();
-    }
+        };
+        // 複製の読みが終わった時（read() の失敗・複製の終了）は、合図の仕組みを外して、
+        // MediaStreamTrackProcessor が無い時と同じ動き（予約だけ）に戻す
+        const stopSignal = () => {
+          if (!running) return;
+          document.removeEventListener('visibilitychange', onVisibility);
+          if (frameTrack) frameTrack.stop();
+          frameTrack = null;
+          frameReader = null;
+          if (waitFrame) {
+            waitFrame = false;
+            scheduleNext();
+          }
+        };
+        pump().then(stopSignal, stopSignal);
+        document.addEventListener('visibilitychange', onVisibility);
+        // 始めから裏だった時に、予約からカメラのフレーム待ちに切り替える
+        onVisibility();
+      }
 
-    return outStream;
+      return outStream;
+    } catch (e) {
+      dispose();
+      throw e;
+    }
   }
 
   const origGUM = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
