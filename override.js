@@ -1445,6 +1445,7 @@ void main() {
       }
       scheduleNext();
     };
+
     // パイプライン一式の破棄: 描画ループ停止・video解放・WebGLコンテキスト返却
     const dispose = () => {
       if (!running) return;
@@ -1485,7 +1486,6 @@ void main() {
 
       // 裏のタブの間の合図: カメラのトラックの複製を読み、フレームが届くたびに render を呼ぶ。
       // 映像は video 要素から描くので、フレームは合図にだけ使い、表・裏に関わらず届くたびにすぐ閉じる。
-      // outTrack.stop の上書きと ended の登録の後で準備する（前で準備すると、その間で例外が出た時に複製を止める者がいない）
       if (typeof MediaStreamTrackProcessor === 'function') {
         try {
           frameTrack = videoTrack.clone();
