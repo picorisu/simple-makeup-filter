@@ -10,7 +10,7 @@ Simple Makeup Filter for Google Meet™
 コミュニケーション
 
 ## 言語
-日本語・英語
+英語（既定）・日本語
 
 ## サポート URL（サポートタブ / ウェブサイト欄）
 https://forms.gle/PLrEpVQxsKttEWri6
